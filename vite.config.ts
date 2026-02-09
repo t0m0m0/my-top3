@@ -8,6 +8,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    devServer({ entry: 'src/server/index.ts' }),
+    devServer({
+      entry: 'src/server/index.ts',
+      exclude: [/^\/(?!api\/).*/],
+    }),
   ],
 })
