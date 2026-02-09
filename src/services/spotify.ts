@@ -68,9 +68,7 @@ export async function getAccessToken(
     return { ok: true, data: cachedToken }
   }
 
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString(
-    'base64',
-  )
+  const credentials = btoa(`${clientId}:${clientSecret}`)
 
   const result = await fetchJson<SpotifyTokenResponse>(TOKEN_URL, {
     method: 'POST',
