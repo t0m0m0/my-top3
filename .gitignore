@@ -32,3 +32,8 @@ dist-ssr
 .claude
 
 .serena
+
+# Test artifacts
+coverage
+playwright-report
+test-results
