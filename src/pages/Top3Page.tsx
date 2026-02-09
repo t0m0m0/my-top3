@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { parseTop3Params } from '../utils/url-params'
+import Top3Image from '../components/Top3Image'
 import type { SearchResultItem } from '../types/common'
 
 type WorkState = {
@@ -226,6 +227,24 @@ function Top3Page() {
             label="MOVIE"
           />
         </div>
+
+        {/* Image Generation -- only show when all data is loaded */}
+        {!book.loading &&
+          !music.loading &&
+          !movie.loading &&
+          !book.error &&
+          !music.error &&
+          !movie.error &&
+          (book.data || music.data || movie.data) && (
+            <div className="mt-8">
+              <Top3Image
+                theme={params.theme}
+                book={book.data}
+                music={music.data}
+                movie={movie.data}
+              />
+            </div>
+          )}
 
         <div className="mt-6 text-center">
           <Button component={Link} to="/" variant="outlined">
