@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
 import { useNavigate } from 'react-router-dom'
-import { useSelection } from '../contexts/SelectionContext'
+import { useSelection } from '../hooks/useSelection'
 import { buildTop3Url } from '../utils/url-params'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 

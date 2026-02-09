@@ -1,36 +1,14 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  type ReactNode,
-} from 'react'
+import { useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { SearchResultItem, MediaCategory } from '../types/common'
+import { SelectionContext, type Selection } from './selection-context-value'
 
-type Selection = {
-  book: SearchResultItem | null
-  music: SearchResultItem | null
-  movie: SearchResultItem | null
-}
-
-type SelectionContextValue = {
-  selection: Selection
-  selectItem: (item: SearchResultItem) => void
-  deselectItem: (category: MediaCategory) => void
-  clearAll: () => void
-  isComplete: boolean
-}
+export { SelectionContext } from './selection-context-value'
 
 const initialSelection: Selection = {
   book: null,
   music: null,
   movie: null,
 }
-
-const SelectionContext = createContext<SelectionContextValue | undefined>(
-  undefined,
-)
 
 export function SelectionProvider({ children }: { children: ReactNode }) {
   const [selection, setSelection] = useState<Selection>(initialSelection)
@@ -77,12 +55,4 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       {children}
     </SelectionContext.Provider>
   )
-}
-
-export function useSelection(): SelectionContextValue {
-  const context = useContext(SelectionContext)
-  if (context === undefined) {
-    throw new Error('useSelection must be used within a SelectionProvider')
-  }
-  return context
 }

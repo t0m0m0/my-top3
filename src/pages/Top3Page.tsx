@@ -37,6 +37,39 @@ async function fetchWork(
   return result.data
 }
 
+function useWorkFetch(
+  category: 'book' | 'music' | 'movie',
+  id: string,
+): WorkState {
+  const [state, setState] = useState<WorkState>(() => ({
+    data: null,
+    loading: !!id,
+    error: null,
+  }))
+
+  useEffect(() => {
+    if (!id) return
+    let cancelled = false
+    fetchWork(category, id)
+      .then((data) => {
+        if (!cancelled) setState({ data, loading: false, error: null })
+      })
+      .catch((err) => {
+        if (!cancelled)
+          setState({
+            data: null,
+            loading: false,
+            error: (err as Error).message,
+          })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [category, id])
+
+  return state
+}
+
 function WorkCard({
   work,
   loading,
@@ -136,54 +169,9 @@ function Top3Page() {
   const [searchParams] = useSearchParams()
   const params = parseTop3Params(searchParams)
 
-  const [book, setBook] = useState<WorkState>({
-    data: null,
-    loading: false,
-    error: null,
-  })
-  const [music, setMusic] = useState<WorkState>({
-    data: null,
-    loading: false,
-    error: null,
-  })
-  const [movie, setMovie] = useState<WorkState>({
-    data: null,
-    loading: false,
-    error: null,
-  })
-
-  useEffect(() => {
-    if (params.bookId) {
-      setBook({ data: null, loading: true, error: null })
-      fetchWork('book', params.bookId)
-        .then((data) => setBook({ data, loading: false, error: null }))
-        .catch((err) =>
-          setBook({ data: null, loading: false, error: err.message }),
-        )
-    }
-  }, [params.bookId])
-
-  useEffect(() => {
-    if (params.musicId) {
-      setMusic({ data: null, loading: true, error: null })
-      fetchWork('music', params.musicId)
-        .then((data) => setMusic({ data, loading: false, error: null }))
-        .catch((err) =>
-          setMusic({ data: null, loading: false, error: err.message }),
-        )
-    }
-  }, [params.musicId])
-
-  useEffect(() => {
-    if (params.movieId) {
-      setMovie({ data: null, loading: true, error: null })
-      fetchWork('movie', params.movieId)
-        .then((data) => setMovie({ data, loading: false, error: null }))
-        .catch((err) =>
-          setMovie({ data: null, loading: false, error: err.message }),
-        )
-    }
-  }, [params.movieId])
+  const book = useWorkFetch('book', params.bookId)
+  const music = useWorkFetch('music', params.musicId)
+  const movie = useWorkFetch('movie', params.movieId)
 
   const hasAnyId = params.bookId || params.musicId || params.movieId
 

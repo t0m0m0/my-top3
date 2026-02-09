@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { SelectionProvider, useSelection } from './SelectionContext'
+import { SelectionProvider } from './SelectionContext'
+import { useSelection } from '../hooks/useSelection'
 import { createSearchResultItem } from '../test/fixtures'
 
 function wrapper({ children }: { children: ReactNode }) {
