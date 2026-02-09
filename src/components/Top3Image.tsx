@@ -205,7 +205,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
+            fontFamily:
+              '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
             transformOrigin: 'top left',
             transform: 'scale(0.5)',
             // scale(0.5) shrinks visually but not in layout flow;
@@ -278,11 +279,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
       </div>
 
       {error && (
-        <Typography
-          variant="body2"
-          color="error"
-          className="mt-2 text-center"
-        >
+        <Typography variant="body2" color="error" className="mt-2 text-center">
           {error}
         </Typography>
       )}

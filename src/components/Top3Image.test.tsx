@@ -72,14 +72,23 @@ function mockCreateElementForAnchor() {
     return originalCreateElement(tag)
   })
 
-  return { clickSpy, getDownload: () => capturedDownload, getHref: () => capturedHref }
+  return {
+    clickSpy,
+    getDownload: () => capturedDownload,
+    getHref: () => capturedHref,
+  }
 }
 
 describe('Top3Image', () => {
   describe('rendering', () => {
     it('renders capture area with 1080x1080 dimensions', () => {
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
       const captureArea = screen.getByTestId('top3-image-capture')
       expect(captureArea).toBeInTheDocument()
@@ -101,14 +110,24 @@ describe('Top3Image', () => {
 
     it('does not display theme when empty', () => {
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
       expect(screen.queryByText(/「.*」/)).not.toBeInTheDocument()
     })
 
     it('displays all three work titles and subtitles', () => {
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
       expect(screen.getByText('Test Book')).toBeInTheDocument()
       expect(screen.getByText('Test Album')).toBeInTheDocument()
@@ -120,7 +139,12 @@ describe('Top3Image', () => {
 
     it('displays category labels and #1 badges', () => {
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
       expect(screen.getByText('BOOK')).toBeInTheDocument()
       expect(screen.getByText('MUSIC')).toBeInTheDocument()
@@ -130,7 +154,12 @@ describe('Top3Image', () => {
 
     it('shows download button', () => {
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
       expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
     })
@@ -156,7 +185,12 @@ describe('Top3Image', () => {
       const { clickSpy } = mockCreateElementForAnchor()
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
@@ -240,7 +274,12 @@ describe('Top3Image', () => {
       )
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
@@ -250,7 +289,9 @@ describe('Top3Image', () => {
       })
       expect(screen.getByRole('button')).toBeDisabled()
 
-      resolveCanvas({ toDataURL: () => 'data:image/png;base64,mock' } as unknown as HTMLCanvasElement)
+      resolveCanvas({
+        toDataURL: () => 'data:image/png;base64,mock',
+      } as unknown as HTMLCanvasElement)
 
       await waitFor(() => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
@@ -265,7 +306,12 @@ describe('Top3Image', () => {
       } as unknown as HTMLCanvasElement)
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
@@ -285,7 +331,12 @@ describe('Top3Image', () => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
@@ -303,15 +354,17 @@ describe('Top3Image', () => {
 
     it('shows CORS-specific error for SecurityError', async () => {
       const html2canvas = (await import('html2canvas')).default
-      const securityError = new DOMException(
-        'Tainted canvas',
-        'SecurityError',
-      )
+      const securityError = new DOMException('Tainted canvas', 'SecurityError')
       vi.mocked(html2canvas).mockRejectedValueOnce(securityError)
       vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
@@ -333,7 +386,12 @@ describe('Top3Image', () => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
@@ -352,7 +410,12 @@ describe('Top3Image', () => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
-        <Top3Image theme="" book={mockBook} music={mockMusic} movie={mockMovie} />,
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
       )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
