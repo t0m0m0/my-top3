@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { parseTop3Params } from '../utils/url-params'
+import ShareButtons from '../components/ShareButtons'
 import type { SearchResultItem } from '../types/common'
 
 type WorkState = {
@@ -225,6 +226,11 @@ function Top3Page() {
             error={movie.error}
             label="MOVIE"
           />
+        </div>
+
+        {/* Share Buttons */}
+        <div className="mt-6">
+          <ShareButtons theme={params.theme} />
         </div>
 
         <div className="mt-6 text-center">
