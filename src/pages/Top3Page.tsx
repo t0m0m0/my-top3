@@ -228,7 +228,6 @@ function Top3Page() {
           />
         </div>
 
-        {/* Share Buttons */}
         <div className="mt-6">
           <ShareButtons theme={params.theme} />
         </div>
