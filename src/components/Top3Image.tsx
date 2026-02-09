@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
+import Typography from '@mui/material/Typography'
 import DownloadIcon from '@mui/icons-material/Download'
 import html2canvas from 'html2canvas'
 import type { SearchResultItem } from '../types/common'
@@ -12,15 +13,35 @@ type Top3ImageProps = {
   movie: SearchResultItem | null
 }
 
-const IMAGE_SIZE = 1080
-
-function ImageWorkCard({
-  item,
-  label,
-}: {
+type ImageWorkCardProps = {
   item: SearchResultItem | null
   label: string
-}) {
+}
+
+const IMAGE_SIZE = 1080
+
+const COLORS = {
+  textPrimary: '#fff',
+  textSecondary: '#d1d5db',
+  textMuted: '#9ca3af',
+  textSubheading: '#e5e7eb',
+  badgeBg: '#1f2937',
+  rankBadgeBg: '#facc15',
+  canvasBg: '#111827',
+} as const
+
+const TRUNCATED_TEXT: React.CSSProperties = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  maxWidth: 240,
+  textAlign: 'center',
+}
+
+const NO_IMAGE_SRC =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgZmlsbD0iIzM3NDE1MSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOWNhM2FmIiBmb250LXNpemU9IjE0Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
+
+function ImageWorkCard({ item, label }: ImageWorkCardProps) {
   if (!item) {
     return (
       <div
@@ -33,8 +54,8 @@ function ImageWorkCard({
           padding: 16,
         }}
       >
-        <span style={{ color: '#9ca3af', fontSize: 18 }}>{label}</span>
-        <span style={{ color: '#9ca3af', fontSize: 14 }}>No Data</span>
+        <span style={{ color: COLORS.textMuted, fontSize: 18 }}>{label}</span>
+        <span style={{ color: COLORS.textMuted, fontSize: 14 }}>No Data</span>
       </div>
     )
   }
@@ -52,8 +73,8 @@ function ImageWorkCard({
     >
       <div
         style={{
-          background: '#1f2937',
-          color: '#fff',
+          background: COLORS.badgeBg,
+          color: COLORS.textPrimary,
           fontSize: 14,
           fontWeight: 700,
           padding: '4px 12px',
@@ -66,8 +87,8 @@ function ImageWorkCard({
       </div>
       <div
         style={{
-          background: '#facc15',
-          color: '#1f2937',
+          background: COLORS.rankBadgeBg,
+          color: COLORS.badgeBg,
           fontSize: 13,
           fontWeight: 700,
           padding: '2px 10px',
@@ -80,6 +101,11 @@ function ImageWorkCard({
         src={item.thumbnailUrl}
         alt={item.title}
         crossOrigin="anonymous"
+        onError={(e) => {
+          const img = e.target as HTMLImageElement
+          img.crossOrigin = null as unknown as string
+          img.src = NO_IMAGE_SRC
+        }}
         style={{
           width: 200,
           height: 280,
@@ -90,27 +116,19 @@ function ImageWorkCard({
       />
       <span
         style={{
+          ...TRUNCATED_TEXT,
           fontSize: 16,
           fontWeight: 600,
-          color: '#fff',
-          textAlign: 'center',
-          maxWidth: 240,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          color: COLORS.textPrimary,
         }}
       >
         {item.title}
       </span>
       <span
         style={{
+          ...TRUNCATED_TEXT,
           fontSize: 13,
-          color: '#d1d5db',
-          textAlign: 'center',
-          maxWidth: 240,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          color: COLORS.textSecondary,
         }}
       >
         {item.subtitle}
@@ -119,14 +137,20 @@ function ImageWorkCard({
   )
 }
 
+function sanitizeFilename(name: string): string {
+  return name.replace(/[/\\:*?"<>|]/g, '_').slice(0, 50)
+}
+
 function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
   const captureRef = useRef<HTMLDivElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleDownload = useCallback(async () => {
     if (!captureRef.current) return
 
     setIsGenerating(true)
+    setError(null)
     try {
       const canvas = await html2canvas(captureRef.current, {
         width: IMAGE_SIZE,
@@ -134,15 +158,27 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
         scale: 1,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#111827',
+        backgroundColor: COLORS.canvasBg,
       })
 
+      const dataUrl = canvas.toDataURL('image/png')
+      if (!dataUrl || dataUrl === 'data:,') {
+        setError('画像の生成に失敗しました。画像データが空です。')
+        return
+      }
+
+      const safeTheme = theme ? `-${sanitizeFilename(theme)}` : ''
       const link = document.createElement('a')
-      link.download = `my-top3${theme ? `-${theme}` : ''}.png`
-      link.href = canvas.toDataURL('image/png')
+      link.download = `my-top3${safeTheme}.png`
+      link.href = dataUrl
       link.click()
-    } catch {
-      console.error('Failed to generate image')
+    } catch (err) {
+      const message =
+        err instanceof DOMException && err.name === 'SecurityError'
+          ? '画像の取得に失敗しました。外部画像のCORS設定が原因の可能性があります。'
+          : '画像の生成に失敗しました。もう一度お試しください。'
+      console.error('[Top3Image] Failed to generate image:', err)
+      setError(message)
     } finally {
       setIsGenerating(false)
     }
@@ -150,7 +186,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
 
   return (
     <div>
-      {/* Capture target - 1080x1080 at scaled-down display size */}
+      {/* Capture target -- inline styles are required here because html2canvas
+          renders from computed inline styles, not from CSS classes. */}
       <div
         style={{
           overflow: 'hidden',
@@ -163,7 +200,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
           style={{
             width: IMAGE_SIZE,
             height: IMAGE_SIZE,
-            background: 'linear-gradient(135deg, #111827 0%, #1e3a5f 50%, #111827 100%)',
+            background: `linear-gradient(135deg, ${COLORS.canvasBg} 0%, #1e3a5f 50%, ${COLORS.canvasBg} 100%)`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -171,6 +208,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
             fontFamily: '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
             transformOrigin: 'top left',
             transform: 'scale(0.5)',
+            // scale(0.5) shrinks visually but not in layout flow;
+            // negative margin compensates for the remaining 50% of vertical space
             marginBottom: -IMAGE_SIZE * 0.5,
           }}
         >
@@ -185,7 +224,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               style={{
                 fontSize: 28,
                 fontWeight: 800,
-                color: '#fff',
+                color: COLORS.textPrimary,
                 letterSpacing: 2,
               }}
             >
@@ -195,11 +234,11 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               <div
                 style={{
                   fontSize: 22,
-                  color: '#e5e7eb',
+                  color: COLORS.textSubheading,
                   marginTop: 12,
                 }}
               >
-                {`\u300C${theme}\u300D`}
+                {`「${theme}」`}
               </div>
             )}
           </div>
@@ -237,6 +276,16 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
           {isGenerating ? '生成中...' : '画像をダウンロード'}
         </Button>
       </div>
+
+      {error && (
+        <Typography
+          variant="body2"
+          color="error"
+          className="mt-2 text-center"
+        >
+          {error}
+        </Typography>
+      )}
     </div>
   )
 }

@@ -228,15 +228,19 @@ function Top3Page() {
           />
         </div>
 
-        {/* Image Generation */}
-        <div className="mt-8">
-          <Top3Image
-            theme={params.theme}
-            book={book.data}
-            music={music.data}
-            movie={movie.data}
-          />
-        </div>
+        {/* Image Generation -- only show when all data is loaded */}
+        {!book.loading && !music.loading && !movie.loading &&
+         !book.error && !music.error && !movie.error &&
+         (book.data || music.data || movie.data) && (
+          <div className="mt-8">
+            <Top3Image
+              theme={params.theme}
+              book={book.data}
+              music={music.data}
+              movie={movie.data}
+            />
+          </div>
+        )}
 
         <div className="mt-6 text-center">
           <Button component={Link} to="/" variant="outlined">
