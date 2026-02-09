@@ -5,12 +5,22 @@ const DEFAULT_TIMEOUT_MS = 10_000
 export async function fetchJson<T>(
   url: string,
   options: {
+    method?: string
+    headers?: Record<string, string>
+    body?: string
     signal?: AbortSignal
     timeoutMs?: number
     validate?: (data: unknown) => T
   } = {},
 ): Promise<Result<T>> {
-  const { signal, timeoutMs = DEFAULT_TIMEOUT_MS, validate } = options
+  const {
+    method,
+    headers,
+    body,
+    signal,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    validate,
+  } = options
 
   let timedOut = false
   const timeoutController = new AbortController()
@@ -24,7 +34,12 @@ export async function fetchJson<T>(
     : timeoutController.signal
 
   try {
-    const response = await fetch(url, { signal: combinedSignal })
+    const response = await fetch(url, {
+      method,
+      headers,
+      body,
+      signal: combinedSignal,
+    })
 
     if (!response.ok) {
       return { ok: false, error: mapHttpError(response.status) }
