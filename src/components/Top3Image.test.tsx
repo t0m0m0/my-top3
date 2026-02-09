@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '../test/test-utils'
 import Top3Image from './Top3Image'
 import type { SearchResultItem } from '../types/common'
@@ -44,6 +44,10 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
 function mockCreateElementForAnchor() {
   const clickSpy = vi.fn()
   let capturedDownload = ''
@@ -53,8 +57,6 @@ function mockCreateElementForAnchor() {
     if (tag === 'a') {
       return {
         click: clickSpy,
-        _download: '',
-        _href: '',
         set download(v: string) {
           capturedDownload = v
         },
@@ -208,8 +210,6 @@ describe('Top3Image', () => {
       })
 
       expect(clickSpy).toHaveBeenCalledTimes(1)
-
-      vi.restoreAllMocks()
     })
 
     it('uses theme in download filename when provided', async () => {
@@ -234,8 +234,6 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(getDownload()).toBe('my-top3-テストテーマ.png')
       })
-
-      vi.restoreAllMocks()
     })
 
     it('sanitizes special characters in theme for filename', async () => {
@@ -260,8 +258,6 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(getDownload()).toBe('my-top3-test_path_name__bad.png')
       })
-
-      vi.restoreAllMocks()
     })
 
     it('shows loading state and disables button during generation', async () => {
@@ -348,8 +344,6 @@ describe('Top3Image', () => {
           ),
         ).toBeInTheDocument()
       })
-
-      vi.restoreAllMocks()
     })
 
     it('shows CORS-specific error for SecurityError', async () => {
@@ -376,8 +370,6 @@ describe('Top3Image', () => {
           ),
         ).toBeInTheDocument()
       })
-
-      vi.restoreAllMocks()
     })
 
     it('resets generating state after error', async () => {
@@ -400,8 +392,6 @@ describe('Top3Image', () => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
       })
       expect(screen.getByRole('button')).toBeEnabled()
-
-      vi.restoreAllMocks()
     })
 
     it('clears previous error on new download attempt', async () => {
@@ -442,8 +432,6 @@ describe('Top3Image', () => {
           ),
         ).not.toBeInTheDocument()
       })
-
-      vi.restoreAllMocks()
     })
   })
 })

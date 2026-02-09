@@ -36,9 +36,12 @@ export function buildTop3Url(selection: Selection, theme: string): string {
   return queryString ? `/my-top3?${queryString}` : '/my-top3'
 }
 
+const MAX_THEME_URL_LENGTH = 100
+
 export function parseTop3Params(searchParams: URLSearchParams): Top3Params {
+  const rawTheme = searchParams.get('theme') ?? ''
   return {
-    theme: searchParams.get('theme') ?? '',
+    theme: rawTheme.slice(0, MAX_THEME_URL_LENGTH),
     bookId: searchParams.get('book') ?? '',
     musicId: searchParams.get('music') ?? '',
     movieId: searchParams.get('movie') ?? '',

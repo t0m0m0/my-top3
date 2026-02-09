@@ -103,8 +103,9 @@ function ImageWorkCard({ item, label }: ImageWorkCardProps) {
         crossOrigin="anonymous"
         onError={(e) => {
           const img = e.target as HTMLImageElement
-          img.crossOrigin = null as unknown as string
-          img.src = NO_IMAGE_SRC
+          if (img.src !== NO_IMAGE_SRC) {
+            img.src = NO_IMAGE_SRC
+          }
         }}
         style={{
           width: 200,
@@ -138,7 +139,21 @@ function ImageWorkCard({ item, label }: ImageWorkCardProps) {
 }
 
 function sanitizeFilename(name: string): string {
-  return name.replace(/[/\\:*?"<>|]/g, '_').slice(0, 50)
+  return name
+    .replace(/[/\\:*?"<>|\0\n\r]/g, '_')
+    .replace(/^\.+/, '')
+    .trim()
+    .slice(0, 50)
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof DOMException && err.name === 'SecurityError') {
+    return '画像の取得に失敗しました。外部画像のCORS設定が原因の可能性があります。'
+  }
+  if (err instanceof DOMException && err.name === 'QuotaExceededError') {
+    return '画像サイズが大きすぎるため生成できませんでした。'
+  }
+  return '画像の生成に失敗しました。もう一度お試しください。'
 }
 
 function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
@@ -173,12 +188,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
       link.href = dataUrl
       link.click()
     } catch (err) {
-      const message =
-        err instanceof DOMException && err.name === 'SecurityError'
-          ? '画像の取得に失敗しました。外部画像のCORS設定が原因の可能性があります。'
-          : '画像の生成に失敗しました。もう一度お試しください。'
       console.error('[Top3Image] Failed to generate image:', err)
-      setError(message)
+      setError(getErrorMessage(err))
     } finally {
       setIsGenerating(false)
     }
