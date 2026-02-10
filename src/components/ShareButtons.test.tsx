@@ -218,7 +218,11 @@ describe('ShareButtons', () => {
       fireEvent.click(screen.getByText('シェア'))
 
       await waitFor(() => {
-        expect(screen.getByText('シェアに失敗しました。URLをコピーして手動でシェアしてください。')).toBeInTheDocument()
+        expect(
+          screen.getByText(
+            'シェアに失敗しました。URLをコピーして手動でシェアしてください。',
+          ),
+        ).toBeInTheDocument()
       })
     })
   })
