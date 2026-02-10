@@ -76,7 +76,8 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
     }
   }, [theme])
 
-  const canWebShare = typeof navigator.share === 'function'
+  const canWebShare =
+    typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   return (
     <div className="flex flex-wrap justify-center gap-2">

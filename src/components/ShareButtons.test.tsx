@@ -4,9 +4,11 @@ import ShareButtons from './ShareButtons'
 
 describe('ShareButtons', () => {
   let originalClipboard: Clipboard
+  let originalShare: typeof navigator.share
 
   beforeEach(() => {
     originalClipboard = navigator.clipboard
+    originalShare = navigator.share
     Object.assign(navigator, {
       clipboard: {
         writeText: vi.fn().mockResolvedValue(undefined),
@@ -15,7 +17,10 @@ describe('ShareButtons', () => {
   })
 
   afterEach(() => {
-    Object.assign(navigator, { clipboard: originalClipboard })
+    Object.assign(navigator, {
+      clipboard: originalClipboard,
+      share: originalShare,
+    })
     vi.restoreAllMocks()
   })
 
@@ -194,7 +199,6 @@ describe('ShareButtons', () => {
       const abortError = new DOMException('Share canceled', 'AbortError')
       const shareMock = vi.fn().mockRejectedValue(abortError)
       Object.assign(navigator, { share: shareMock })
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
       render(<ShareButtons />)
       fireEvent.click(screen.getByText('シェア'))
@@ -204,7 +208,6 @@ describe('ShareButtons', () => {
       })
       // AbortError should not show error snackbar
       expect(screen.queryByText(/シェアに失敗しました/)).not.toBeInTheDocument()
-      consoleSpy.mockRestore()
     })
 
     it('shows error snackbar when share fails', async () => {
