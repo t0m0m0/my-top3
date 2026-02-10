@@ -72,6 +72,7 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return
       }
+      console.error('[ShareButtons] Web Share API failed:', error)
       setShareFailed(true)
     }
   }, [theme])
@@ -134,7 +135,7 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
           variant="filled"
           onClose={handleCloseShareError}
         >
-          シェアに失敗しました
+          シェアに失敗しました。URLをコピーして手動でシェアしてください。
         </Alert>
       </Snackbar>
     </div>
