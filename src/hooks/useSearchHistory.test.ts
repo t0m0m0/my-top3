@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useSearchHistory } from './useSearchHistory'
+import type { MediaCategory } from '../types/common'
 
 describe('useSearchHistory', () => {
   beforeEach(() => {
@@ -134,16 +135,28 @@ describe('useSearchHistory', () => {
     expect(musicResult.current.history).toEqual(['music keyword'])
   })
 
-  it('handles corrupted localStorage data gracefully', () => {
+  it('handles corrupted localStorage data gracefully and logs warning', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     localStorage.setItem('search-history-book', 'not valid json')
     const { result } = renderHook(() => useSearchHistory('book'))
     expect(result.current.history).toEqual([])
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to load history'),
+      expect.anything(),
+    )
+    warnSpy.mockRestore()
   })
 
-  it('handles valid JSON that is not an array', () => {
+  it('handles valid JSON that is not an array and resets data', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     localStorage.setItem('search-history-book', '{"key": "value"}')
     const { result } = renderHook(() => useSearchHistory('book'))
     expect(result.current.history).toEqual([])
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid data format'),
+    )
+    expect(localStorage.getItem('search-history-book')).toBeNull()
+    warnSpy.mockRestore()
   })
 
   it('filters out malformed items from localStorage', () => {
@@ -202,6 +215,30 @@ describe('useSearchHistory', () => {
     expect(result.current.history).toEqual(['村上春樹'])
   })
 
+  it('logs warning and still updates in-memory state when localStorage.setItem fails', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { result } = renderHook(() => useSearchHistory('book'))
+
+    const setItemSpy = vi
+      .spyOn(Storage.prototype, 'setItem')
+      .mockImplementation(() => {
+        throw new DOMException('QuotaExceededError')
+      })
+
+    act(() => {
+      result.current.addHistory('村上春樹')
+    })
+
+    expect(result.current.history).toEqual(['村上春樹'])
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to save history'),
+      expect.anything(),
+    )
+
+    setItemSpy.mockRestore()
+    warnSpy.mockRestore()
+  })
+
   it('reloads history when category changes', () => {
     localStorage.setItem(
       'search-history-book',
@@ -214,7 +251,7 @@ describe('useSearchHistory', () => {
 
     const { result, rerender } = renderHook(
       ({ category }) => useSearchHistory(category),
-      { initialProps: { category: 'book' as const } },
+      { initialProps: { category: 'book' as MediaCategory } },
     )
     expect(result.current.history).toEqual(['book keyword'])
 

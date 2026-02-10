@@ -34,9 +34,19 @@ function loadHistory(category: MediaCategory): SearchHistoryItem[] {
     const raw = localStorage.getItem(getStorageKey(category))
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
+    if (!Array.isArray(parsed)) {
+      console.warn(
+        `[useSearchHistory] Invalid data format for "${getStorageKey(category)}". Resetting.`,
+      )
+      localStorage.removeItem(getStorageKey(category))
+      return []
+    }
     return parsed.filter(isHistoryItem)
-  } catch {
+  } catch (error) {
+    console.warn(
+      `[useSearchHistory] Failed to load history for "${category}":`,
+      error,
+    )
     return []
   }
 }
@@ -47,8 +57,11 @@ function saveHistory(
 ): void {
   try {
     localStorage.setItem(getStorageKey(category), JSON.stringify(items))
-  } catch {
-    // localStorage may be unavailable (private browsing, quota exceeded)
+  } catch (error) {
+    console.warn(
+      `[useSearchHistory] Failed to save history for "${category}":`,
+      error,
+    )
   }
 }
 
