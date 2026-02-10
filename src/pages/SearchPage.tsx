@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSearch } from '../hooks/useSearch'
+import { useSearchHistory } from '../hooks/useSearchHistory'
 import { useSelection } from '../hooks/useSelection'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
+import SearchHistory from '../components/SearchHistory'
 import SearchResults from '../components/SearchResults'
 import ThemeInput from '../components/ThemeInput'
 import SelectionArea from '../components/SelectionArea'
@@ -31,9 +33,24 @@ function SearchPage() {
     debouncedQuery,
   )
 
+  const { addHistory } = useSearchHistory(activeTab)
+
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      addHistory(debouncedQuery.trim())
+    }
+  }, [debouncedQuery, addHistory])
+
   const handleQueryChange = useCallback(
     (value: string) => {
       setQueries((prev) => ({ ...prev, [activeTab]: value }))
+    },
+    [activeTab],
+  )
+
+  const handleHistorySearch = useCallback(
+    (keyword: string) => {
+      setQueries((prev) => ({ ...prev, [activeTab]: keyword }))
     },
     [activeTab],
   )
@@ -68,6 +85,11 @@ function SearchPage() {
 
         {/* Search Bar */}
         <SearchBar value={currentQuery} onChange={handleQueryChange} />
+
+        {/* Search History (shown when search bar is empty) */}
+        {!currentQuery.trim() && (
+          <SearchHistory category={activeTab} onSearch={handleHistorySearch} />
+        )}
 
         {/* Search Results */}
         <SearchResults
