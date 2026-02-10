@@ -99,7 +99,7 @@ describe('ShareButtons', () => {
     )
   })
 
-  it('includes theme in X share text', () => {
+  it('includes theme and #MyTop3 hashtag in X share text', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons theme="雨の日に" />)
     fireEvent.click(screen.getByText('Xでシェア'))
@@ -107,9 +107,10 @@ describe('ShareButtons', () => {
     const url = (window.open as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0] as string
     expect(url).toContain(encodeURIComponent('My Top 3 「雨の日に」'))
+    expect(url).toContain(encodeURIComponent('#MyTop3'))
   })
 
-  it('uses default text when theme is not provided', () => {
+  it('includes #MyTop3 hashtag when theme is not provided', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons />)
     fireEvent.click(screen.getByText('Xでシェア'))
@@ -117,6 +118,7 @@ describe('ShareButtons', () => {
     const url = (window.open as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0] as string
     expect(url).toContain(encodeURIComponent('My Top 3'))
+    expect(url).toContain(encodeURIComponent('#MyTop3'))
     expect(url).not.toContain(encodeURIComponent('「'))
   })
 
@@ -141,5 +143,84 @@ describe('ShareButtons', () => {
     )
 
     locationSpy.mockRestore()
+  })
+
+  describe('Web Share API', () => {
+    it('renders share button when Web Share API is available', () => {
+      Object.assign(navigator, { share: vi.fn() })
+      render(<ShareButtons />)
+      expect(screen.getByText('シェア')).toBeInTheDocument()
+    })
+
+    it('does not render share button when Web Share API is unavailable', () => {
+      Object.assign(navigator, { share: undefined })
+      render(<ShareButtons />)
+      expect(screen.queryByText('シェア')).not.toBeInTheDocument()
+    })
+
+    it('calls navigator.share with correct data including theme', async () => {
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      render(<ShareButtons theme="雨の日に" />)
+      fireEvent.click(screen.getByText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith({
+          title: 'My Top 3',
+          text: 'My Top 3 「雨の日に」 #MyTop3',
+          url: window.location.href,
+        })
+      })
+    })
+
+    it('calls navigator.share with correct data without theme', async () => {
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith({
+          title: 'My Top 3',
+          text: 'My Top 3 #MyTop3',
+          url: window.location.href,
+        })
+      })
+    })
+
+    it('handles share cancellation gracefully (AbortError)', async () => {
+      const abortError = new DOMException('Share canceled', 'AbortError')
+      const shareMock = vi.fn().mockRejectedValue(abortError)
+      Object.assign(navigator, { share: shareMock })
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalled()
+      })
+      // AbortError should not show error snackbar
+      expect(screen.queryByText(/シェアに失敗しました/)).not.toBeInTheDocument()
+      consoleSpy.mockRestore()
+    })
+
+    it('shows error snackbar when share fails', async () => {
+      const shareMock = vi
+        .fn()
+        .mockRejectedValue(new Error('Share failed'))
+      Object.assign(navigator, { share: shareMock })
+
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByText('シェア'))
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('シェアに失敗しました'),
+        ).toBeInTheDocument()
+      })
+    })
   })
 })
