@@ -211,18 +211,14 @@ describe('ShareButtons', () => {
     })
 
     it('shows error snackbar when share fails', async () => {
-      const shareMock = vi
-        .fn()
-        .mockRejectedValue(new Error('Share failed'))
+      const shareMock = vi.fn().mockRejectedValue(new Error('Share failed'))
       Object.assign(navigator, { share: shareMock })
 
       render(<ShareButtons />)
       fireEvent.click(screen.getByText('シェア'))
 
       await waitFor(() => {
-        expect(
-          screen.getByText('シェアに失敗しました'),
-        ).toBeInTheDocument()
+        expect(screen.getByText('シェアに失敗しました')).toBeInTheDocument()
       })
     })
   })
