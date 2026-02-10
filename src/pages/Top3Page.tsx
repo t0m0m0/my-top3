@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { parseTop3Params } from '../utils/url-params'
+import ShareButtons from '../components/ShareButtons'
 import Top3Image from '../components/Top3Image'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 
@@ -237,7 +238,6 @@ function Top3Page() {
           />
         </div>
 
-        {/* Image Generation -- only show when all data is loaded */}
         {showImage && (
           <div className="mt-8">
             <Top3Image
@@ -248,6 +248,10 @@ function Top3Page() {
             />
           </div>
         )}
+
+        <div className="mt-6">
+          <ShareButtons theme={params.theme} />
+        </div>
 
         <div className="mt-6 text-center">
           <Button component={Link} to="/" variant="outlined">
