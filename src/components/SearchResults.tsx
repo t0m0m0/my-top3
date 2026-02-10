@@ -53,7 +53,7 @@ export default function SearchResults({
   }
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
       {results.map((item) => (
         <ResultCard key={item.id} item={item} onSelect={onSelect} />
       ))}
