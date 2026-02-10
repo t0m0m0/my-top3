@@ -20,13 +20,22 @@ function getStorageKey(category: MediaCategory): string {
   return `${STORAGE_KEY_PREFIX}-${category}`
 }
 
+function isHistoryItem(item: unknown): item is SearchHistoryItem {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    typeof (item as SearchHistoryItem).keyword === 'string' &&
+    typeof (item as SearchHistoryItem).timestamp === 'number'
+  )
+}
+
 function loadHistory(category: MediaCategory): SearchHistoryItem[] {
   try {
     const raw = localStorage.getItem(getStorageKey(category))
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed as SearchHistoryItem[]
+    return parsed.filter(isHistoryItem)
   } catch {
     return []
   }
@@ -44,7 +53,7 @@ function saveHistory(
 }
 
 function toKeywords(items: SearchHistoryItem[]): string[] {
-  return items
+  return [...items]
     .sort((a, b) => b.timestamp - a.timestamp)
     .map((item) => item.keyword)
 }

@@ -140,6 +140,68 @@ describe('useSearchHistory', () => {
     expect(result.current.history).toEqual([])
   })
 
+  it('handles valid JSON that is not an array', () => {
+    localStorage.setItem('search-history-book', '{"key": "value"}')
+    const { result } = renderHook(() => useSearchHistory('book'))
+    expect(result.current.history).toEqual([])
+  })
+
+  it('filters out malformed items from localStorage', () => {
+    const items = [
+      { keyword: '村上春樹', timestamp: Date.now() },
+      null,
+      42,
+      { keyword: 123 },
+      { keyword: '東野圭吾', timestamp: Date.now() - 1000 },
+    ]
+    localStorage.setItem('search-history-book', JSON.stringify(items))
+    const { result } = renderHook(() => useSearchHistory('book'))
+    expect(result.current.history).toEqual(['村上春樹', '東野圭吾'])
+  })
+
+  it('persists removal to localStorage', () => {
+    const { result } = renderHook(() => useSearchHistory('book'))
+    act(() => {
+      result.current.addHistory('村上春樹')
+    })
+    act(() => {
+      result.current.addHistory('東野圭吾')
+    })
+    act(() => {
+      result.current.removeHistory('村上春樹')
+    })
+    const stored = JSON.parse(
+      localStorage.getItem('search-history-book')!,
+    ) as Array<{ keyword: string }>
+    expect(stored).toHaveLength(1)
+    expect(stored[0].keyword).toBe('東野圭吾')
+  })
+
+  it('persists clearHistory to localStorage', () => {
+    const { result } = renderHook(() => useSearchHistory('book'))
+    act(() => {
+      result.current.addHistory('村上春樹')
+    })
+    act(() => {
+      result.current.clearHistory()
+    })
+    const stored = JSON.parse(
+      localStorage.getItem('search-history-book')!,
+    ) as Array<unknown>
+    expect(stored).toEqual([])
+  })
+
+  it('does not throw when removing a non-existent keyword', () => {
+    const { result } = renderHook(() => useSearchHistory('book'))
+    act(() => {
+      result.current.addHistory('村上春樹')
+    })
+    act(() => {
+      result.current.removeHistory('存在しないキーワード')
+    })
+    expect(result.current.history).toEqual(['村上春樹'])
+  })
+
   it('reloads history when category changes', () => {
     localStorage.setItem(
       'search-history-book',

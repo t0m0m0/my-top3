@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSearch } from '../hooks/useSearch'
@@ -34,11 +34,16 @@ function SearchPage() {
   )
 
   const { addHistory } = useSearchHistory(activeTab)
+  const prevDebouncedQueryRef = useRef(debouncedQuery)
 
   useEffect(() => {
-    if (debouncedQuery.trim()) {
+    if (
+      debouncedQuery.trim() &&
+      debouncedQuery !== prevDebouncedQueryRef.current
+    ) {
       addHistory(debouncedQuery.trim())
     }
+    prevDebouncedQueryRef.current = debouncedQuery
   }, [debouncedQuery, addHistory])
 
   const handleQueryChange = useCallback(
