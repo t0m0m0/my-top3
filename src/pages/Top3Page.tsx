@@ -5,7 +5,8 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { parseTop3Params } from '../utils/url-params'
 import ShareButtons from '../components/ShareButtons'
-import type { SearchResultItem } from '../types/common'
+import Top3Image from '../components/Top3Image'
+import type { MediaCategory, SearchResultItem } from '../types/common'
 
 type WorkState = {
   data: SearchResultItem | null
@@ -13,11 +14,17 @@ type WorkState = {
   error: string | null
 }
 
+const CATEGORY_LABELS: Record<MediaCategory, string> = {
+  book: '書籍',
+  music: '音楽',
+  movie: '映画',
+}
+
 async function fetchWork(
-  category: 'book' | 'music' | 'movie',
+  category: MediaCategory,
   id: string,
 ): Promise<SearchResultItem> {
-  const endpoints: Record<string, string> = {
+  const endpoints: Record<MediaCategory, string> = {
     book: `/api/books/${id}`,
     music: `/api/music/${id}`,
     movie: `/api/movies/${id}`,
@@ -38,10 +45,7 @@ async function fetchWork(
   return result.data
 }
 
-function useWorkFetch(
-  category: 'book' | 'music' | 'movie',
-  id: string,
-): WorkState {
+function useWorkFetch(category: MediaCategory, id: string): WorkState {
   const [state, setState] = useState<WorkState>(() => ({
     data: null,
     loading: !!id,
@@ -56,12 +60,17 @@ function useWorkFetch(
         if (!cancelled) setState({ data, loading: false, error: null })
       })
       .catch((err) => {
-        if (!cancelled)
+        if (!cancelled) {
+          console.error(
+            `[Top3Page] Failed to fetch ${category} (id: ${id}):`,
+            err,
+          )
           setState({
             data: null,
             loading: false,
-            error: (err as Error).message,
+            error: `${CATEGORY_LABELS[category]}の取得に失敗しました`,
           })
+        }
       })
     return () => {
       cancelled = true
@@ -71,17 +80,14 @@ function useWorkFetch(
   return state
 }
 
-function WorkCard({
-  work,
-  loading,
-  error,
-  label,
-}: {
+type WorkCardProps = {
   work: SearchResultItem | null
   loading: boolean
   error: string | null
   label: string
-}) {
+}
+
+function WorkCard({ work, loading, error, label }: WorkCardProps) {
   if (loading) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-4">
@@ -175,6 +181,10 @@ function Top3Page() {
   const movie = useWorkFetch('movie', params.movieId)
 
   const hasAnyId = params.bookId || params.musicId || params.movieId
+  const allLoaded = !book.loading && !music.loading && !movie.loading
+  const noErrors = !book.error && !music.error && !movie.error
+  const hasAnyData = !!(book.data || music.data || movie.data)
+  const showImage = allLoaded && noErrors && hasAnyData
 
   if (!hasAnyId) {
     return (
@@ -227,6 +237,17 @@ function Top3Page() {
             label="MOVIE"
           />
         </div>
+
+        {showImage && (
+          <div className="mt-8">
+            <Top3Image
+              theme={params.theme}
+              book={book.data}
+              music={music.data}
+              movie={movie.data}
+            />
+          </div>
+        )}
 
         <div className="mt-6">
           <ShareButtons theme={params.theme} />
