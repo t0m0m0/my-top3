@@ -169,7 +169,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
 
     const updateScale = () => {
       const containerWidth = container.clientWidth
-      const newScale = Math.min(containerWidth / IMAGE_SIZE, 0.5)
+      const newScale =
+        Math.round(Math.min(containerWidth / IMAGE_SIZE, 0.5) * 1000) / 1000
       setScale(newScale)
     }
 

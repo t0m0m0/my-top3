@@ -59,17 +59,21 @@ export default function SearchResults({
       ))}
 
       {isLoading && (
-        <Box className="flex justify-center py-6">
+        <Box className="col-span-full flex justify-center py-6">
           <CircularProgress size={32} />
         </Box>
       )}
 
       {!isLoading && hasMore && (
-        <div ref={sentinelRef} className="h-4" aria-hidden="true" />
+        <div
+          ref={sentinelRef}
+          className="col-span-full h-4"
+          aria-hidden="true"
+        />
       )}
 
       {!isLoading && !hasMore && results.length > 0 && (
-        <Box className="py-4 text-center">
+        <Box className="col-span-full py-4 text-center">
           <Typography variant="body2" color="text.secondary">
             全件表示しました
           </Typography>
