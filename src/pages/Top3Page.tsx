@@ -189,7 +189,7 @@ function Top3Page() {
   if (!hasAnyId) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="mx-auto max-w-3xl px-4 py-8 text-center">
+        <div className="mx-auto max-w-3xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
           <Typography variant="h5" className="text-gray-900">
             Top3を作成してください
           </Typography>
@@ -208,8 +208,10 @@ function Top3Page() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900">My Top 3</h1>
+      <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
+        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
+          My Top 3
+        </h1>
 
         {params.theme && (
           <Typography variant="h6" className="mt-2 text-center text-gray-700">
@@ -217,7 +219,7 @@ function Top3Page() {
           </Typography>
         )}
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row">
           <WorkCard
             work={book.data}
             loading={book.loading}

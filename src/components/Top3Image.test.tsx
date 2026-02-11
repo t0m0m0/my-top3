@@ -11,6 +11,14 @@ vi.mock('html2canvas', () => ({
   ),
 }))
 
+// Mock ResizeObserver for responsive scale tests
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+vi.stubGlobal('ResizeObserver', MockResizeObserver)
+
 const mockBook: SearchResultItem = {
   id: 'book1',
   category: 'book',
@@ -432,6 +440,23 @@ describe('Top3Image', () => {
           ),
         ).not.toBeInTheDocument()
       })
+    })
+  })
+
+  describe('responsive scaling', () => {
+    it('renders capture area with dynamic scale based on container width', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      const captureArea = screen.getByTestId('top3-image-capture')
+      // Scale should be applied (default 0.5 or based on container width)
+      expect(captureArea.style.transform).toMatch(/^scale\(/)
+      expect(captureArea.style.transformOrigin).toBe('top left')
     })
   })
 })

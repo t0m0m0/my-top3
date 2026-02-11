@@ -13,4 +13,12 @@ describe('SelectionArea', () => {
     render(<SelectionArea theme="" />)
     expect(screen.queryByText('Top3を作成')).not.toBeInTheDocument()
   })
+
+  it('uses responsive flex layout (column on mobile, row on sm+)', () => {
+    const { container } = render(<SelectionArea theme="" />)
+    const slotContainer = container.querySelector(
+      '.flex.flex-col.sm\\:flex-row',
+    )
+    expect(slotContainer).toBeInTheDocument()
+  })
 })

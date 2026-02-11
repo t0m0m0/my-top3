@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
@@ -158,8 +158,28 @@ function getErrorMessage(err: unknown): string {
 
 function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
   const captureRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [scale, setScale] = useState(0.5)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const updateScale = () => {
+      const containerWidth = container.clientWidth
+      const newScale =
+        Math.round(Math.min(containerWidth / IMAGE_SIZE, 0.5) * 1000) / 1000
+      setScale(newScale)
+    }
+
+    updateScale()
+
+    const observer = new ResizeObserver(updateScale)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
 
   const handleDownload = useCallback(async () => {
     if (!captureRef.current) return
@@ -200,6 +220,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
       {/* Capture target -- inline styles are required here because html2canvas
           renders from computed inline styles, not from CSS classes. */}
       <div
+        ref={containerRef}
         style={{
           overflow: 'hidden',
           maxWidth: '100%',
@@ -219,10 +240,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
             fontFamily:
               '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
             transformOrigin: 'top left',
-            transform: 'scale(0.5)',
-            // scale(0.5) shrinks visually but not in layout flow;
-            // negative margin compensates for the remaining 50% of vertical space
-            marginBottom: -IMAGE_SIZE * 0.5,
+            transform: `scale(${scale})`,
+            marginBottom: -IMAGE_SIZE * (1 - scale),
           }}
         >
           {/* Header */}

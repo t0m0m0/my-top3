@@ -70,4 +70,13 @@ describe('SearchResults', () => {
     )
     expect(screen.getByText('全件表示しました')).toBeInTheDocument()
   })
+
+  it('uses responsive grid layout (1-col mobile, 2-col sm+)', () => {
+    const items = [createSearchResultItem({ id: '1', title: 'Item 1' })]
+    const { container } = render(
+      <SearchResults {...defaultProps} query="test" results={items} />,
+    )
+    const grid = container.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2')
+    expect(grid).toBeInTheDocument()
+  })
 })

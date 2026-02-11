@@ -29,7 +29,7 @@ function SlotCard({
 }) {
   if (!item) {
     return (
-      <div className="flex h-24 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-white p-2">
+      <div className="flex h-16 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-white p-2 sm:h-24">
         <Typography variant="caption" className="text-gray-400">
           {CATEGORY_LABELS[category]}
         </Typography>
@@ -41,7 +41,7 @@ function SlotCard({
   }
 
   return (
-    <div className="relative flex h-24 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white p-2">
+    <div className="relative flex h-16 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 sm:h-24">
       <IconButton
         size="small"
         onClick={() => onDeselect(category)}
@@ -98,7 +98,7 @@ function SelectionArea({ theme }: SelectionAreaProps) {
 
   return (
     <Box>
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <SlotCard
           category="book"
           item={selection.book}
