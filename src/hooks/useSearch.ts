@@ -90,12 +90,18 @@ export function useSearch(
         const { items, totalItems, startIndex: returnedIndex } = json.data
 
         if (append) {
-          setResults((prev) => [...prev, ...items])
+          setResults((prev) => {
+            const existingIds = new Set(prev.map((r) => r.id))
+            const unique = items.filter((item) => !existingIds.has(item.id))
+            return [...prev, ...unique]
+          })
         } else {
           setResults(items)
         }
 
-        setHasMore(returnedIndex + items.length < totalItems)
+        setHasMore(
+          items.length > 0 && returnedIndex + items.length < totalItems,
+        )
         setStartIndex(returnedIndex + items.length)
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
