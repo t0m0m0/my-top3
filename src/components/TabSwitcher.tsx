@@ -23,7 +23,7 @@ type TabSwitcherProps = {
 
 export default function TabSwitcher({ value, onChange }: TabSwitcherProps) {
   return (
-    <div className="mt-6">
+    <div className="mt-0">
       <Tabs
         value={value}
         onChange={(_, newValue: MediaCategory) => onChange(newValue)}

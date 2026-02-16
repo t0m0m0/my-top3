@@ -67,12 +67,11 @@ function SearchPage() {
 
         {/* Selection Area - Sticky */}
         <div
-          className="sticky z-30 -mx-3 mt-5 px-3 pb-3 pt-2 sm:-mx-4 sm:px-4"
+          className="sticky z-30 mt-4 rounded-xl p-4 shadow-md sm:p-5"
           style={{
             top: 0,
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            backgroundColor: 'rgba(255,255,255,0.75)',
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
           }}
         >
           <SelectionArea
