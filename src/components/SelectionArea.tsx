@@ -8,17 +8,12 @@ import { useNavigate } from 'react-router-dom'
 import { useSelection } from '../hooks/useSelection'
 import { buildTop3Url } from '../utils/url-params'
 import type { MediaCategory, SearchResultItem } from '../types/common'
+import { CATEGORY_LABELS_EN } from '../constants/category'
 
 type SelectionAreaProps = {
   theme: string
   onBeforeCreate?: () => void
   onCompleteChange?: (isComplete: boolean) => void
-}
-
-const CATEGORY_LABELS: Record<MediaCategory, string> = {
-  book: 'Book',
-  music: 'Music',
-  movie: 'Movie',
 }
 
 function SlotCard({
@@ -44,7 +39,7 @@ function SlotCard({
           sx={{ fontSize: '0.75rem', fontWeight: 600 }}
           style={{ color: 'var(--color-text-secondary)' }}
         >
-          {CATEGORY_LABELS[category]}
+          {CATEGORY_LABELS_EN[category]}
         </Typography>
         <Typography
           variant="caption"
@@ -69,7 +64,7 @@ function SlotCard({
         onClick={() => onDeselect(category)}
         className="absolute right-0 top-0"
         sx={{ position: 'absolute', top: 2, right: 2, padding: '2px' }}
-        aria-label={`${CATEGORY_LABELS[category]}の選択を解除`}
+        aria-label={`${CATEGORY_LABELS_EN[category]}の選択を解除`}
       >
         <CloseIcon sx={{ fontSize: 16 }} />
       </IconButton>
@@ -87,7 +82,7 @@ function SlotCard({
           variant="caption"
           sx={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}
         >
-          {CATEGORY_LABELS[category]}
+          {CATEGORY_LABELS_EN[category]}
         </Typography>
         <Typography
           variant="body2"
