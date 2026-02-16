@@ -34,6 +34,17 @@ describe('ResultCard', () => {
     expect(onSelect).toHaveBeenCalledWith(item)
   })
 
+  it('calls onSelect when card is clicked', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const item = createSearchResultItem()
+    render(<ResultCard item={item} onSelect={onSelect} />)
+    await user.click(
+      screen.getByRole('button', { name: /My Book|Test Title/i }),
+    )
+    expect(onSelect).toHaveBeenCalled()
+  })
+
   it('shows select button text', () => {
     render(<ResultCard item={createSearchResultItem()} onSelect={vi.fn()} />)
     expect(screen.getByText('#1に選ぶ')).toBeInTheDocument()
