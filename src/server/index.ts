@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { booksApp } from './routes/books.ts'
 import { musicApp } from './routes/music.ts'
 import { moviesApp } from './routes/movies.ts'
@@ -25,6 +26,14 @@ if (!process.env['TMDB_API_KEY']) {
 }
 
 const app = new Hono()
+
+app.use(
+  '/api/*',
+  cors({
+    origin: ['https://myno1s.exe.xyz'],
+    allowMethods: ['GET'],
+  }),
+)
 
 app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)
