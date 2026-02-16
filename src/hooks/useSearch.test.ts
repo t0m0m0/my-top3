@@ -72,8 +72,22 @@ describe('useSearch', () => {
             ok: true,
             data: {
               items: [
-                { id: 'b1', category: 'book', title: 'Book 1', subtitle: 'A1', thumbnailUrl: '', externalUrl: '' },
-                { id: 'b2', category: 'book', title: 'Book 2', subtitle: 'A2', thumbnailUrl: '', externalUrl: '' },
+                {
+                  id: 'b1',
+                  category: 'book',
+                  title: 'Book 1',
+                  subtitle: 'A1',
+                  thumbnailUrl: '',
+                  externalUrl: '',
+                },
+                {
+                  id: 'b2',
+                  category: 'book',
+                  title: 'Book 2',
+                  subtitle: 'A2',
+                  thumbnailUrl: '',
+                  externalUrl: '',
+                },
               ],
               totalItems: 4,
               startIndex: 0,
@@ -84,8 +98,22 @@ describe('useSearch', () => {
           ok: true,
           data: {
             items: [
-              { id: 'b2', category: 'book', title: 'Book 2', subtitle: 'A2', thumbnailUrl: '', externalUrl: '' },
-              { id: 'b3', category: 'book', title: 'Book 3', subtitle: 'A3', thumbnailUrl: '', externalUrl: '' },
+              {
+                id: 'b2',
+                category: 'book',
+                title: 'Book 2',
+                subtitle: 'A2',
+                thumbnailUrl: '',
+                externalUrl: '',
+              },
+              {
+                id: 'b3',
+                category: 'book',
+                title: 'Book 3',
+                subtitle: 'A3',
+                thumbnailUrl: '',
+                externalUrl: '',
+              },
             ],
             totalItems: 4,
             startIndex: 2,
