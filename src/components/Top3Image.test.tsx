@@ -272,7 +272,9 @@ describe('Top3Image', () => {
       })
 
       await waitFor(() => {
-        expect(getDownload()).toBe(`my-top3-${getTodayDate()}-test_path_name__bad.png`)
+        expect(getDownload()).toBe(
+          `my-top3-${getTodayDate()}-test_path_name__bad.png`,
+        )
       })
     })
 
@@ -308,7 +310,9 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
       })
-      expect(screen.getByRole('button', { name: /画像をダウンロード/ })).toBeEnabled()
+      expect(
+        screen.getByRole('button', { name: /画像をダウンロード/ }),
+      ).toBeEnabled()
     })
 
     it('shows error when toDataURL returns empty', async () => {
@@ -407,7 +411,9 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
       })
-      expect(screen.getByRole('button', { name: /画像をダウンロード/ })).toBeEnabled()
+      expect(
+        screen.getByRole('button', { name: /画像をダウンロード/ }),
+      ).toBeEnabled()
     })
 
     it('clears previous error on new download attempt', async () => {
