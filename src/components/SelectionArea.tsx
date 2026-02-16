@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -12,6 +12,7 @@ import type { MediaCategory, SearchResultItem } from '../types/common'
 type SelectionAreaProps = {
   theme: string
   onBeforeCreate?: () => void
+  onCompleteChange?: (isComplete: boolean) => void
 }
 
 const CATEGORY_LABELS: Record<MediaCategory, string> = {
@@ -29,43 +30,10 @@ function SlotCard({
   item: SearchResultItem | null
   onDeselect: (category: MediaCategory) => void
 }) {
-  const prevItemRef = useRef<SearchResultItem | null>(null)
-  const slotRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const el = slotRef.current
-    if (!el) return
-
-    // Item was just added
-    if (item && !prevItemRef.current) {
-      el.classList.remove('slot-card-exit')
-      el.classList.add('slot-card-enter')
-      const handleEnd = () => el.classList.remove('slot-card-enter')
-      el.addEventListener('animationend', handleEnd, { once: true })
-    }
-
-    prevItemRef.current = item
-  }, [item])
-
-  const handleDeselect = (cat: MediaCategory) => {
-    const el = slotRef.current
-    if (el) {
-      el.classList.add('slot-card-exit')
-      const handleEnd = () => {
-        el.classList.remove('slot-card-exit')
-        onDeselect(cat)
-      }
-      el.addEventListener('animationend', handleEnd, { once: true })
-    } else {
-      onDeselect(cat)
-    }
-  }
-
   if (!item) {
     return (
       <div
-        ref={slotRef}
-        className="slot-card flex h-20 flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 sm:h-28"
+        className="flex h-20 flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 transition-colors sm:h-28"
         style={{
           borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
@@ -90,8 +58,7 @@ function SlotCard({
 
   return (
     <div
-      ref={slotRef}
-      className="slot-card relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 sm:h-28"
+      className="relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-colors sm:h-28"
       style={{
         borderColor: 'var(--color-border)',
         backgroundColor: 'var(--color-surface)',
@@ -99,7 +66,7 @@ function SlotCard({
     >
       <IconButton
         size="small"
-        onClick={() => handleDeselect(category)}
+        onClick={() => onDeselect(category)}
         className="absolute right-0 top-0"
         sx={{ position: 'absolute', top: 2, right: 2, padding: '2px' }}
         aria-label={`${CATEGORY_LABELS[category]}の選択を解除`}
@@ -141,13 +108,21 @@ function SlotCard({
   )
 }
 
-function SelectionArea({ theme, onBeforeCreate }: SelectionAreaProps) {
+function SelectionArea({
+  theme,
+  onBeforeCreate,
+  onCompleteChange,
+}: SelectionAreaProps) {
   const { selection, deselectItem, isComplete } = useSelection()
   const navigate = useNavigate()
 
   const selectedCount = (
     [selection.book, selection.music, selection.movie] as const
   ).filter(Boolean).length
+
+  useEffect(() => {
+    onCompleteChange?.(isComplete)
+  }, [isComplete, onCompleteChange])
 
   const handleCreate = () => {
     onBeforeCreate?.()
@@ -196,6 +171,47 @@ function SelectionArea({ theme, onBeforeCreate }: SelectionAreaProps) {
             Top3を作成
           </Button>
         </div>
+      )}
+
+      {/* Floating action button - fixed at bottom for mobile */}
+      {isComplete && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1200,
+            display: 'flex',
+            justifyContent: 'center',
+            pb: `max(12px, env(safe-area-inset-bottom))`,
+            pt: 1.5,
+            px: 2,
+            background:
+              'linear-gradient(transparent, rgba(255,255,255,0.95) 30%)',
+            pointerEvents: 'none',
+          }}
+        >
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            size="large"
+            sx={{
+              pointerEvents: 'auto',
+              minHeight: 48,
+              minWidth: 200,
+              fontSize: '1rem',
+              fontWeight: 700,
+              borderRadius: '9999px',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+              '&:hover': {
+                boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+              },
+            }}
+          >
+            Top3を作成 🎉
+          </Button>
+        </Box>
       )}
     </Box>
   )

@@ -41,6 +41,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
         borderLeft: `4px solid ${accentColor}`,
         transition: 'all 0.2s ease',
         cursor: 'pointer',
+        WebkitTapHighlightColor: 'transparent',
         ...(isSelected && {
           bgcolor: 'action.selected',
           borderLeftColor: 'success.main',
@@ -50,6 +51,9 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           '&:hover': {
             transform: 'translateY(-2px)',
             boxShadow: 4,
+          },
+          '&:active': {
+            transform: 'scale(0.98)',
           },
         }),
       }}
@@ -112,7 +116,12 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
               color="success"
               disableElevation
               startIcon={<CheckCircleIcon />}
-              sx={{ mt: 1, fontSize: '0.8rem', pointerEvents: 'none' }}
+              sx={{
+                mt: 1,
+                fontSize: '0.8rem',
+                minHeight: 36,
+                pointerEvents: 'none',
+              }}
             >
               選択済み
             </Button>
@@ -124,7 +133,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
               disableElevation
               startIcon={<AddCircleOutlineIcon />}
               onClick={() => onSelect(item)}
-              sx={{ mt: 1, fontSize: '0.8rem' }}
+              sx={{ mt: 1, fontSize: '0.8rem', minHeight: 36 }}
             >
               #1に選ぶ
             </Button>
