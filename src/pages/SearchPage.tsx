@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSearch } from '../hooks/useSearch'
@@ -74,34 +74,31 @@ function SearchPage() {
     setTheme(selectedTheme)
   }, [])
 
+  const [selectionComplete, setSelectionComplete] = useState(false)
+
   const handleBeforeCreate = useCallback(() => {
     addThemeHistory(theme)
   }, [theme, addThemeHistory])
 
+  const handleCompleteChange = useCallback((complete: boolean) => {
+    setSelectionComplete(complete)
+  }, [])
+
+  const mainStyle = useMemo(
+    () => ({
+      background:
+        'linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)',
+      paddingBottom: selectionComplete
+        ? 'calc(72px + env(safe-area-inset-bottom))'
+        : undefined,
+    }),
+    [selectionComplete],
+  )
+
   return (
-    <div
-      className="noise-overlay min-h-screen"
-      style={{
-        background: `
-          radial-gradient(ellipse 80% 50% at 70% 5%, rgba(13,148,136,0.12) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 40% at 20% 60%, rgba(245,158,11,0.06) 0%, transparent 50%),
-          linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)
-        `,
-      }}
-    >
-      {/* Hero Section with decorative gradient orb */}
-      <div className="relative px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
-        {/* Decorative gradient orb */}
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2"
-          style={{
-            width: '360px',
-            height: '260px',
-            background:
-              'radial-gradient(circle, rgba(20,184,166,0.18) 0%, rgba(13,148,136,0.05) 40%, transparent 70%)',
-            filter: 'blur(40px)',
-          }}
-        />
+    <div className="min-h-screen" style={mainStyle}>
+      {/* Hero Section */}
+      <div className="px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
         <h1
           className="text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
@@ -121,7 +118,13 @@ function SearchPage() {
 
       <div className="mx-auto max-w-3xl px-3 sm:px-4">
         {/* Theme Input Section */}
-        <div className="glass-card rounded-xl p-4 sm:p-5">
+        <div
+          className="rounded-xl p-4 shadow-sm sm:p-5"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
           <ThemeInput value={theme} onChange={setTheme} />
           <ThemeHistory onSelect={handleThemeHistorySelect} />
         </div>
@@ -136,11 +139,21 @@ function SearchPage() {
             backgroundColor: 'rgba(255,255,255,0.75)',
           }}
         >
-          <SelectionArea theme={theme} onBeforeCreate={handleBeforeCreate} />
+          <SelectionArea
+            theme={theme}
+            onBeforeCreate={handleBeforeCreate}
+            onCompleteChange={handleCompleteChange}
+          />
         </div>
 
         {/* Search Section Card */}
-        <div className="glass-card mt-4 rounded-xl p-4 sm:p-5">
+        <div
+          className="mt-4 rounded-xl p-4 shadow-sm sm:p-5"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
           <TabSwitcher value={activeTab} onChange={setActiveTab} />
           <SearchBar value={currentQuery} onChange={handleQueryChange} />
 

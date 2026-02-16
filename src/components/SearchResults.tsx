@@ -63,14 +63,8 @@ export default function SearchResults({
 
   return (
     <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-      {results.map((item, index) => (
-        <div
-          key={item.id}
-          className="animate-fade-in-up"
-          style={{ animationDelay: `${Math.min(index, 7) * 60}ms` }}
-        >
-          <ResultCard item={item} onSelect={onSelect} />
-        </div>
+      {results.map((item) => (
+        <ResultCard key={item.id} item={item} onSelect={onSelect} />
       ))}
 
       {isLoading && results.length === 0
