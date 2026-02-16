@@ -53,8 +53,24 @@ describe('SearchResults', () => {
     expect(screen.getByText('Item 2')).toBeInTheDocument()
   })
 
-  it('shows loading spinner', () => {
-    render(<SearchResults {...defaultProps} query="test" isLoading={true} />)
+  it('shows skeleton cards when loading with no results', () => {
+    const { container } = render(
+      <SearchResults {...defaultProps} query="test" isLoading={true} />,
+    )
+    const skeletons = container.querySelectorAll('.MuiSkeleton-root')
+    expect(skeletons.length).toBeGreaterThan(0)
+  })
+
+  it('shows loading spinner when loading with existing results', () => {
+    const items = [createSearchResultItem({ id: '1', title: 'Item 1' })]
+    render(
+      <SearchResults
+        {...defaultProps}
+        query="test"
+        results={items}
+        isLoading={true}
+      />,
+    )
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
