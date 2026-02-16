@@ -26,17 +26,17 @@ describe('ShareButtons', () => {
 
   it('renders URL copy button', () => {
     render(<ShareButtons />)
-    expect(screen.getByText('URLをコピー')).toBeInTheDocument()
+    expect(screen.getByLabelText('URLをコピー')).toBeInTheDocument()
   })
 
   it('renders X share button', () => {
     render(<ShareButtons />)
-    expect(screen.getByText('Xでシェア')).toBeInTheDocument()
+    expect(screen.getByLabelText('Xでシェア')).toBeInTheDocument()
   })
 
   it('copies URL to clipboard on click', async () => {
     render(<ShareButtons />)
-    fireEvent.click(screen.getByText('URLをコピー'))
+    fireEvent.click(screen.getByLabelText('URLをコピー'))
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
@@ -47,7 +47,7 @@ describe('ShareButtons', () => {
 
   it('shows success snackbar after copy', async () => {
     render(<ShareButtons />)
-    fireEvent.click(screen.getByText('URLをコピー'))
+    fireEvent.click(screen.getByLabelText('URLをコピー'))
 
     await waitFor(() => {
       expect(screen.getByText('URLをコピーしました')).toBeInTheDocument()
@@ -64,7 +64,7 @@ describe('ShareButtons', () => {
     document.execCommand = execCommandMock
 
     render(<ShareButtons />)
-    fireEvent.click(screen.getByText('URLをコピー'))
+    fireEvent.click(screen.getByLabelText('URLをコピー'))
 
     await waitFor(() => {
       expect(execCommandMock).toHaveBeenCalledWith('copy')
@@ -81,7 +81,7 @@ describe('ShareButtons', () => {
     document.execCommand = vi.fn().mockReturnValue(false)
 
     render(<ShareButtons />)
-    fireEvent.click(screen.getByText('URLをコピー'))
+    fireEvent.click(screen.getByLabelText('URLをコピー'))
 
     await waitFor(() => {
       expect(
@@ -95,7 +95,7 @@ describe('ShareButtons', () => {
   it('opens X intent URL on share click', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons theme="テスト" />)
-    fireEvent.click(screen.getByText('Xでシェア'))
+    fireEvent.click(screen.getByLabelText('Xでシェア'))
 
     expect(window.open).toHaveBeenCalledWith(
       expect.stringContaining('twitter.com/intent/tweet'),
@@ -107,7 +107,7 @@ describe('ShareButtons', () => {
   it('includes theme and #MyNo1s hashtag in X share text', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons theme="雨の日に" />)
-    fireEvent.click(screen.getByText('Xでシェア'))
+    fireEvent.click(screen.getByLabelText('Xでシェア'))
 
     const url = (window.open as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0] as string
@@ -118,7 +118,7 @@ describe('ShareButtons', () => {
   it('includes #MyNo1s hashtag when theme is not provided', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons />)
-    fireEvent.click(screen.getByText('Xでシェア'))
+    fireEvent.click(screen.getByLabelText('Xでシェア'))
 
     const url = (window.open as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0] as string
@@ -140,7 +140,7 @@ describe('ShareButtons', () => {
     })
 
     render(<ShareButtons />)
-    fireEvent.click(screen.getByText('Xでシェア'))
+    fireEvent.click(screen.getByLabelText('Xでシェア'))
 
     expect(window.open).toHaveBeenCalled()
     expect(hrefSetter).toHaveBeenCalledWith(
@@ -154,13 +154,13 @@ describe('ShareButtons', () => {
     it('renders share button when Web Share API is available', () => {
       Object.assign(navigator, { share: vi.fn() })
       render(<ShareButtons />)
-      expect(screen.getByText('シェア')).toBeInTheDocument()
+      expect(screen.getByLabelText('シェア')).toBeInTheDocument()
     })
 
     it('does not render share button when Web Share API is unavailable', () => {
       Object.assign(navigator, { share: undefined })
       render(<ShareButtons />)
-      expect(screen.queryByText('シェア')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('シェア')).not.toBeInTheDocument()
     })
 
     it('calls navigator.share with correct data including theme', async () => {
@@ -168,7 +168,7 @@ describe('ShareButtons', () => {
       Object.assign(navigator, { share: shareMock })
 
       render(<ShareButtons theme="雨の日に" />)
-      fireEvent.click(screen.getByText('シェア'))
+      fireEvent.click(screen.getByLabelText('シェア'))
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
@@ -184,7 +184,7 @@ describe('ShareButtons', () => {
       Object.assign(navigator, { share: shareMock })
 
       render(<ShareButtons />)
-      fireEvent.click(screen.getByText('シェア'))
+      fireEvent.click(screen.getByLabelText('シェア'))
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
@@ -201,7 +201,7 @@ describe('ShareButtons', () => {
       Object.assign(navigator, { share: shareMock })
 
       render(<ShareButtons />)
-      fireEvent.click(screen.getByText('シェア'))
+      fireEvent.click(screen.getByLabelText('シェア'))
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalled()
@@ -215,7 +215,7 @@ describe('ShareButtons', () => {
       Object.assign(navigator, { share: shareMock })
 
       render(<ShareButtons />)
-      fireEvent.click(screen.getByText('シェア'))
+      fireEvent.click(screen.getByLabelText('シェア'))
 
       await waitFor(() => {
         expect(

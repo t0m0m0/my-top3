@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
-import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
@@ -81,25 +82,56 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   return (
-    <div className="flex flex-wrap justify-center gap-2">
-      <Button
-        variant="outlined"
-        startIcon={<ContentCopyIcon />}
-        onClick={handleCopyUrl}
-      >
-        URLをコピー
-      </Button>
-      <Button variant="outlined" startIcon={<XIcon />} onClick={handleShareX}>
-        Xでシェア
-      </Button>
-      {canWebShare && (
-        <Button
-          variant="outlined"
-          startIcon={<ShareIcon />}
-          onClick={handleWebShare}
+    <div className="flex justify-center gap-3">
+      <Tooltip title="Xでシェア" arrow>
+        <IconButton
+          onClick={handleShareX}
+          aria-label="Xでシェア"
+          sx={{
+            width: 44,
+            height: 44,
+            backgroundColor: '#1a1a1a',
+            color: '#ffffff',
+            '&:hover': { backgroundColor: '#333333' },
+          }}
         >
-          シェア
-        </Button>
+          <XIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="URLをコピー" arrow>
+        <IconButton
+          onClick={handleCopyUrl}
+          aria-label="URLをコピー"
+          sx={{
+            width: 44,
+            height: 44,
+            backgroundColor: 'var(--color-primary)',
+            color: '#ffffff',
+            '&:hover': { backgroundColor: 'var(--color-primary-dark)' },
+          }}
+        >
+          <ContentCopyIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      {canWebShare && (
+        <Tooltip title="シェア" arrow>
+          <IconButton
+            onClick={handleWebShare}
+            aria-label="シェア"
+            sx={{
+              width: 44,
+              height: 44,
+              backgroundColor: 'var(--color-secondary)',
+              color: '#ffffff',
+              '&:hover': {
+                backgroundColor: 'var(--color-secondary)',
+                filter: 'brightness(0.9)',
+              },
+            }}
+          >
+            <ShareIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )}
 
       <Snackbar

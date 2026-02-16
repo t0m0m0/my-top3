@@ -82,52 +82,46 @@ function Top3Page() {
           />
         </div>
 
-        {/* Theme display with decorative quotes */}
+        {/* Theme display with decorative quotes via CSS pseudo-elements */}
         {params.theme && (
           <div className="mt-3 text-center">
             <Typography
               variant="h6"
               sx={{
                 color: 'var(--color-text-primary)',
-                position: 'relative',
                 display: 'inline-block',
-                px: 2,
+                px: 3,
+                position: 'relative',
+                '&::before': {
+                  content: '"\\201C"',
+                  position: 'absolute',
+                  left: -4,
+                  top: -8,
+                  fontSize: '2.5rem',
+                  color: 'var(--color-primary)',
+                  opacity: 0.3,
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1,
+                },
+                '&::after': {
+                  content: '"\\201D"',
+                  position: 'absolute',
+                  right: -4,
+                  bottom: -12,
+                  fontSize: '2.5rem',
+                  color: 'var(--color-primary)',
+                  opacity: 0.3,
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1,
+                },
               }}
             >
-              <span
-                style={{
-                  position: 'absolute',
-                  left: -8,
-                  top: -4,
-                  fontSize: '2rem',
-                  color: 'var(--color-primary)',
-                  opacity: 0.3,
-                  fontFamily: 'Georgia, serif',
-                  lineHeight: 1,
-                }}
-              >
-                “
-              </span>
               {params.theme}
-              <span
-                style={{
-                  position: 'absolute',
-                  right: -8,
-                  bottom: -8,
-                  fontSize: '2rem',
-                  color: 'var(--color-primary)',
-                  opacity: 0.3,
-                  fontFamily: 'Georgia, serif',
-                  lineHeight: 1,
-                }}
-              >
-                ”
-              </span>
             </Typography>
           </div>
         )}
 
-        <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:flex-row">
+        <div className="mt-4 flex flex-col items-stretch gap-4 sm:mt-6 sm:flex-row">
           <WorkCard
             work={book.data}
             loading={book.loading}
