@@ -1,40 +1,32 @@
 import { createTheme } from '@mui/material/styles'
 
-const fontFamily = [
-  '"Noto Sans JP"',
-  '"Outfit"',
-  'sans-serif',
-].join(',')
+const fontFamily = ['"Noto Sans JP"', '"Outfit"', 'sans-serif'].join(',')
 
-const displayFontFamily = [
-  '"Outfit"',
-  '"Noto Sans JP"',
-  'sans-serif',
-].join(',')
+const displayFontFamily = ['"Outfit"', '"Noto Sans JP"', 'sans-serif'].join(',')
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#0d9488',      // teal-600
-      light: '#14b8a6',     // teal-500
-      dark: '#0f766e',      // teal-700
+      main: '#0d9488', // teal-600
+      light: '#14b8a6', // teal-500
+      dark: '#0f766e', // teal-700
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#f59e0b',      // amber-500 (warm gold)
-      light: '#fbbf24',     // amber-400
-      dark: '#d97706',      // amber-600
+      main: '#f59e0b', // amber-500 (warm gold)
+      light: '#fbbf24', // amber-400
+      dark: '#d97706', // amber-600
       contrastText: '#ffffff',
     },
     error: {
       main: '#ef4444',
     },
     background: {
-      default: '#f8fafc',   // slate-50
+      default: '#f8fafc', // slate-50
       paper: '#ffffff',
     },
     text: {
-      primary: '#1e293b',   // slate-800
+      primary: '#1e293b', // slate-800
       secondary: '#64748b', // slate-500
     },
   },
@@ -48,7 +40,11 @@ const theme = createTheme({
     h6: { fontFamily: displayFontFamily, fontWeight: 600 },
     subtitle1: { fontWeight: 600 },
     subtitle2: { fontWeight: 600 },
-    button: { fontFamily: displayFontFamily, fontWeight: 600, textTransform: 'none' as const },
+    button: {
+      fontFamily: displayFontFamily,
+      fontWeight: 600,
+      textTransform: 'none' as const,
+    },
   },
   shape: {
     borderRadius: 10,
@@ -73,7 +69,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)',
+          boxShadow:
+            '0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)',
         },
       },
     },

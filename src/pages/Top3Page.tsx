@@ -90,9 +90,19 @@ type WorkCardProps = {
 function WorkCard({ work, loading, error, label }: WorkCardProps) {
   if (loading) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center rounded-lg border p-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
+      <div
+        className="flex flex-1 flex-col items-center justify-center rounded-lg border p-4"
+        style={{
+          borderColor: 'var(--color-border)',
+          backgroundColor: 'var(--color-surface)',
+        }}
+      >
         <CircularProgress size={32} color="primary" />
-        <Typography variant="caption" className="mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+        <Typography
+          variant="caption"
+          className="mt-2"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           {label}
         </Typography>
       </div>
@@ -111,8 +121,17 @@ function WorkCard({ work, loading, error, label }: WorkCardProps) {
 
   if (!work) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center rounded-lg border p-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-        <Typography variant="caption" style={{ color: 'var(--color-text-secondary)' }}>
+      <div
+        className="flex flex-1 flex-col items-center justify-center rounded-lg border p-4"
+        style={{
+          borderColor: 'var(--color-border)',
+          backgroundColor: 'var(--color-surface)',
+        }}
+      >
+        <Typography
+          variant="caption"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           {label} - データなし
         </Typography>
       </div>
@@ -120,8 +139,17 @@ function WorkCard({ work, loading, error, label }: WorkCardProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center rounded-lg border p-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-      <div className="mb-1 rounded px-2 py-0.5" style={{ backgroundColor: 'var(--color-primary-dark)' }}>
+    <div
+      className="flex flex-1 flex-col items-center rounded-lg border p-4"
+      style={{
+        borderColor: 'var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
+      }}
+    >
+      <div
+        className="mb-1 rounded px-2 py-0.5"
+        style={{ backgroundColor: 'var(--color-primary-dark)' }}
+      >
         <Typography
           variant="caption"
           className="font-bold uppercase text-white"
@@ -130,7 +158,10 @@ function WorkCard({ work, loading, error, label }: WorkCardProps) {
           {label}
         </Typography>
       </div>
-      <div className="mb-1 rounded px-2 py-0.5" style={{ backgroundColor: 'var(--color-secondary-light)' }}>
+      <div
+        className="mb-1 rounded px-2 py-0.5"
+        style={{ backgroundColor: 'var(--color-secondary-light)' }}
+      >
         <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>
           #1
         </Typography>
@@ -189,12 +220,22 @@ function Top3Page() {
 
   if (!hasAnyId) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)' }}>
+      <div
+        className="min-h-screen"
+        style={{
+          background:
+            'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+        }}
+      >
         <div className="mx-auto max-w-3xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
           <Typography variant="h5" sx={{ color: 'var(--color-text-primary)' }}>
             Top3を作成してください
           </Typography>
-          <Typography variant="body2" className="mt-2" sx={{ color: 'var(--color-text-secondary)' }}>
+          <Typography
+            variant="body2"
+            className="mt-2"
+            sx={{ color: 'var(--color-text-secondary)' }}
+          >
             作品が選択されていません。トップページから3作品を選んでください。
           </Typography>
           <div className="mt-4">
@@ -208,17 +249,29 @@ function Top3Page() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)' }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+      }}
+    >
       <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
         <h1
           className="text-xl font-extrabold sm:text-2xl"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary-dark)' }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-primary-dark)',
+          }}
         >
           My Top 3
         </h1>
 
         {params.theme && (
-          <Typography variant="h6" className="mt-2 text-center" sx={{ color: 'var(--color-text-primary)' }}>
+          <Typography
+            variant="h6"
+            className="mt-2 text-center"
+            sx={{ color: 'var(--color-text-primary)' }}
+          >
             「{params.theme}」
           </Typography>
         )}

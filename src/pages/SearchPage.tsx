@@ -68,15 +68,26 @@ function SearchPage() {
   )
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)' }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+      }}
+    >
       <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
         <h1
           className="text-xl font-extrabold sm:text-2xl"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary-dark)' }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-primary-dark)',
+          }}
         >
           My Top 3
         </h1>
-        <p className="mt-1 text-sm sm:mt-2 sm:text-base" style={{ color: 'var(--color-text-secondary)' }}>
+        <p
+          className="mt-1 text-sm sm:mt-2 sm:text-base"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           テーマを決めて、お気に入りの3作品を選ぼう
         </p>
 

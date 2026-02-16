@@ -29,11 +29,23 @@ function SlotCard({
 }) {
   if (!item) {
     return (
-      <div className="flex h-16 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 sm:h-24" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-        <Typography variant="caption" style={{ color: 'var(--color-text-secondary)' }}>
+      <div
+        className="flex h-16 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 sm:h-24"
+        style={{
+          borderColor: 'var(--color-border)',
+          backgroundColor: 'var(--color-surface)',
+        }}
+      >
+        <Typography
+          variant="caption"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           {CATEGORY_LABELS[category]}
         </Typography>
-        <Typography variant="caption" style={{ color: 'var(--color-text-secondary)' }}>
+        <Typography
+          variant="caption"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           未選択
         </Typography>
       </div>
@@ -41,7 +53,13 @@ function SlotCard({
   }
 
   return (
-    <div className="relative flex h-16 flex-1 items-center gap-2 rounded-lg border p-2 sm:h-24" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
+    <div
+      className="relative flex h-16 flex-1 items-center gap-2 rounded-lg border p-2 sm:h-24"
+      style={{
+        borderColor: 'var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
+      }}
+    >
       <IconButton
         size="small"
         onClick={() => onDeselect(category)}
