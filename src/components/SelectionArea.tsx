@@ -31,7 +31,7 @@ function SlotCard({
   if (!item) {
     return (
       <div
-        className="flex h-16 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 sm:h-24"
+        className="flex h-20 flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 transition-colors sm:h-28"
         style={{
           borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
@@ -39,6 +39,7 @@ function SlotCard({
       >
         <Typography
           variant="caption"
+          sx={{ fontSize: '0.75rem', fontWeight: 600 }}
           style={{ color: 'var(--color-text-secondary)' }}
         >
           {CATEGORY_LABELS[category]}
@@ -55,7 +56,7 @@ function SlotCard({
 
   return (
     <div
-      className="relative flex h-16 flex-1 items-center gap-2 rounded-lg border p-2 sm:h-24"
+      className="relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-colors sm:h-28"
       style={{
         borderColor: 'var(--color-border)',
         backgroundColor: 'var(--color-surface)',
@@ -109,6 +110,10 @@ function SelectionArea({ theme, onBeforeCreate }: SelectionAreaProps) {
   const { selection, deselectItem, isComplete } = useSelection()
   const navigate = useNavigate()
 
+  const selectedCount = (
+    [selection.book, selection.music, selection.movie] as const
+  ).filter(Boolean).length
+
   const handleCreate = () => {
     onBeforeCreate?.()
     const url = buildTop3Url(selection, theme)
@@ -117,6 +122,22 @@ function SelectionArea({ theme, onBeforeCreate }: SelectionAreaProps) {
 
   return (
     <Box>
+      <div className="mb-2 flex items-center justify-between">
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, fontSize: '0.85rem' }}
+          style={{ color: 'var(--color-primary-dark)' }}
+        >
+          選択中の作品
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+          style={{ color: 'var(--color-primary)' }}
+        >
+          {selectedCount} / 3
+        </Typography>
+      </div>
       <div className="flex flex-col gap-2 sm:flex-row">
         <SlotCard
           category="book"
