@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test('search page loads', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle(/My Top 3/)
+  await expect(page).toHaveTitle(/My No.1s/)
 })
 
 test('tab switching works', async ({ page }) => {

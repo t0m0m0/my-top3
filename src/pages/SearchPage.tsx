@@ -106,7 +106,7 @@ function SearchPage() {
             color: '#fff',
           }}
         >
-          My Top 3
+          My No.1s
         </h1>
         <p
           className="mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"

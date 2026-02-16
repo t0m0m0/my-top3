@@ -104,26 +104,26 @@ describe('ShareButtons', () => {
     )
   })
 
-  it('includes theme and #MyTop3 hashtag in X share text', () => {
+  it('includes theme and #MyNo1s hashtag in X share text', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons theme="雨の日に" />)
     fireEvent.click(screen.getByText('Xでシェア'))
 
     const url = (window.open as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0] as string
-    expect(url).toContain(encodeURIComponent('My Top 3 「雨の日に」'))
-    expect(url).toContain(encodeURIComponent('#MyTop3'))
+    expect(url).toContain(encodeURIComponent('My No.1s 「雨の日に」'))
+    expect(url).toContain(encodeURIComponent('#MyNo1s'))
   })
 
-  it('includes #MyTop3 hashtag when theme is not provided', () => {
+  it('includes #MyNo1s hashtag when theme is not provided', () => {
     vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<ShareButtons />)
     fireEvent.click(screen.getByText('Xでシェア'))
 
     const url = (window.open as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0] as string
-    expect(url).toContain(encodeURIComponent('My Top 3'))
-    expect(url).toContain(encodeURIComponent('#MyTop3'))
+    expect(url).toContain(encodeURIComponent('My No.1s'))
+    expect(url).toContain(encodeURIComponent('#MyNo1s'))
     expect(url).not.toContain(encodeURIComponent('「'))
   })
 
@@ -172,8 +172,8 @@ describe('ShareButtons', () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
-          title: 'My Top 3',
-          text: 'My Top 3 「雨の日に」 #MyTop3',
+          title: 'My No.1s',
+          text: 'My No.1s 「雨の日に」 #MyNo1s',
           url: window.location.href,
         })
       })
@@ -188,8 +188,8 @@ describe('ShareButtons', () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
-          title: 'My Top 3',
-          text: 'My Top 3 #MyTop3',
+          title: 'My No.1s',
+          text: 'My No.1s #MyNo1s',
           url: window.location.href,
         })
       })

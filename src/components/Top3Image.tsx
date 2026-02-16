@@ -232,7 +232,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
       const date = formatDate()
       const safeTheme = theme ? `-${sanitizeFilename(theme)}` : ''
       const link = document.createElement('a')
-      link.download = `my-top3-${date}${safeTheme}.png`
+      link.download = `my-no1s-${date}${safeTheme}.png`
       link.href = dataUrl
       link.click()
       setSuccessOpen(true)
@@ -396,7 +396,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
                 textShadow: '0 2px 12px rgba(0,0,0,0.3)',
               }}
             >
-              My Top 3
+              My No.1s
             </div>
             {theme && (
               <div
@@ -454,7 +454,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
                 fontWeight: 500,
               }}
             >
-              my-top3.app
+              my-no1s.app
             </span>
           </div>
         </div>

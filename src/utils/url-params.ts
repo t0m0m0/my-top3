@@ -33,7 +33,7 @@ export function buildTop3Url(selection: Selection, theme: string): string {
   }
 
   const queryString = params.toString()
-  return queryString ? `/my-top3?${queryString}` : '/my-top3'
+  return queryString ? `/my-no1s?${queryString}` : '/my-no1s'
 }
 
 const MAX_THEME_URL_LENGTH = 100

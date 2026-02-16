@@ -248,7 +248,7 @@ describe('Top3Image', () => {
       })
 
       await waitFor(() => {
-        expect(getDownload()).toBe(`my-top3-${getTodayDate()}-テストテーマ.png`)
+        expect(getDownload()).toBe(`my-no1s-${getTodayDate()}-テストテーマ.png`)
       })
     })
 
@@ -273,7 +273,7 @@ describe('Top3Image', () => {
 
       await waitFor(() => {
         expect(getDownload()).toBe(
-          `my-top3-${getTodayDate()}-test_path_name__bad.png`,
+          `my-no1s-${getTodayDate()}-test_path_name__bad.png`,
         )
       })
     })
