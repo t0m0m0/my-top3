@@ -185,7 +185,8 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
         className="pointer-events-none absolute inset-0 rounded-xl"
         style={{
           border: '2px solid var(--color-border)',
-          borderImage: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary)) 1',
+          borderImage:
+            'linear-gradient(135deg, var(--color-primary), var(--color-secondary)) 1',
           borderRadius: 'inherit',
           mask: 'linear-gradient(#fff 0 0)',
           WebkitMask: 'linear-gradient(#fff 0 0)',
@@ -195,7 +196,8 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
       <div
         className="mb-1.5 rounded-md px-3 py-1"
         style={{
-          background: 'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
+          background:
+            'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
         }}
       >
         <Typography
@@ -251,7 +253,11 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
       <Typography
         variant="caption"
         className="text-center"
-        sx={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', mt: 0.25 }}
+        sx={{
+          fontSize: '0.7rem',
+          color: 'var(--color-text-secondary)',
+          mt: 0.25,
+        }}
       >
         {work.subtitle}
       </Typography>
@@ -318,14 +324,16 @@ function Top3Page() {
           <div
             className="mx-auto mb-2 h-0.5 w-16 rounded-full"
             style={{
-              background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+              background:
+                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
             }}
           />
           <h1
             className="text-xl font-extrabold sm:text-2xl"
             style={{
               fontFamily: 'var(--font-display)',
-              background: 'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
+              background:
+                'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -336,7 +344,8 @@ function Top3Page() {
           <div
             className="mx-auto mt-2 h-0.5 w-16 rounded-full"
             style={{
-              background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+              background:
+                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
             }}
           />
         </div>

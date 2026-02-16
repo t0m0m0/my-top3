@@ -291,7 +291,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               transform: 'translateX(-50%)',
               width: 200,
               height: 3,
-              background: 'linear-gradient(90deg, transparent, rgba(250,204,21,0.6), transparent)',
+              background:
+                'linear-gradient(90deg, transparent, rgba(250,204,21,0.6), transparent)',
               borderRadius: 2,
             }}
           />
@@ -352,7 +353,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               left: 20,
               width: 1,
               height: 120,
-              background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent)',
+              background:
+                'linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent)',
             }}
           />
           <div
@@ -362,7 +364,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               right: 20,
               width: 1,
               height: 120,
-              background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent)',
+              background:
+                'linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent)',
             }}
           />
 
@@ -378,7 +381,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               style={{
                 width: 60,
                 height: 2,
-                background: 'linear-gradient(90deg, transparent, rgba(250,204,21,0.5), transparent)',
+                background:
+                  'linear-gradient(90deg, transparent, rgba(250,204,21,0.5), transparent)',
                 margin: '0 auto 16px',
                 borderRadius: 1,
               }}
@@ -411,7 +415,8 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               style={{
                 width: 60,
                 height: 2,
-                background: 'linear-gradient(90deg, transparent, rgba(250,204,21,0.5), transparent)',
+                background:
+                  'linear-gradient(90deg, transparent, rgba(250,204,21,0.5), transparent)',
                 margin: '16px auto 0',
                 borderRadius: 1,
               }}
