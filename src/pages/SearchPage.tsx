@@ -3,12 +3,14 @@ import type { MediaCategory, SearchResultItem } from '../types/common'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSearch } from '../hooks/useSearch'
 import { useSearchHistory } from '../hooks/useSearchHistory'
+import { useThemeHistory } from '../hooks/useThemeHistory'
 import { useSelection } from '../hooks/useSelection'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
 import SearchHistory from '../components/SearchHistory'
 import SearchResults from '../components/SearchResults'
 import ThemeInput from '../components/ThemeInput'
+import ThemeHistory from '../components/ThemeHistory'
 import SelectionArea from '../components/SelectionArea'
 
 type QueryState = Record<MediaCategory, string>
@@ -24,6 +26,7 @@ function SearchPage() {
   const [queries, setQueries] = useState<QueryState>(INITIAL_QUERIES)
   const [theme, setTheme] = useState('')
   const { selectItem } = useSelection()
+  const { addHistory: addThemeHistory } = useThemeHistory()
 
   const currentQuery = queries[activeTab]
   const debouncedQuery = useDebounce(currentQuery, 300)
@@ -67,6 +70,14 @@ function SearchPage() {
     [selectItem],
   )
 
+  const handleThemeHistorySelect = useCallback((selectedTheme: string) => {
+    setTheme(selectedTheme)
+  }, [])
+
+  const handleBeforeCreate = useCallback(() => {
+    addThemeHistory(theme)
+  }, [theme, addThemeHistory])
+
   return (
     <div
       className="min-h-screen"
@@ -94,11 +105,12 @@ function SearchPage() {
         {/* Theme Input Area */}
         <div className="mt-6">
           <ThemeInput value={theme} onChange={setTheme} />
+          <ThemeHistory onSelect={handleThemeHistorySelect} />
         </div>
 
         {/* Selection Area */}
         <div className="mt-4">
-          <SelectionArea theme={theme} />
+          <SelectionArea theme={theme} onBeforeCreate={handleBeforeCreate} />
         </div>
 
         {/* Tab Switcher */}
