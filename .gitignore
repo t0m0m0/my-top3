@@ -30,6 +30,7 @@ dist-ssr
 
 # Claude
 .claude
+CLAUDE.md
 
 .serena
 
