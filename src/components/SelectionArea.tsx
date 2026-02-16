@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -28,10 +29,43 @@ function SlotCard({
   item: SearchResultItem | null
   onDeselect: (category: MediaCategory) => void
 }) {
+  const prevItemRef = useRef<SearchResultItem | null>(null)
+  const slotRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = slotRef.current
+    if (!el) return
+
+    // Item was just added
+    if (item && !prevItemRef.current) {
+      el.classList.remove('slot-card-exit')
+      el.classList.add('slot-card-enter')
+      const handleEnd = () => el.classList.remove('slot-card-enter')
+      el.addEventListener('animationend', handleEnd, { once: true })
+    }
+
+    prevItemRef.current = item
+  }, [item])
+
+  const handleDeselect = (cat: MediaCategory) => {
+    const el = slotRef.current
+    if (el) {
+      el.classList.add('slot-card-exit')
+      const handleEnd = () => {
+        el.classList.remove('slot-card-exit')
+        onDeselect(cat)
+      }
+      el.addEventListener('animationend', handleEnd, { once: true })
+    } else {
+      onDeselect(cat)
+    }
+  }
+
   if (!item) {
     return (
       <div
-        className="flex h-20 flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 transition-colors sm:h-28"
+        ref={slotRef}
+        className="slot-card flex h-20 flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 sm:h-28"
         style={{
           borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
@@ -56,7 +90,8 @@ function SlotCard({
 
   return (
     <div
-      className="relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-colors sm:h-28"
+      ref={slotRef}
+      className="slot-card relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 sm:h-28"
       style={{
         borderColor: 'var(--color-border)',
         backgroundColor: 'var(--color-surface)',
@@ -64,7 +99,7 @@ function SlotCard({
     >
       <IconButton
         size="small"
-        onClick={() => onDeselect(category)}
+        onClick={() => handleDeselect(category)}
         className="absolute right-0 top-0"
         sx={{ position: 'absolute', top: 2, right: 2, padding: '2px' }}
         aria-label={`${CATEGORY_LABELS[category]}の選択を解除`}

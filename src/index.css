@@ -37,3 +37,112 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ========================================
+   Animations & Micro-interactions
+   ======================================== */
+
+/* Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseScale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.animate-pulse-scale {
+  animation: pulseScale 0.35s ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+/* Stagger delay utilities */
+.animation-delay-0 {
+  animation-delay: 0ms;
+}
+.animation-delay-1 {
+  animation-delay: 80ms;
+}
+.animation-delay-2 {
+  animation-delay: 160ms;
+}
+.animation-delay-3 {
+  animation-delay: 240ms;
+}
+.animation-delay-4 {
+  animation-delay: 320ms;
+}
+.animation-delay-5 {
+  animation-delay: 400ms;
+}
+.animation-delay-6 {
+  animation-delay: 480ms;
+}
+.animation-delay-7 {
+  animation-delay: 560ms;
+}
+
+/* Tab content crossfade */
+.tab-content-fade {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Selection slot transitions */
+.slot-card {
+  transition: all 0.3s ease;
+}
+
+.slot-card-enter {
+  animation: fadeInUp 0.3s ease-out both, pulseScale 0.35s ease-in-out 0.1s both;
+}
+
+.slot-card-exit {
+  animation: fadeIn 0.25s ease-out reverse both;
+}
+
+/* Prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-pulse-scale,
+  .animate-fade-in,
+  .tab-content-fade,
+  .slot-card-enter,
+  .slot-card-exit {
+    animation: none !important;
+  }
+  .slot-card {
+    transition: none !important;
+  }
+}
