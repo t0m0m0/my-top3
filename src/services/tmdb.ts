@@ -4,6 +4,7 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
+import { assertObject, assertField, assertArray } from './validation-helpers.ts'
 
 const BASE_URL = 'https://api.themoviedb.org/3'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300'
@@ -52,33 +53,17 @@ type TMDbMovieDetail = {
 // ── Validation functions ────────────────────────────────────────────
 
 function validateSearchResponse(data: unknown): TMDbSearchResponse {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from TMDb search API')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['total_results'] !== 'number') {
-    throw new Error('Missing or invalid total_results in TMDb search response')
-  }
-  if (typeof obj['page'] !== 'number') {
-    throw new Error('Missing or invalid page in TMDb search response')
-  }
-  if (!Array.isArray(obj['results'])) {
-    throw new Error('Missing or invalid results in TMDb search response')
-  }
+  const obj = assertObject(data, 'TMDb search API')
+  assertField<number>(obj, 'total_results', 'number', 'TMDb search response')
+  assertField<number>(obj, 'page', 'number', 'TMDb search response')
+  assertArray(obj, 'results', 'TMDb search response')
   return data as TMDbSearchResponse
 }
 
 function validateMovieDetail(data: unknown): TMDbMovieDetail {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from TMDb movie API')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['id'] !== 'number') {
-    throw new Error('Missing or invalid id in TMDb movie response')
-  }
-  if (typeof obj['title'] !== 'string') {
-    throw new Error('Missing title in TMDb movie response')
-  }
+  const obj = assertObject(data, 'TMDb movie API')
+  assertField<number>(obj, 'id', 'number', 'TMDb movie response')
+  assertField<string>(obj, 'title', 'string', 'TMDb movie response')
   return data as TMDbMovieDetail
 }
 
