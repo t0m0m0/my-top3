@@ -65,6 +65,23 @@ function validateVolume(data: unknown): GoogleBooksVolume {
   return data as GoogleBooksVolume
 }
 
+function buildSearchUrl(
+  apiKey: string,
+  query: string,
+  field: 'intitle' | 'inauthor',
+  startIndex: number,
+  maxResults: number,
+): string {
+  const params = new URLSearchParams({
+    q: `${field}:${query}`,
+    startIndex: String(startIndex),
+    maxResults: String(maxResults),
+    langRestrict: 'ja',
+    key: apiKey,
+  })
+  return `${BASE_URL}?${params.toString()}`
+}
+
 export async function searchBooks(
   apiKey: string,
   query: string,
@@ -84,22 +101,40 @@ export async function searchBooks(
     }
   }
 
-  const params = new URLSearchParams({
-    q: trimmed,
-    startIndex: String(startIndex),
-    maxResults: String(maxResults),
-    key: apiKey,
-  })
+  // Search by title and author in parallel, then merge results
+  const [titleResult, authorResult] = await Promise.all([
+    fetchJson<GoogleBooksSearchResponse>(
+      buildSearchUrl(apiKey, trimmed, 'intitle', startIndex, maxResults),
+      { signal, validate: validateSearchResponse },
+    ),
+    fetchJson<GoogleBooksSearchResponse>(
+      buildSearchUrl(apiKey, trimmed, 'inauthor', startIndex, maxResults),
+      { signal, validate: validateSearchResponse },
+    ),
+  ])
 
-  const result = await fetchJson<GoogleBooksSearchResponse>(
-    `${BASE_URL}?${params.toString()}`,
-    { signal, validate: validateSearchResponse },
-  )
+  // If both fail, return the title search error
+  if (!titleResult.ok && !authorResult.ok) return titleResult
 
-  if (!result.ok) return result
+  const titleItems = titleResult.ok ? (titleResult.data.items ?? []) : []
+  const authorItems = authorResult.ok ? (authorResult.data.items ?? []) : []
 
-  const { totalItems, items = [] } = result.data
-  const mapped = items.map(mapVolumeToSearchResult)
+  // Merge: title results first, then author-only results (deduplicated)
+  const seen = new Set<string>()
+  const merged: GoogleBooksVolume[] = []
+  for (const item of [...titleItems, ...authorItems]) {
+    if (!seen.has(item.id)) {
+      seen.add(item.id)
+      merged.push(item)
+    }
+  }
+
+  const mapped = merged.slice(0, maxResults).map(mapVolumeToSearchResult)
+
+  // Use the larger totalItems as an approximation
+  const titleTotal = titleResult.ok ? titleResult.data.totalItems : 0
+  const authorTotal = authorResult.ok ? authorResult.data.totalItems : 0
+  const totalItems = Math.max(titleTotal, authorTotal)
 
   return {
     ok: true,

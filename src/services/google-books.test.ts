@@ -53,6 +53,62 @@ describe('searchBooks', () => {
     }
   })
 
+  it('sends langRestrict=ja parameter', async () => {
+    let capturedUrl = ''
+    server.use(
+      http.get(BOOKS_API, ({ request }) => {
+        capturedUrl = request.url
+        return HttpResponse.json(mockSearchResponse([mockVolume()], 1))
+      }),
+    )
+    await searchBooks('key', 'test')
+    const url = new URL(capturedUrl)
+    expect(url.searchParams.get('langRestrict')).toBe('ja')
+  })
+
+  it('searches by both title and author fields', async () => {
+    const capturedUrls: string[] = []
+    server.use(
+      http.get(BOOKS_API, ({ request }) => {
+        capturedUrls.push(request.url)
+        return HttpResponse.json(mockSearchResponse([mockVolume()], 1))
+      }),
+    )
+    await searchBooks('key', 'test')
+    expect(capturedUrls).toHaveLength(2)
+    const queries = capturedUrls.map(
+      (u) => new URL(u).searchParams.get('q') ?? '',
+    )
+    expect(queries).toContain('intitle:test')
+    expect(queries).toContain('inauthor:test')
+  })
+
+  it('deduplicates results from title and author searches', async () => {
+    const vol1 = mockVolume()
+    const vol2 = mockVolume({ title: 'Another Book' })
+    // vol2 has same id as vol1 by default, so make it unique
+    const vol2WithId = { ...vol2, id: 'vol-2' }
+    let callCount = 0
+    server.use(
+      http.get(BOOKS_API, () => {
+        callCount++
+        if (callCount === 1) {
+          // intitle returns vol1 and vol2WithId
+          return HttpResponse.json(mockSearchResponse([vol1, vol2WithId], 2))
+        }
+        // inauthor returns vol1 (duplicate)
+        return HttpResponse.json(mockSearchResponse([vol1], 1))
+      }),
+    )
+    const result = await searchBooks('key', 'test')
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.items).toHaveLength(2)
+      const ids = result.data.items.map((i) => i.id)
+      expect(ids).toEqual(['vol-1', 'vol-2'])
+    }
+  })
+
   it('upgrades HTTP thumbnails to HTTPS', async () => {
     server.use(
       http.get(BOOKS_API, () =>
