@@ -179,11 +179,12 @@ export async function getMovieById(
 // ── Mapping ─────────────────────────────────────────────────────────
 
 function mapMovieToSearchResult(movie: TMDbMovie): SearchResultItem {
+  const releaseYear = movie.release_date?.split('-')[0]
   return {
     id: String(movie.id),
     category: 'movie',
     title: movie.title || 'タイトル不明',
-    subtitle: '監督不明',
+    subtitle: releaseYear || '公開日不明',
     thumbnailUrl: movie.poster_path
       ? `${IMAGE_BASE_URL}${movie.poster_path}`
       : '',

@@ -61,6 +61,41 @@ describe('searchMovies', () => {
       expect(result.data.items[0].category).toBe('movie')
       expect(result.data.items[0].title).toBe('Test Movie')
       expect(result.data.items[0].thumbnailUrl).toContain('/poster.jpg')
+      expect(result.data.items[0].subtitle).toBe('2024')
+    }
+  })
+
+  it('shows 公開日不明 when release_date is missing', async () => {
+    server.use(
+      http.get(`${BASE_URL}/search/movie`, () =>
+        HttpResponse.json({
+          page: 1,
+          results: [mockMovie({ release_date: undefined })],
+          total_pages: 1,
+          total_results: 1,
+        }),
+      ),
+    )
+    const result = await searchMovies('key', 'test')
+    if (result.ok) {
+      expect(result.data.items[0].subtitle).toBe('公開日不明')
+    }
+  })
+
+  it('shows 公開日不明 when release_date is empty string', async () => {
+    server.use(
+      http.get(`${BASE_URL}/search/movie`, () =>
+        HttpResponse.json({
+          page: 1,
+          results: [mockMovie({ release_date: '' })],
+          total_pages: 1,
+          total_results: 1,
+        }),
+      ),
+    )
+    const result = await searchMovies('key', 'test')
+    if (result.ok) {
+      expect(result.data.items[0].subtitle).toBe('公開日不明')
     }
   })
 
