@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, env)
 
   return {
+    server: {
+      allowedHosts: ['myno1s.exe.xyz'],
+    },
     plugins: [
       react(),
       tailwindcss(),
