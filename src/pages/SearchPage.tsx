@@ -87,7 +87,7 @@ function SearchPage() {
       }}
     >
       {/* Hero Section */}
-      <div className="px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
+      <div className="animate-fade-in-up animation-delay-0 px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
         <h1
           className="text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
@@ -108,7 +108,7 @@ function SearchPage() {
       <div className="mx-auto max-w-3xl px-3 sm:px-4">
         {/* Theme Input Section */}
         <div
-          className="rounded-xl p-4 shadow-sm sm:p-5"
+          className="animate-fade-in-up animation-delay-1 rounded-xl p-4 shadow-sm sm:p-5"
           style={{
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
@@ -120,7 +120,7 @@ function SearchPage() {
 
         {/* Selection Area - Sticky */}
         <div
-          className="sticky z-30 -mx-3 mt-5 px-3 pb-3 pt-2 sm:-mx-4 sm:px-4"
+          className="animate-fade-in-up animation-delay-2 sticky z-30 -mx-3 mt-5 px-3 pb-3 pt-2 sm:-mx-4 sm:px-4"
           style={{
             top: 0,
             backdropFilter: 'blur(12px)',
@@ -133,31 +133,33 @@ function SearchPage() {
 
         {/* Search Section Card */}
         <div
-          className="mt-4 rounded-xl p-4 shadow-sm sm:p-5"
+          className="animate-fade-in-up animation-delay-3 mt-4 rounded-xl p-4 shadow-sm sm:p-5"
           style={{
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
         >
           <TabSwitcher value={activeTab} onChange={setActiveTab} />
-          <SearchBar value={currentQuery} onChange={handleQueryChange} />
+          <div key={activeTab} className="tab-content-fade">
+            <SearchBar value={currentQuery} onChange={handleQueryChange} />
 
-          {!currentQuery.trim() && (
-            <SearchHistory
-              category={activeTab}
-              onSearch={handleHistorySearch}
+            {!currentQuery.trim() && (
+              <SearchHistory
+                category={activeTab}
+                onSearch={handleHistorySearch}
+              />
+            )}
+
+            <SearchResults
+              results={results}
+              isLoading={isLoading}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              onSelect={handleSelect}
+              query={debouncedQuery}
+              error={error}
             />
-          )}
-
-          <SearchResults
-            results={results}
-            isLoading={isLoading}
-            hasMore={hasMore}
-            onLoadMore={loadMore}
-            onSelect={handleSelect}
-            query={debouncedQuery}
-            error={error}
-          />
+          </div>
         </div>
 
         {/* Bottom spacer */}
