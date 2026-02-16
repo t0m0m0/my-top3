@@ -2,8 +2,11 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import ResultCard from './ResultCard'
+import SkeletonCard from './SkeletonCard'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import type { SearchResultItem } from '../types/common'
+
+const SKELETON_COUNT = 4
 
 type SearchResultsProps = {
   results: SearchResultItem[]
@@ -58,11 +61,15 @@ export default function SearchResults({
         <ResultCard key={item.id} item={item} onSelect={onSelect} />
       ))}
 
-      {isLoading && (
-        <Box className="col-span-full flex justify-center py-6">
-          <CircularProgress size={32} />
-        </Box>
-      )}
+      {isLoading && results.length === 0
+        ? Array.from({ length: SKELETON_COUNT }, (_, i) => (
+            <SkeletonCard key={`skeleton-${i}`} />
+          ))
+        : isLoading && (
+            <Box className="col-span-full flex justify-center py-6">
+              <CircularProgress size={32} />
+            </Box>
+          )}
 
       {!isLoading && hasMore && (
         <div
