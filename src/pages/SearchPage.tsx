@@ -50,17 +50,19 @@ function SearchPage() {
         </p>
       </div>
 
-      <div className="mx-auto max-w-3xl px-3 sm:px-4">
+      <div className="mx-auto max-w-5xl px-3 sm:px-4">
         {/* Theme Input Section */}
-        <div
-          className="rounded-xl p-4 shadow-sm sm:p-5"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <ThemeInput value={theme} onChange={setTheme} />
-          <ThemeHistory onSelect={handleThemeHistorySelect} />
+        <div className="mx-auto max-w-2xl">
+          <div
+            className="rounded-xl p-4 shadow-sm sm:p-5"
+            style={{
+              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+            }}
+          >
+            <ThemeInput value={theme} onChange={setTheme} />
+            <ThemeHistory onSelect={handleThemeHistorySelect} />
+          </div>
         </div>
 
         {/* Selection Area - Sticky */}
