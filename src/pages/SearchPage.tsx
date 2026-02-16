@@ -80,14 +80,28 @@ function SearchPage() {
 
   return (
     <div
-      className="min-h-screen"
+      className="noise-overlay min-h-screen"
       style={{
-        background:
-          'linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)',
+        background: `
+          radial-gradient(ellipse 80% 50% at 70% 5%, rgba(13,148,136,0.12) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 20% 60%, rgba(245,158,11,0.06) 0%, transparent 50%),
+          linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)
+        `,
       }}
     >
-      {/* Hero Section */}
-      <div className="animate-fade-in-up animation-delay-0 px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
+      {/* Hero Section with decorative gradient orb */}
+      <div className="relative px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
+        {/* Decorative gradient orb */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2"
+          style={{
+            width: '360px',
+            height: '260px',
+            background:
+              'radial-gradient(circle, rgba(20,184,166,0.18) 0%, rgba(13,148,136,0.05) 40%, transparent 70%)',
+            filter: 'blur(40px)',
+          }}
+        />
         <h1
           className="text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
@@ -107,20 +121,14 @@ function SearchPage() {
 
       <div className="mx-auto max-w-3xl px-3 sm:px-4">
         {/* Theme Input Section */}
-        <div
-          className="animate-fade-in-up animation-delay-1 rounded-xl p-4 shadow-sm sm:p-5"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
+        <div className="glass-card rounded-xl p-4 sm:p-5">
           <ThemeInput value={theme} onChange={setTheme} />
           <ThemeHistory onSelect={handleThemeHistorySelect} />
         </div>
 
         {/* Selection Area - Sticky */}
         <div
-          className="animate-fade-in-up animation-delay-2 sticky z-30 -mx-3 mt-5 px-3 pb-3 pt-2 sm:-mx-4 sm:px-4"
+          className="sticky z-30 -mx-3 mt-5 px-3 pb-3 pt-2 sm:-mx-4 sm:px-4"
           style={{
             top: 0,
             backdropFilter: 'blur(12px)',
@@ -132,34 +140,26 @@ function SearchPage() {
         </div>
 
         {/* Search Section Card */}
-        <div
-          className="animate-fade-in-up animation-delay-3 mt-4 rounded-xl p-4 shadow-sm sm:p-5"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
+        <div className="glass-card mt-4 rounded-xl p-4 sm:p-5">
           <TabSwitcher value={activeTab} onChange={setActiveTab} />
-          <div key={activeTab} className="tab-content-fade">
-            <SearchBar value={currentQuery} onChange={handleQueryChange} />
+          <SearchBar value={currentQuery} onChange={handleQueryChange} />
 
-            {!currentQuery.trim() && (
-              <SearchHistory
-                category={activeTab}
-                onSearch={handleHistorySearch}
-              />
-            )}
-
-            <SearchResults
-              results={results}
-              isLoading={isLoading}
-              hasMore={hasMore}
-              onLoadMore={loadMore}
-              onSelect={handleSelect}
-              query={debouncedQuery}
-              error={error}
+          {!currentQuery.trim() && (
+            <SearchHistory
+              category={activeTab}
+              onSearch={handleHistorySearch}
             />
-          </div>
+          )}
+
+          <SearchResults
+            results={results}
+            isLoading={isLoading}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            onSelect={handleSelect}
+            query={debouncedQuery}
+            error={error}
+          />
         </div>
 
         {/* Bottom spacer */}

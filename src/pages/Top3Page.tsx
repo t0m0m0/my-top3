@@ -174,7 +174,9 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
     <div
       className="group relative flex flex-1 flex-col items-center rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
-        background: 'var(--color-surface)',
+        background: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         border: '2px solid transparent',
         backgroundClip: 'padding-box',
         boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
@@ -293,10 +295,12 @@ function Top3Page() {
   if (!hasAnyId) {
     return (
       <div
-        className="min-h-screen"
+        className="noise-overlay min-h-screen"
         style={{
-          background:
-            'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+          background: `
+            radial-gradient(ellipse 60% 40% at 50% 50%, rgba(13,148,136,0.06) 0%, transparent 60%),
+            linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)
+          `,
         }}
       >
         <div className="mx-auto max-w-3xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
@@ -312,15 +316,18 @@ function Top3Page() {
 
   return (
     <div
-      className="min-h-screen"
+      className="noise-overlay min-h-screen"
       style={{
-        background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #f0fdf4 50%, #ecfdf5 100%)',
+        background: `
+          radial-gradient(ellipse 70% 50% at 30% 10%, rgba(13,148,136,0.10) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 40% at 80% 70%, rgba(245,158,11,0.06) 0%, transparent 50%),
+          linear-gradient(180deg, var(--color-bg) 0%, #f0fdf4 50%, #ecfdf5 100%)
+        `,
       }}
     >
       <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
         {/* Header with decorative line */}
-        <div className="text-center">
+        <div className="dot-grid text-center">
           <div
             className="mx-auto mb-2 h-0.5 w-16 rounded-full"
             style={{
@@ -346,6 +353,15 @@ function Top3Page() {
             style={{
               background:
                 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+            }}
+          />
+          {/* Decorative accent shape */}
+          <div
+            className="pointer-events-none mx-auto mt-3 h-1 w-8 rounded-full"
+            style={{
+              background:
+                'linear-gradient(90deg, var(--color-secondary), var(--color-accent))',
+              opacity: 0.5,
             }}
           />
         </div>
