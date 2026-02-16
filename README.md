@@ -71,3 +71,48 @@ export default defineConfig([
   },
 ])
 ```
+
+## 本番デプロイ (Production Deployment)
+
+### systemd サービスとして実行
+
+このアプリケーションを systemd サービスとして永続化できます。
+
+#### 前提条件
+
+- Node.js がインストールされていること
+- `npm install` で依存パッケージがインストール済みであること
+- `.env` ファイルに API キーが設定されていること
+
+#### セットアップ手順
+
+1. セットアップスクリプトを実行します:
+
+```bash
+sudo ./scripts/setup-service.sh
+```
+
+これにより以下が行われます:
+
+- `my-top3.service` を `/etc/systemd/system/` にコピー
+- systemd デーモンをリロード
+- サービスを有効化（OS 起動時に自動起動）
+- サービスを起動
+
+#### サービス管理コマンド
+
+```bash
+# ステータス確認
+sudo systemctl status my-top3
+
+# 停止
+sudo systemctl stop my-top3
+
+# 再起動
+sudo systemctl restart my-top3
+
+# ログ確認
+sudo journalctl -u my-top3 -f
+```
+
+サーバーはデフォルトで `http://localhost:8000` で起動します。
