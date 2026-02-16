@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import CircularProgress from '@mui/material/CircularProgress'
+import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { parseTop3Params } from '../utils/url-params'
@@ -116,20 +116,17 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
   if (loading) {
     return (
       <div
-        className="flex flex-1 flex-col items-center justify-center rounded-lg border p-4"
+        className="flex flex-1 flex-col items-center rounded-lg border p-4"
         style={{
           borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
         }}
       >
-        <CircularProgress size={32} color="primary" />
-        <Typography
-          variant="caption"
-          className="mt-2"
-          style={{ color: 'var(--color-text-secondary)' }}
-        >
-          {label}
-        </Typography>
+        <Skeleton variant="rounded" width={56} height={20} sx={{ mb: 0.5 }} />
+        <Skeleton variant="rounded" width={32} height={18} sx={{ mb: 1 }} />
+        <Skeleton variant="rounded" width={96} height={128} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width={100} height={18} />
+        <Skeleton variant="text" width={72} height={14} />
       </div>
     )
   }
