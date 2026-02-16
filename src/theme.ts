@@ -1,8 +1,13 @@
 import { createTheme } from '@mui/material/styles'
 
-const fontFamily = ['"Noto Sans JP"', '"Outfit"', 'sans-serif'].join(',')
+const fontFamily = ['"Noto Sans JP"', '"Sora"', 'sans-serif'].join(',')
 
-const displayFontFamily = ['"Outfit"', '"Noto Sans JP"', 'sans-serif'].join(',')
+const displayFontFamily = [
+  '"Sora"',
+  '"Outfit"',
+  '"Noto Sans JP"',
+  'sans-serif',
+].join(',')
 
 const theme = createTheme({
   palette: {
@@ -47,20 +52,29 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 10,
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 20,
+          borderRadius: 24,
           textTransform: 'none' as const,
           fontWeight: 600,
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'scale(1.03)',
+          },
+          '&:active': {
+            transform: 'scale(0.98)',
+          },
         },
         containedPrimary: {
           background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)',
+          boxShadow: '0 4px 14px rgba(13, 148, 136, 0.25)',
           '&:hover': {
             background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)',
+            boxShadow: '0 6px 20px rgba(13, 148, 136, 0.35)',
           },
         },
       },
@@ -68,9 +82,10 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 14,
           boxShadow:
-            '0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)',
+            '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.04)',
+          transition: 'box-shadow 0.2s ease, transform 0.2s ease',
         },
       },
     },

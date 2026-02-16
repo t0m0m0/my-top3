@@ -32,9 +32,30 @@ function SearchPage() {
   return (
     <div className="min-h-screen" style={mainStyle}>
       {/* Hero Section */}
-      <div className="px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
+      <div className="relative overflow-hidden px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
+        {/* Decorative dots pattern */}
+        <svg
+          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 opacity-10"
+          width="320"
+          height="120"
+          viewBox="0 0 320 120"
+          fill="none"
+          aria-hidden="true"
+        >
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((col) =>
+            [0, 1, 2].map((row) => (
+              <circle
+                key={`${col}-${row}`}
+                cx={40 * col + 20}
+                cy={40 * row + 20}
+                r="4"
+                fill="white"
+              />
+            )),
+          )}
+        </svg>
         <h1
-          className="text-3xl font-extrabold tracking-tight sm:text-4xl"
+          className="relative text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
             fontFamily: 'var(--font-display)',
             color: '#fff',
@@ -43,8 +64,8 @@ function SearchPage() {
           My No.1s
         </h1>
         <p
-          className="mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
-          style={{ color: 'rgba(255,255,255,0.8)' }}
+          className="relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
+          style={{ color: 'rgba(255,255,255,0.9)' }}
         >
           テーマを決めて、お気に入りの3作品を選ぼう
         </p>

@@ -10,6 +10,12 @@ import { buildTop3Url } from '../utils/url-params'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { CATEGORY_LABELS_EN } from '../constants/category'
 
+const CATEGORY_ICONS: Record<MediaCategory, string> = {
+  book: '📖',
+  music: '🎵',
+  movie: '🎬',
+}
+
 type SelectionAreaProps = {
   theme: string
   onBeforeCreate?: () => void
@@ -28,12 +34,17 @@ function SlotCard({
   if (!item) {
     return (
       <div
-        className="flex h-20 flex-1 flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 transition-colors sm:h-28"
+        className="gradient-border-slot flex h-20 flex-1 flex-col items-center justify-center rounded-xl p-2 transition-all sm:h-28"
         style={{
-          borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
         }}
       >
+        <span
+          className="pointer-events-none select-none text-2xl opacity-15 sm:text-3xl"
+          aria-hidden="true"
+        >
+          {CATEGORY_ICONS[category]}
+        </span>
         <Typography
           variant="caption"
           sx={{ fontSize: '0.75rem', fontWeight: 600 }}
@@ -53,9 +64,9 @@ function SlotCard({
 
   return (
     <div
-      className="relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-colors sm:h-28"
+      className="slot-selected relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-all sm:h-28"
       style={{
-        borderColor: 'var(--color-border)',
+        borderColor: 'var(--color-primary-light)',
         backgroundColor: 'var(--color-surface)',
       }}
     >

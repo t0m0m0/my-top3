@@ -25,8 +25,12 @@
   --color-border: #e2e8f0;
 
   /* Fonts */
-  --font-display: 'Outfit', 'Noto Sans JP', sans-serif;
-  --font-body: 'Noto Sans JP', 'Outfit', sans-serif;
+  --font-display: 'Sora', 'Outfit', 'Noto Sans JP', sans-serif;
+  --font-body: 'Noto Sans JP', 'Sora', sans-serif;
+
+  /* Colored Shadows */
+  --shadow-primary: 0 4px 14px rgba(13, 148, 136, 0.15);
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.04);
 }
 
 /* Base styles */
@@ -34,6 +38,58 @@ body {
   font-family: var(--font-body);
   color: var(--color-text-primary);
   background-color: var(--color-bg);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glass Card utility */
+.glass-card {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-card);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #0d9488 0%, #059669 50%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient border for slots */
+.gradient-border-slot {
+  position: relative;
+  border: none !important;
+  background: var(--color-surface);
+}
+.gradient-border-slot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    var(--color-border) 0%,
+    var(--color-primary-light) 50%,
+    var(--color-border) 100%
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+/* Selected slot glow */
+.slot-selected {
+  box-shadow: var(--shadow-primary);
+  border-color: var(--color-primary-light) !important;
 }
