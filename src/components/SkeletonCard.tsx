@@ -37,12 +37,7 @@ export default function SkeletonCard() {
           {/* Subtitle */}
           <Skeleton variant="text" width="60%" height={20} sx={{ mt: 0.5 }} />
           {/* Button */}
-          <Skeleton
-            variant="rounded"
-            width={80}
-            height={30}
-            sx={{ mt: 1 }}
-          />
+          <Skeleton variant="rounded" width={80} height={30} sx={{ mt: 1 }} />
         </CardContent>
       </Box>
     </Card>

@@ -122,24 +122,9 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
           backgroundColor: 'var(--color-surface)',
         }}
       >
-        <Skeleton
-          variant="rounded"
-          width={56}
-          height={20}
-          sx={{ mb: 0.5 }}
-        />
-        <Skeleton
-          variant="rounded"
-          width={32}
-          height={18}
-          sx={{ mb: 1 }}
-        />
-        <Skeleton
-          variant="rounded"
-          width={96}
-          height={128}
-          sx={{ mb: 1 }}
-        />
+        <Skeleton variant="rounded" width={56} height={20} sx={{ mb: 0.5 }} />
+        <Skeleton variant="rounded" width={32} height={18} sx={{ mb: 1 }} />
+        <Skeleton variant="rounded" width={96} height={128} sx={{ mb: 1 }} />
         <Skeleton variant="text" width={100} height={18} />
         <Skeleton variant="text" width={72} height={14} />
       </div>
