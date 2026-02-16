@@ -162,7 +162,12 @@ function SelectionArea({
       </div>
       {isComplete && (
         <div className="mt-3 text-center">
-          <Button variant="contained" onClick={handleCreate} size="medium">
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            size="medium"
+            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+          >
             Top3を作成
           </Button>
         </div>
@@ -177,7 +182,7 @@ function SelectionArea({
             left: 0,
             right: 0,
             zIndex: 1200,
-            display: 'flex',
+            display: { xs: 'flex', sm: 'none' },
             justifyContent: 'center',
             pb: `max(12px, env(safe-area-inset-bottom))`,
             pt: 1.5,
