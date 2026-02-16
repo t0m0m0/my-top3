@@ -20,15 +20,17 @@ export default function ErrorMessage({
       className="mx-auto max-w-md rounded-lg border border-red-200 bg-red-50 p-6 text-center"
       role="alert"
     >
-      <Typography
-        variant="body1"
-        sx={{ color: 'error.main', fontWeight: 500 }}
-      >
+      <Typography variant="body1" sx={{ color: 'error.main', fontWeight: 500 }}>
         {message}
       </Typography>
       <div className="mt-4 flex flex-col items-center gap-2">
         {onRetry && (
-          <Button variant="outlined" color="error" size="small" onClick={onRetry}>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            onClick={onRetry}
+          >
             {retryLabel}
           </Button>
         )}

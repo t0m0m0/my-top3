@@ -9,7 +9,8 @@ import ShareButtons from '../components/ShareButtons'
 import Top3Image from '../components/Top3Image'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 
-const DEFAULT_THUMBNAIL = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="96" height="128" fill="%23e5e7eb"><rect width="96" height="128"/><text x="48" y="68" text-anchor="middle" fill="%239ca3af" font-size="12">No Image</text></svg>'
+const DEFAULT_THUMBNAIL =
+  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="96" height="128" fill="%23e5e7eb"><rect width="96" height="128"/><text x="48" y="68" text-anchor="middle" fill="%239ca3af" font-size="12">No Image</text></svg>'
 
 type WorkState = {
   data: SearchResultItem | null
@@ -36,7 +37,9 @@ async function fetchWork(
   const response = await fetch(endpoints[category])
   if (!response.ok) {
     if (response.status === 404) {
-      throw new Error(`${CATEGORY_LABELS[category]}が見つかりませんでした (ID: ${id})`)
+      throw new Error(
+        `${CATEGORY_LABELS[category]}が見つかりませんでした (ID: ${id})`,
+      )
     }
     if (response.status === 429) {
       throw new Error('しばらく時間をおいて再度お試しください')
@@ -48,7 +51,10 @@ async function fetchWork(
 
   // API returns Result type: { ok: true, data: ... } or { ok: false, error: ... }
   if (!result.ok) {
-    throw new Error(result.error?.message ?? `${CATEGORY_LABELS[category]}の取得に失敗しました`)
+    throw new Error(
+      result.error?.message ??
+        `${CATEGORY_LABELS[category]}の取得に失敗しました`,
+    )
   }
 
   return result.data
@@ -65,7 +71,6 @@ function useWorkFetch(category: MediaCategory, id: string) {
   useEffect(() => {
     if (!id) return
     let cancelled = false
-    setState({ data: null, loading: true, error: null })
     fetchWork(category, id)
       .then((data) => {
         if (!cancelled) setState({ data, loading: false, error: null })
@@ -79,7 +84,10 @@ function useWorkFetch(category: MediaCategory, id: string) {
           setState({
             data: null,
             loading: false,
-            error: err instanceof Error ? err.message : `${CATEGORY_LABELS[category]}の取得に失敗しました`,
+            error:
+              err instanceof Error
+                ? err.message
+                : `${CATEGORY_LABELS[category]}の取得に失敗しました`,
           })
         }
       })
@@ -88,7 +96,10 @@ function useWorkFetch(category: MediaCategory, id: string) {
     }
   }, [category, id, retryCount])
 
-  const retry = useCallback(() => setRetryCount((c) => c + 1), [])
+  const retry = useCallback(() => {
+    setState({ data: null, loading: true, error: null })
+    setRetryCount((c) => c + 1)
+  }, [])
 
   return { ...state, retry }
 }

@@ -44,10 +44,7 @@ class ErrorBoundary extends Component<Props, State> {
             >
               予期しないエラーが発生しました
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: 'text.secondary', mb: 3 }}
-            >
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
               {this.state.error?.message || '不明なエラー'}
             </Typography>
             <div className="flex justify-center gap-3">
