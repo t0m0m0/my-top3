@@ -10,6 +10,7 @@ import type { MediaCategory, SearchResultItem } from '../types/common'
 
 type SelectionAreaProps = {
   theme: string
+  onBeforeCreate?: () => void
 }
 
 const CATEGORY_LABELS: Record<MediaCategory, string> = {
@@ -104,11 +105,12 @@ function SlotCard({
   )
 }
 
-function SelectionArea({ theme }: SelectionAreaProps) {
+function SelectionArea({ theme, onBeforeCreate }: SelectionAreaProps) {
   const { selection, deselectItem, isComplete } = useSelection()
   const navigate = useNavigate()
 
   const handleCreate = () => {
+    onBeforeCreate?.()
     const url = buildTop3Url(selection, theme)
     navigate(url)
   }
