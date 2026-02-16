@@ -28,10 +28,14 @@ if (!process.env['TMDB_API_KEY']) {
 
 const app = new Hono()
 
+const corsOrigins = process.env['CORS_ORIGIN']
+  ? process.env['CORS_ORIGIN'].split(',')
+  : ['https://myno1s.exe.xyz:8000']
+
 app.use(
   '/api/*',
   cors({
-    origin: ['https://myno1s.exe.xyz'],
+    origin: corsOrigins,
     allowMethods: ['GET'],
   }),
 )
