@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { rateLimiter } from './middleware/rate-limiter.ts'
 import { booksApp } from './routes/books.ts'
 import { musicApp } from './routes/music.ts'
 import { moviesApp } from './routes/movies.ts'
@@ -34,6 +35,8 @@ app.use(
     allowMethods: ['GET'],
   }),
 )
+
+app.use('/api/*', rateLimiter({ windowMs: 60_000, max: 60 }))
 
 app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)
