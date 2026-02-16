@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { parseTop3Params } from '../utils/url-params'
+import ErrorMessage from '../components/ErrorMessage'
 import ShareButtons from '../components/ShareButtons'
 import Top3Image from '../components/Top3Image'
 import type { MediaCategory, SearchResultItem } from '../types/common'
+
+const DEFAULT_THUMBNAIL =
+  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="96" height="128" fill="%23e5e7eb"><rect width="96" height="128"/><text x="48" y="68" text-anchor="middle" fill="%239ca3af" font-size="12">No Image</text></svg>'
 
 type WorkState = {
   data: SearchResultItem | null
@@ -32,25 +36,37 @@ async function fetchWork(
 
   const response = await fetch(endpoints[category])
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${category}: ${response.statusText}`)
+    if (response.status === 404) {
+      throw new Error(
+        `${CATEGORY_LABELS[category]}が見つかりませんでした (ID: ${id})`,
+      )
+    }
+    if (response.status === 429) {
+      throw new Error('しばらく時間をおいて再度お試しください')
+    }
+    throw new Error(`${CATEGORY_LABELS[category]}の取得に失敗しました`)
   }
 
   const result = await response.json()
 
   // API returns Result type: { ok: true, data: ... } or { ok: false, error: ... }
   if (!result.ok) {
-    throw new Error(result.error?.message ?? `Failed to fetch ${category} data`)
+    throw new Error(
+      result.error?.message ??
+        `${CATEGORY_LABELS[category]}の取得に失敗しました`,
+    )
   }
 
   return result.data
 }
 
-function useWorkFetch(category: MediaCategory, id: string): WorkState {
+function useWorkFetch(category: MediaCategory, id: string) {
   const [state, setState] = useState<WorkState>(() => ({
     data: null,
     loading: !!id,
     error: null,
   }))
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     if (!id) return
@@ -68,16 +84,24 @@ function useWorkFetch(category: MediaCategory, id: string): WorkState {
           setState({
             data: null,
             loading: false,
-            error: `${CATEGORY_LABELS[category]}の取得に失敗しました`,
+            error:
+              err instanceof Error
+                ? err.message
+                : `${CATEGORY_LABELS[category]}の取得に失敗しました`,
           })
         }
       })
     return () => {
       cancelled = true
     }
-  }, [category, id])
+  }, [category, id, retryCount])
 
-  return state
+  const retry = useCallback(() => {
+    setState({ data: null, loading: true, error: null })
+    setRetryCount((c) => c + 1)
+  }, [])
+
+  return { ...state, retry }
 }
 
 type WorkCardProps = {
@@ -85,9 +109,10 @@ type WorkCardProps = {
   loading: boolean
   error: string | null
   label: string
+  onRetry?: () => void
 }
 
-function WorkCard({ work, loading, error, label }: WorkCardProps) {
+function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
   if (loading) {
     return (
       <div
@@ -127,6 +152,16 @@ function WorkCard({ work, loading, error, label }: WorkCardProps) {
         <Typography variant="caption" className="text-red-500">
           {error}
         </Typography>
+        {onRetry && (
+          <Button
+            size="small"
+            color="error"
+            onClick={onRetry}
+            sx={{ mt: 1, fontSize: '0.7rem' }}
+          >
+            再試行
+          </Button>
+        )}
       </div>
     )
   }
@@ -183,8 +218,10 @@ function WorkCard({ work, loading, error, label }: WorkCardProps) {
         alt={work.title}
         className="mb-2 h-32 w-24 rounded object-cover"
         onError={(e) => {
-          ;(e.target as HTMLImageElement).src = ''
-          ;(e.target as HTMLImageElement).alt = 'No Image'
+          const img = e.target as HTMLImageElement
+          if (img.src !== DEFAULT_THUMBNAIL) {
+            img.src = DEFAULT_THUMBNAIL
+          }
         }}
       />
       <Typography
@@ -240,21 +277,11 @@ function Top3Page() {
         }}
       >
         <div className="mx-auto max-w-3xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
-          <Typography variant="h5" sx={{ color: 'var(--color-text-primary)' }}>
-            Top3を作成してください
-          </Typography>
-          <Typography
-            variant="body2"
-            className="mt-2"
-            sx={{ color: 'var(--color-text-secondary)' }}
-          >
-            作品が選択されていません。トップページから3作品を選んでください。
-          </Typography>
-          <div className="mt-4">
-            <Button component={Link} to="/" variant="outlined">
-              トップページに戻る
+          <ErrorMessage message="作品が選択されていません。トップページから3作品を選んでください。">
+            <Button component={Link} to="/" variant="outlined" size="small">
+              Top3を作成する
             </Button>
-          </div>
+          </ErrorMessage>
         </div>
       </div>
     )
@@ -294,18 +321,21 @@ function Top3Page() {
             loading={book.loading}
             error={book.error}
             label="BOOK"
+            onRetry={book.error ? book.retry : undefined}
           />
           <WorkCard
             work={music.data}
             loading={music.loading}
             error={music.error}
             label="MUSIC"
+            onRetry={music.error ? music.retry : undefined}
           />
           <WorkCard
             work={movie.data}
             loading={movie.loading}
             error={movie.error}
             label="MOVIE"
+            onRetry={movie.error ? movie.retry : undefined}
           />
         </div>
 

@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import ResultCard from './ResultCard'
 import SkeletonCard from './SkeletonCard'
+import ErrorMessage from './ErrorMessage'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import type { SearchResultItem } from '../types/common'
 
@@ -16,6 +17,7 @@ type SearchResultsProps = {
   onSelect: (item: SearchResultItem) => void
   query: string
   error?: string | null
+  onRetry?: () => void
 }
 
 export default function SearchResults({
@@ -26,13 +28,14 @@ export default function SearchResults({
   onSelect,
   query,
   error,
+  onRetry,
 }: SearchResultsProps) {
   const sentinelRef = useIntersectionObserver(onLoadMore)
 
   if (error) {
     return (
-      <Box className="mt-8 text-center">
-        <Typography color="error">{error}</Typography>
+      <Box className="mt-8">
+        <ErrorMessage message={error} onRetry={onRetry} />
       </Box>
     )
   }
@@ -50,6 +53,9 @@ export default function SearchResults({
       <Box className="mt-8 text-center">
         <Typography color="text.secondary">
           検索結果が見つかりませんでした
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          別のキーワードでお試しください
         </Typography>
       </Box>
     )
