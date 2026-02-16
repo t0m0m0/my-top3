@@ -157,7 +157,6 @@ function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
       <img
         src={item.thumbnailUrl}
         alt={item.title}
-        crossOrigin="anonymous"
         onError={(e) => {
           const img = e.target as HTMLImageElement
           if (img.src !== NO_IMAGE_SRC) {
