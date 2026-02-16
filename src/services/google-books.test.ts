@@ -66,6 +66,20 @@ describe('searchBooks', () => {
     expect(url.searchParams.get('langRestrict')).toBe('ja')
   })
 
+  it('restricts search to title field', async () => {
+    let capturedUrl = ''
+    server.use(
+      http.get(BOOKS_API, ({ request }) => {
+        capturedUrl = request.url
+        return HttpResponse.json(mockSearchResponse([mockVolume()], 1))
+      }),
+    )
+    await searchBooks('key', 'test')
+    const url = new URL(capturedUrl)
+    const q = url.searchParams.get('q') ?? ''
+    expect(q).toBe('intitle:test')
+  })
+
   it('upgrades HTTP thumbnails to HTTPS', async () => {
     server.use(
       http.get(BOOKS_API, () =>

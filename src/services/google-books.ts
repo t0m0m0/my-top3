@@ -85,7 +85,7 @@ export async function searchBooks(
   }
 
   const params = new URLSearchParams({
-    q: trimmed,
+    q: `intitle:${trimmed}`,
     startIndex: String(startIndex),
     maxResults: String(maxResults),
     langRestrict: 'ja',
