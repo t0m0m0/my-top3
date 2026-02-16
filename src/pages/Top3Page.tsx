@@ -339,7 +339,7 @@ function Top3Page() {
               backgroundClip: 'text',
             }}
           >
-            My Top 3
+            My No.1s
           </h1>
           <div
             className="mx-auto mt-2 h-0.5 w-16 rounded-full"

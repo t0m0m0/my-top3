@@ -10,7 +10,7 @@ describe('buildTop3Url', () => {
       movie: createSearchResultItem({ id: 'v1', category: 'movie' }),
     }
     const url = buildTop3Url(selection, '雨の日に楽しむ')
-    expect(url).toContain('/my-top3?')
+    expect(url).toContain('/my-no1s?')
     expect(url).toContain('theme=')
     expect(url).toContain('book=b1')
     expect(url).toContain('music=m1')
@@ -45,9 +45,9 @@ describe('buildTop3Url', () => {
     expect(url).not.toContain('movie=')
   })
 
-  it('returns /my-top3 with no selections and no theme', () => {
+  it('returns /my-no1s with no selections and no theme', () => {
     const selection = { book: null, music: null, movie: null }
-    expect(buildTop3Url(selection, '')).toBe('/my-top3')
+    expect(buildTop3Url(selection, '')).toBe('/my-no1s')
   })
 
   it('trims theme whitespace', () => {

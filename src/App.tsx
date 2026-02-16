@@ -10,7 +10,7 @@ function App() {
       <SelectionProvider>
         <Routes>
           <Route path="/" element={<SearchPage />} />
-          <Route path="/my-top3" element={<Top3Page />} />
+          <Route path="/my-no1s" element={<Top3Page />} />
         </Routes>
       </SelectionProvider>
     </ErrorBoundary>

@@ -11,8 +11,8 @@ type ShareButtonsProps = {
 }
 
 function buildShareText(theme?: string): string {
-  const base = theme ? `My Top 3 「${theme}」` : 'My Top 3'
-  return `${base} #MyTop3`
+  const base = theme ? `My No.1s 「${theme}」` : 'My No.1s'
+  return `${base} #MyNo1s`
 }
 
 export default function ShareButtons({ theme }: ShareButtonsProps) {
@@ -64,7 +64,7 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
   const handleWebShare = useCallback(async () => {
     try {
       await navigator.share({
-        title: 'My Top 3',
+        title: 'My No.1s',
         text: buildShareText(theme),
         url: window.location.href,
       })
