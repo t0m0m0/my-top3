@@ -61,4 +61,73 @@ describe('useSearch', () => {
     })
     expect(musicResult.current.results[0]?.category).toBe('music')
   })
+
+  it('deduplicates items when loading more returns overlapping results', async () => {
+    let callCount = 0
+    server.use(
+      http.get('/api/books/search', () => {
+        callCount++
+        if (callCount === 1) {
+          return HttpResponse.json({
+            ok: true,
+            data: {
+              items: [
+                { id: 'b1', category: 'book', title: 'Book 1', subtitle: 'A1', thumbnailUrl: '', externalUrl: '' },
+                { id: 'b2', category: 'book', title: 'Book 2', subtitle: 'A2', thumbnailUrl: '', externalUrl: '' },
+              ],
+              totalItems: 4,
+              startIndex: 0,
+            },
+          })
+        }
+        return HttpResponse.json({
+          ok: true,
+          data: {
+            items: [
+              { id: 'b2', category: 'book', title: 'Book 2', subtitle: 'A2', thumbnailUrl: '', externalUrl: '' },
+              { id: 'b3', category: 'book', title: 'Book 3', subtitle: 'A3', thumbnailUrl: '', externalUrl: '' },
+            ],
+            totalItems: 4,
+            startIndex: 2,
+          },
+        })
+      }),
+    )
+
+    const { result } = renderHook(() => useSearch('book', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(result.current.results).toHaveLength(2)
+    expect(result.current.hasMore).toBe(true)
+
+    result.current.loadMore()
+    await waitFor(() => {
+      expect(result.current.results).toHaveLength(3)
+    })
+    const ids = result.current.results.map((r) => r.id)
+    expect(ids).toEqual(['b1', 'b2', 'b3'])
+  })
+
+  it('sets hasMore to false when API returns empty items with remaining totalItems', async () => {
+    server.use(
+      http.get('/api/books/search', () => {
+        return HttpResponse.json({
+          ok: true,
+          data: {
+            items: [],
+            totalItems: 100,
+            startIndex: 0,
+          },
+        })
+      }),
+    )
+
+    const { result } = renderHook(() => useSearch('book', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(result.current.hasMore).toBe(false)
+    expect(result.current.results).toEqual([])
+  })
 })

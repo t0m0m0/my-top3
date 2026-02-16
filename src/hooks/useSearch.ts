@@ -93,15 +93,24 @@ export function useSearch(
           setResults((prev) => {
             const existingIds = new Set(prev.map((r) => r.id))
             const unique = items.filter((item) => !existingIds.has(item.id))
+            if (import.meta.env.DEV && unique.length < items.length) {
+              console.warn(
+                `[useSearch] Dropped ${items.length - unique.length} duplicate item(s) during pagination.`,
+              )
+            }
             return [...prev, ...unique]
           })
         } else {
           setResults(items)
         }
 
-        setHasMore(
-          items.length > 0 && returnedIndex + items.length < totalItems,
-        )
+        const moreAvailable = returnedIndex + items.length < totalItems
+        if (import.meta.env.DEV && items.length === 0 && moreAvailable) {
+          console.warn(
+            `[useSearch] API returned 0 items but totalItems=${totalItems} at index=${returnedIndex}. Stopping pagination.`,
+          )
+        }
+        setHasMore(items.length > 0 && moreAvailable)
         setStartIndex(returnedIndex + items.length)
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
