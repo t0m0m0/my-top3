@@ -43,7 +43,7 @@ describe('searchMovies', () => {
     })
   })
 
-  it('maps TMDb response correctly', async () => {
+  it('maps TMDb response correctly with director name', async () => {
     server.use(
       http.get(`${BASE_URL}/search/movie`, () =>
         HttpResponse.json({
@@ -53,6 +53,9 @@ describe('searchMovies', () => {
           total_results: 1,
         }),
       ),
+      http.get(`${BASE_URL}/movie/:id`, () =>
+        HttpResponse.json(mockMovieDetail()),
+      ),
     )
     const result = await searchMovies('key', 'test')
     expect(result.ok).toBe(true)
@@ -61,11 +64,11 @@ describe('searchMovies', () => {
       expect(result.data.items[0].category).toBe('movie')
       expect(result.data.items[0].title).toBe('Test Movie')
       expect(result.data.items[0].thumbnailUrl).toContain('/poster.jpg')
-      expect(result.data.items[0].subtitle).toBe('2024')
+      expect(result.data.items[0].subtitle).toBe('Test Director')
     }
   })
 
-  it('shows 公開日不明 when release_date is missing', async () => {
+  it('shows 監督不明 when credits fetch fails', async () => {
     server.use(
       http.get(`${BASE_URL}/search/movie`, () =>
         HttpResponse.json({
@@ -75,27 +78,31 @@ describe('searchMovies', () => {
           total_results: 1,
         }),
       ),
+      http.get(`${BASE_URL}/movie/:id`, () => HttpResponse.error()),
     )
     const result = await searchMovies('key', 'test')
     if (result.ok) {
-      expect(result.data.items[0].subtitle).toBe('公開日不明')
+      expect(result.data.items[0].subtitle).toBe('監督不明')
     }
   })
 
-  it('shows 公開日不明 when release_date is empty string', async () => {
+  it('shows 監督不明 when no Director in crew', async () => {
     server.use(
       http.get(`${BASE_URL}/search/movie`, () =>
         HttpResponse.json({
           page: 1,
-          results: [mockMovie({ release_date: '' })],
+          results: [mockMovie()],
           total_pages: 1,
           total_results: 1,
         }),
       ),
+      http.get(`${BASE_URL}/movie/:id`, () =>
+        HttpResponse.json(mockMovieDetail({ credits: { crew: [] } })),
+      ),
     )
     const result = await searchMovies('key', 'test')
     if (result.ok) {
-      expect(result.data.items[0].subtitle).toBe('公開日不明')
+      expect(result.data.items[0].subtitle).toBe('監督不明')
     }
   })
 
@@ -109,10 +116,59 @@ describe('searchMovies', () => {
           total_results: 1,
         }),
       ),
+      http.get(`${BASE_URL}/movie/:id`, () =>
+        HttpResponse.json(mockMovieDetail()),
+      ),
     )
     const result = await searchMovies('key', 'test')
     if (result.ok) {
       expect(result.data.items[0].thumbnailUrl).toBe('')
+    }
+  })
+
+  it('fetches director info for multiple movies in parallel', async () => {
+    const movies = [
+      mockMovie({ id: 1, title: 'Movie A' }),
+      mockMovie({ id: 2, title: 'Movie B' }),
+    ]
+    server.use(
+      http.get(`${BASE_URL}/search/movie`, () =>
+        HttpResponse.json({
+          page: 1,
+          results: movies,
+          total_pages: 1,
+          total_results: 2,
+        }),
+      ),
+      http.get(`${BASE_URL}/movie/1`, () =>
+        HttpResponse.json(
+          mockMovieDetail({
+            id: 1,
+            title: 'Movie A',
+            credits: {
+              crew: [{ id: 10, name: 'Director A', job: 'Director' }],
+            },
+          }),
+        ),
+      ),
+      http.get(`${BASE_URL}/movie/2`, () =>
+        HttpResponse.json(
+          mockMovieDetail({
+            id: 2,
+            title: 'Movie B',
+            credits: {
+              crew: [{ id: 20, name: 'Director B', job: 'Director' }],
+            },
+          }),
+        ),
+      ),
+    )
+    const result = await searchMovies('key', 'test')
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.items).toHaveLength(2)
+      expect(result.data.items[0].subtitle).toBe('Director A')
+      expect(result.data.items[1].subtitle).toBe('Director B')
     }
   })
 })
