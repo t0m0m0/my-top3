@@ -31,7 +31,7 @@ function Top3Page() {
             'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
         }}
       >
-        <div className="mx-auto max-w-3xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
+        <div className="mx-auto max-w-4xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
           <ErrorMessage message="作品が選択されていません。トップページから3作品を選んでください。">
             <Button component={Link} to="/" variant="outlined" size="small">
               Top3を作成する
@@ -50,7 +50,7 @@ function Top3Page() {
           'linear-gradient(180deg, var(--color-bg) 0%, #f0fdf4 50%, #ecfdf5 100%)',
       }}
     >
-      <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
+      <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
         {/* Header with decorative line */}
         <div className="text-center">
           <div
