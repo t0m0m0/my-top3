@@ -4,6 +4,11 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
+import {
+  assertObject,
+  assertField,
+  assertOptionalArray,
+} from './validation-helpers.ts'
 
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes'
 const DEFAULT_MAX_RESULTS = 20
@@ -38,30 +43,29 @@ type GoogleBooksSearchResponse = {
 }
 
 function validateSearchResponse(data: unknown): GoogleBooksSearchResponse {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from Google Books API')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['totalItems'] !== 'number') {
-    throw new Error('Missing or invalid totalItems in Google Books response')
-  }
-  if (obj['items'] !== undefined && !Array.isArray(obj['items'])) {
-    throw new Error('Invalid items field in Google Books response')
-  }
+  const obj = assertObject(data, 'Google Books API')
+  assertField<number>(obj, 'totalItems', 'number', 'Google Books response')
+  assertOptionalArray(obj, 'items', 'Google Books response')
   return data as GoogleBooksSearchResponse
 }
 
 function validateVolume(data: unknown): GoogleBooksVolume {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from Google Books API')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['id'] !== 'string' || obj['id'] === '') {
+  const obj = assertObject(data, 'Google Books API')
+  const id = assertField<string>(
+    obj,
+    'id',
+    'string',
+    'Google Books volume response',
+  )
+  if (id === '') {
     throw new Error('Missing or empty id in Google Books volume response')
   }
-  if (typeof obj['volumeInfo'] !== 'object' || obj['volumeInfo'] === null) {
-    throw new Error('Missing volumeInfo in Google Books volume response')
-  }
+  assertField<object>(
+    obj,
+    'volumeInfo',
+    'object',
+    'Google Books volume response',
+  )
   return data as GoogleBooksVolume
 }
 

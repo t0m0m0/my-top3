@@ -1,14 +1,11 @@
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { Hono } from 'hono'
 import {
   getAccessToken,
   searchMusic,
   getMusicById,
 } from '../../services/spotify.ts'
-import {
-  validateSearchQuery,
-  clampStartIndex,
-} from '../middleware/validate-search.ts'
+import { registerRoutes } from './route-factory.ts'
+import type { Result } from '../../types/common.ts'
 
 const app = new Hono()
 
@@ -20,126 +17,42 @@ function getClientSecret(): string {
   return process.env['SPOTIFY_CLIENT_SECRET'] ?? ''
 }
 
-app.get('/search', async (c) => {
-  try {
+async function getToken(): Promise<Result<string>> {
+  const clientId = getClientId()
+  const clientSecret = getClientSecret()
+  if (!clientId || !clientSecret) {
+    return {
+      ok: false,
+      error: {
+        kind: 'auth-error',
+        message: 'Spotify credentials not configured',
+        status: 500,
+      },
+    }
+  }
+  return getAccessToken(clientId, clientSecret)
+}
+
+// Music routes need token-based auth, so we wrap the service functions
+registerRoutes(app, {
+  name: 'music',
+  getAuth: () => {
     const clientId = getClientId()
     const clientSecret = getClientSecret()
-    if (!clientId || !clientSecret) {
-      console.error(
-        '[music/search] SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not configured',
-      )
-      return c.json(
-        {
-          ok: false,
-          error: {
-            kind: 'unknown',
-            message: 'Spotify credentials not configured',
-          },
-        },
-        500,
-      )
-    }
-
-    const tokenResult = await getAccessToken(clientId, clientSecret)
-    if (!tokenResult.ok) {
-      const status = (tokenResult.error.status ?? 500) as ContentfulStatusCode
-      console.error(
-        `[music/search] token error: kind=${tokenResult.error.kind} status=${status} message=${tokenResult.error.message}`,
-      )
-      return c.json(tokenResult, status)
-    }
-
-    const query = c.req.query('q') ?? ''
-    const queryError = validateSearchQuery(query)
-    if (queryError) {
-      return c.json(
-        { ok: false, error: { kind: 'unknown', message: queryError } },
-        400,
-      )
-    }
-    const startIndex = clampStartIndex(c.req.query('startIndex') ?? '0')
-    const maxResults = Math.max(
-      1,
-      Math.min(10, Number(c.req.query('maxResults') ?? '10') || 10),
-    )
-
-    const result = await searchMusic(tokenResult.data, query, {
-      startIndex,
-      maxResults,
-    })
-
-    if (!result.ok) {
-      const status = (result.error.status ?? 500) as ContentfulStatusCode
-      console.error(
-        `[music/search] error: kind=${result.error.kind} status=${status} message=${result.error.message}`,
-      )
-      return c.json(result, status)
-    }
-
-    return c.json(result)
-  } catch (err) {
-    console.error('[music/search] unexpected error:', err)
-    return c.json(
-      {
-        ok: false,
-        error: { kind: 'unknown', message: 'Internal server error' },
-      },
-      500,
-    )
-  }
-})
-
-app.get('/:id', async (c) => {
-  try {
-    const clientId = getClientId()
-    const clientSecret = getClientSecret()
-    if (!clientId || !clientSecret) {
-      console.error(
-        '[music/:id] SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not configured',
-      )
-      return c.json(
-        {
-          ok: false,
-          error: {
-            kind: 'unknown',
-            message: 'Spotify credentials not configured',
-          },
-        },
-        500,
-      )
-    }
-
-    const tokenResult = await getAccessToken(clientId, clientSecret)
-    if (!tokenResult.ok) {
-      const status = (tokenResult.error.status ?? 500) as ContentfulStatusCode
-      console.error(
-        `[music/:id] token error: kind=${tokenResult.error.kind} status=${status} message=${tokenResult.error.message}`,
-      )
-      return c.json(tokenResult, status)
-    }
-
-    const albumId = c.req.param('id')
-    const result = await getMusicById(tokenResult.data, albumId)
-
-    if (!result.ok) {
-      const status = (result.error.status ?? 500) as ContentfulStatusCode
-      console.error(
-        `[music/:id] error: kind=${result.error.kind} status=${status} message=${result.error.message} albumId=${albumId}`,
-      )
-      return c.json(result, status)
-    }
-
-    return c.json(result)
-  } catch (err) {
-    console.error('[music/:id] unexpected error:', err)
-    return c.json(
-      {
-        ok: false,
-        error: { kind: 'unknown', message: 'Internal server error' },
-      },
-      500,
-    )
-  }
+    return clientId && clientSecret ? 'has-credentials' : ''
+  },
+  authErrorMessage: 'Spotify credentials not configured',
+  searchFn: async (_auth, query, options) => {
+    const tokenResult = await getToken()
+    if (!tokenResult.ok) return tokenResult
+    return searchMusic(tokenResult.data, query, options)
+  },
+  getByIdFn: async (_auth, id) => {
+    const tokenResult = await getToken()
+    if (!tokenResult.ok) return tokenResult
+    return getMusicById(tokenResult.data, id)
+  },
+  maxSearchResults: { min: 1, max: 10, default: 10 },
 })
 
 export { app as musicApp }

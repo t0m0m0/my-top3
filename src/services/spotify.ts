@@ -4,6 +4,7 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
+import { assertObject, assertField, assertArray } from './validation-helpers.ts'
 
 const SEARCH_URL = 'https://api.spotify.com/v1/search'
 const ALBUMS_URL = 'https://api.spotify.com/v1/albums'
@@ -107,48 +108,28 @@ async function fetchNewToken(
 // ── Validation functions ────────────────────────────────────────────
 
 function validateTokenResponse(data: unknown): SpotifyTokenResponse {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from Spotify token endpoint')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['access_token'] !== 'string') {
-    throw new Error('Missing or invalid access_token in Spotify token response')
-  }
-  if (typeof obj['expires_in'] !== 'number') {
-    throw new Error('Missing or invalid expires_in in Spotify token response')
-  }
+  const obj = assertObject(data, 'Spotify token endpoint')
+  assertField<string>(obj, 'access_token', 'string', 'Spotify token response')
+  assertField<number>(obj, 'expires_in', 'number', 'Spotify token response')
   return data as SpotifyTokenResponse
 }
 
 function validateSearchResponse(data: unknown): SpotifySearchResponse {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from Spotify search API')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['albums'] !== 'object' || obj['albums'] === null) {
-    throw new Error('Missing or invalid albums in Spotify search response')
-  }
+  const obj = assertObject(data, 'Spotify search API')
+  assertField<object>(obj, 'albums', 'object', 'Spotify search response')
   const albums = obj['albums'] as Record<string, unknown>
-  if (typeof albums['total'] !== 'number') {
-    throw new Error('Missing or invalid total in Spotify albums response')
-  }
-  if (!Array.isArray(albums['items'])) {
-    throw new Error('Missing or invalid items in Spotify albums response')
-  }
+  assertField<number>(albums, 'total', 'number', 'Spotify albums response')
+  assertArray(albums, 'items', 'Spotify albums response')
   return data as SpotifySearchResponse
 }
 
 function validateAlbum(data: unknown): SpotifyAlbum {
-  if (typeof data !== 'object' || data === null) {
-    throw new Error('Expected object response from Spotify album API')
-  }
-  const obj = data as Record<string, unknown>
-  if (typeof obj['id'] !== 'string' || obj['id'] === '') {
+  const obj = assertObject(data, 'Spotify album API')
+  const id = assertField<string>(obj, 'id', 'string', 'Spotify album response')
+  if (id === '') {
     throw new Error('Missing or empty id in Spotify album response')
   }
-  if (typeof obj['name'] !== 'string') {
-    throw new Error('Missing name in Spotify album response')
-  }
+  assertField<string>(obj, 'name', 'string', 'Spotify album response')
   return data as SpotifyAlbum
 }
 
