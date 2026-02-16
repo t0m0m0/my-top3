@@ -11,7 +11,6 @@ vi.mock('html2canvas', () => ({
   ),
 }))
 
-// Mock ResizeObserver for responsive scale tests
 class MockResizeObserver {
   observe() {}
   unobserve() {}
@@ -123,7 +122,7 @@ describe('Top3Image', () => {
           movie={mockMovie}
         />,
       )
-      expect(screen.getByText('「雨の日に楽しむ」')).toBeInTheDocument()
+      expect(screen.getByText('「 雨の日に楽しむ 」')).toBeInTheDocument()
     })
 
     it('does not display theme when empty', () => {
@@ -155,7 +154,7 @@ describe('Top3Image', () => {
       expect(screen.getByText('Director Name')).toBeInTheDocument()
     })
 
-    it('displays category labels and #1 badges', () => {
+    it('displays category labels', () => {
       render(
         <Top3Image
           theme=""
@@ -167,7 +166,30 @@ describe('Top3Image', () => {
       expect(screen.getByText('BOOK')).toBeInTheDocument()
       expect(screen.getByText('MUSIC')).toBeInTheDocument()
       expect(screen.getByText('MOVIE')).toBeInTheDocument()
-      expect(screen.getAllByText('#1')).toHaveLength(3)
+    })
+
+    it('does not display #1 badges', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      expect(screen.queryByText('#1')).not.toBeInTheDocument()
+    })
+
+    it('does not display My No.1s title', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      expect(screen.queryByText('My No.1s')).not.toBeInTheDocument()
     })
 
     it('shows download button', () => {
@@ -182,7 +204,7 @@ describe('Top3Image', () => {
       expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
     })
 
-    it('handles null items gracefully', () => {
+    it('handles null items gracefully with fallback', () => {
       render(<Top3Image theme="" book={null} music={null} movie={null} />)
       expect(screen.getAllByText('No Data')).toHaveLength(3)
     })
@@ -194,6 +216,92 @@ describe('Top3Image', () => {
       expect(screen.getByText('Test Book')).toBeInTheDocument()
       expect(screen.getByText('Test Movie')).toBeInTheDocument()
       expect(screen.getAllByText('No Data')).toHaveLength(1)
+    })
+  })
+
+  describe('layout configuration', () => {
+    it('renders layout selector with 3 slots', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      expect(screen.getByTestId('layout-selector')).toBeInTheDocument()
+    })
+
+    it('defaults to music on top, book bottom-left, movie bottom-right', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      const topSlot = screen.getByTestId('slot-top')
+      const bottomLeftSlot = screen.getByTestId('slot-bottom-left')
+      const bottomRightSlot = screen.getByTestId('slot-bottom-right')
+      expect(topSlot).toHaveTextContent('Test Album')
+      expect(bottomLeftSlot).toHaveTextContent('Test Book')
+      expect(bottomRightSlot).toHaveTextContent('Test Movie')
+    })
+
+    it('can change layout by swapping slots', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      // Click the top slot select and change to book
+      const topSelect = screen.getByTestId('select-top')
+      fireEvent.change(topSelect, { target: { value: 'book' } })
+
+      const topSlot = screen.getByTestId('slot-top')
+      expect(topSlot).toHaveTextContent('Test Book')
+    })
+
+    it('swaps categories when selecting one already in use', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      // Default: top=music, bottom-left=book, bottom-right=movie
+      // Change top to book → music should go to bottom-left (where book was)
+      const topSelect = screen.getByTestId('select-top')
+      fireEvent.change(topSelect, { target: { value: 'book' } })
+
+      const topSlot = screen.getByTestId('slot-top')
+      const bottomLeftSlot = screen.getByTestId('slot-bottom-left')
+      expect(topSlot).toHaveTextContent('Test Book')
+      expect(bottomLeftSlot).toHaveTextContent('Test Album')
+    })
+  })
+
+  describe('full-bleed image layout', () => {
+    it('renders thumbnail images in each slot', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      const images = screen.getAllByRole('img')
+      const srcs = images.map((img) => img.getAttribute('src'))
+      expect(srcs).toContain('https://example.com/book.jpg')
+      expect(srcs).toContain('https://example.com/music.jpg')
+      expect(srcs).toContain('https://example.com/movie.jpg')
     })
   })
 
@@ -440,7 +548,6 @@ describe('Top3Image', () => {
         ).toBeInTheDocument()
       })
 
-      // Second attempt succeeds
       vi.mocked(html2canvas).mockResolvedValueOnce({
         toDataURL: () => 'data:image/png;base64,mock',
       } as unknown as HTMLCanvasElement)
@@ -468,7 +575,6 @@ describe('Top3Image', () => {
         />,
       )
       const captureArea = screen.getByTestId('top3-image-capture')
-      // Scale should be applied (default 0.5 or based on container width)
       expect(captureArea.style.transform).toMatch(/^scale\(/)
       expect(captureArea.style.transformOrigin).toBe('top left')
     })
