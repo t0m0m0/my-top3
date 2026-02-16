@@ -4,6 +4,7 @@ import { useDebounce } from '../hooks/useDebounce'
 import { useSearch } from '../hooks/useSearch'
 import { useSearchHistory } from '../hooks/useSearchHistory'
 import { useThemeHistory } from '../hooks/useThemeHistory'
+import { useTheme } from '../hooks/useTheme'
 import { useSelection } from '../hooks/useSelection'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
@@ -24,7 +25,7 @@ const INITIAL_QUERIES: QueryState = {
 function SearchPage() {
   const [activeTab, setActiveTab] = useState<MediaCategory>('book')
   const [queries, setQueries] = useState<QueryState>(INITIAL_QUERIES)
-  const [theme, setTheme] = useState('')
+  const { theme, setTheme } = useTheme()
   const { selectItem } = useSelection()
   const { addHistory: addThemeHistory } = useThemeHistory()
 
@@ -70,9 +71,12 @@ function SearchPage() {
     [selectItem],
   )
 
-  const handleThemeHistorySelect = useCallback((selectedTheme: string) => {
-    setTheme(selectedTheme)
-  }, [])
+  const handleThemeHistorySelect = useCallback(
+    (selectedTheme: string) => {
+      setTheme(selectedTheme)
+    },
+    [setTheme],
+  )
 
   const [selectionComplete, setSelectionComplete] = useState(false)
 
