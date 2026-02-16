@@ -2,13 +2,17 @@
 import type { ReactElement, ReactNode } from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { ThemeProvider } from '@mui/material/styles'
+import theme from '../theme'
 import { SelectionProvider } from '../contexts/SelectionContext'
 
 function AllProviders({ children }: { children: ReactNode }) {
   return (
-    <BrowserRouter>
-      <SelectionProvider>{children}</SelectionProvider>
-    </BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <SelectionProvider>{children}</SelectionProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

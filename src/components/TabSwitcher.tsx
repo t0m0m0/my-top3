@@ -20,17 +20,8 @@ export default function TabSwitcher({ value, onChange }: TabSwitcherProps) {
         value={value}
         onChange={(_, newValue: MediaCategory) => onChange(newValue)}
         variant="fullWidth"
-        sx={{
-          '& .MuiTab-root': {
-            textTransform: 'none',
-            fontWeight: 600,
-            fontSize: '0.95rem',
-          },
-          '& .MuiTabs-indicator': {
-            height: 3,
-            borderRadius: '3px 3px 0 0',
-          },
-        }}
+        textColor="primary"
+        indicatorColor="primary"
       >
         {TABS.map((tab) => (
           <Tab key={tab.value} label={tab.label} value={tab.value} />

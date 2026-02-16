@@ -19,8 +19,6 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
     <Card
       sx={{
         display: 'flex',
-        borderRadius: '8px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
       }}
     >
       <CardMedia
@@ -77,11 +75,10 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           <Button
             variant="outlined"
             size="small"
+            color="primary"
             onClick={() => onSelect(item)}
             sx={{
               mt: 1,
-              textTransform: 'none',
-              borderRadius: '16px',
               fontSize: '0.8rem',
             }}
           >

@@ -1,1 +1,39 @@
 @import 'tailwindcss';
+
+/* Design System: CSS Custom Properties */
+:root {
+  /* Primary - Teal */
+  --color-primary: #0d9488;
+  --color-primary-light: #14b8a6;
+  --color-primary-dark: #0f766e;
+
+  /* Secondary - Warm Gold */
+  --color-secondary: #f59e0b;
+  --color-secondary-light: #fbbf24;
+  --color-secondary-dark: #d97706;
+
+  /* Accent - Coral */
+  --color-accent: #f97316;
+  --color-accent-light: #fb923c;
+  --color-accent-dark: #ea580c;
+
+  /* Neutrals */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+
+  /* Fonts */
+  --font-display: 'Outfit', 'Noto Sans JP', sans-serif;
+  --font-body: 'Noto Sans JP', 'Outfit', sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
