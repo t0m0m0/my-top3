@@ -71,9 +71,12 @@ function SearchPage() {
     [selectItem],
   )
 
-  const handleThemeHistorySelect = useCallback((selectedTheme: string) => {
-    setTheme(selectedTheme)
-  }, [])
+  const handleThemeHistorySelect = useCallback(
+    (selectedTheme: string) => {
+      setTheme(selectedTheme)
+    },
+    [setTheme],
+  )
 
   const [selectionComplete, setSelectionComplete] = useState(false)
 
