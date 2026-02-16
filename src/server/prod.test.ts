@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi } from 'vitest'
+import { Hono } from 'hono'
 
 vi.mock('@hono/node-server', () => ({
   serve: vi.fn(),
@@ -8,7 +9,6 @@ vi.mock('@hono/node-server/serve-static', () => ({
   serveStatic: vi.fn(() => vi.fn()),
 }))
 vi.mock('./index.ts', () => {
-  const { Hono } = require('hono')
   return { default: new Hono() }
 })
 
@@ -34,7 +34,6 @@ describe('prod server', () => {
       serveStatic: vi.fn(() => vi.fn()),
     }))
     vi.mock('./index.ts', () => {
-      const { Hono } = require('hono')
       return { default: new Hono() }
     })
 
@@ -57,7 +56,6 @@ describe('prod server', () => {
       serveStatic: vi.fn(() => vi.fn()),
     }))
     vi.mock('./index.ts', () => {
-      const { Hono } = require('hono')
       return { default: new Hono() }
     })
 
