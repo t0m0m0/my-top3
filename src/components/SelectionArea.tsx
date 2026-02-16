@@ -64,7 +64,7 @@ function SlotCard({
 
   return (
     <div
-      className="slot-selected relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-all sm:h-28"
+      className="animate-scale-in slot-selected relative flex h-20 flex-1 items-center gap-2 rounded-xl border-2 p-2 transition-all sm:h-28"
       style={{
         borderColor: 'var(--color-primary-light)',
         backgroundColor: 'var(--color-surface)',

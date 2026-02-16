@@ -55,7 +55,7 @@ function SearchPage() {
           )}
         </svg>
         <h1
-          className="relative text-3xl font-extrabold tracking-tight sm:text-4xl"
+          className="animate-fade-in-up relative text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
             fontFamily: 'var(--font-display)',
             color: '#fff',
@@ -64,7 +64,7 @@ function SearchPage() {
           My No.1s
         </h1>
         <p
-          className="relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
+          className="animate-fade-in-up animate-delay-200 relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
           style={{ color: 'rgba(255,255,255,0.9)' }}
         >
           テーマを決めて、お気に入りの3作品を選ぼう
