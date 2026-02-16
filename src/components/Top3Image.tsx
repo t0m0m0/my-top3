@@ -1,7 +1,8 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import DownloadIcon from '@mui/icons-material/Download'
 import html2canvas from 'html2canvas'
 import type { SearchResultItem } from '../types/common'
@@ -156,11 +157,20 @@ function getErrorMessage(err: unknown): string {
   return '画像の生成に失敗しました。もう一度お試しください。'
 }
 
+function formatDate(): string {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
   const captureRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successOpen, setSuccessOpen] = useState(false)
   const [scale, setScale] = useState(0.5)
 
   useEffect(() => {
@@ -202,11 +212,13 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
         return
       }
 
+      const date = formatDate()
       const safeTheme = theme ? `-${sanitizeFilename(theme)}` : ''
       const link = document.createElement('a')
-      link.download = `my-top3${safeTheme}.png`
+      link.download = `my-top3-${date}${safeTheme}.png`
       link.href = dataUrl
       link.click()
+      setSuccessOpen(true)
     } catch (err) {
       console.error('[Top3Image] Failed to generate image:', err)
       setError(getErrorMessage(err))
@@ -308,11 +320,35 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
         </Button>
       </div>
 
-      {error && (
-        <Typography variant="body2" color="error" className="mt-2 text-center">
+      <Snackbar
+        open={successOpen}
+        autoHideDuration={3000}
+        onClose={() => setSuccessOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSuccessOpen(false)}
+          severity="success"
+          variant="filled"
+        >
+          画像を保存しました
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={5000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          variant="filled"
+        >
           {error}
-        </Typography>
-      )}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

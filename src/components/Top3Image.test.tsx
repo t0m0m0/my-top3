@@ -89,6 +89,14 @@ function mockCreateElementForAnchor() {
   }
 }
 
+function getTodayDate(): string {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 describe('Top3Image', () => {
   describe('rendering', () => {
     it('renders capture area with 1080x1080 dimensions', () => {
@@ -240,7 +248,7 @@ describe('Top3Image', () => {
       })
 
       await waitFor(() => {
-        expect(getDownload()).toBe('my-top3-テストテーマ.png')
+        expect(getDownload()).toBe(`my-top3-${getTodayDate()}-テストテーマ.png`)
       })
     })
 
@@ -264,7 +272,7 @@ describe('Top3Image', () => {
       })
 
       await waitFor(() => {
-        expect(getDownload()).toBe('my-top3-test_path_name__bad.png')
+        expect(getDownload()).toBe(`my-top3-${getTodayDate()}-test_path_name__bad.png`)
       })
     })
 
@@ -291,7 +299,7 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(screen.getByText('生成中...')).toBeInTheDocument()
       })
-      expect(screen.getByRole('button')).toBeDisabled()
+      expect(screen.getByRole('button', { name: /生成中/ })).toBeDisabled()
 
       resolveCanvas({
         toDataURL: () => 'data:image/png;base64,mock',
@@ -300,7 +308,7 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
       })
-      expect(screen.getByRole('button')).toBeEnabled()
+      expect(screen.getByRole('button', { name: /画像をダウンロード/ })).toBeEnabled()
     })
 
     it('shows error when toDataURL returns empty', async () => {
@@ -399,7 +407,7 @@ describe('Top3Image', () => {
       await waitFor(() => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
       })
-      expect(screen.getByRole('button')).toBeEnabled()
+      expect(screen.getByRole('button', { name: /画像をダウンロード/ })).toBeEnabled()
     })
 
     it('clears previous error on new download attempt', async () => {
