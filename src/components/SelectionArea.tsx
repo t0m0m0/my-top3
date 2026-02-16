@@ -29,11 +29,11 @@ function SlotCard({
 }) {
   if (!item) {
     return (
-      <div className="flex h-16 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-white p-2 sm:h-24">
-        <Typography variant="caption" className="text-gray-400">
+      <div className="flex h-16 flex-1 flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 sm:h-24" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
+        <Typography variant="caption" style={{ color: 'var(--color-text-secondary)' }}>
           {CATEGORY_LABELS[category]}
         </Typography>
-        <Typography variant="caption" className="text-gray-400">
+        <Typography variant="caption" style={{ color: 'var(--color-text-secondary)' }}>
           未選択
         </Typography>
       </div>
@@ -41,7 +41,7 @@ function SlotCard({
   }
 
   return (
-    <div className="relative flex h-16 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 sm:h-24">
+    <div className="relative flex h-16 flex-1 items-center gap-2 rounded-lg border p-2 sm:h-24" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
       <IconButton
         size="small"
         onClick={() => onDeselect(category)}
@@ -63,8 +63,7 @@ function SlotCard({
       <div className="min-w-0 flex-1 pr-4">
         <Typography
           variant="caption"
-          className="text-gray-500"
-          sx={{ fontSize: '0.65rem' }}
+          sx={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}
         >
           {CATEGORY_LABELS[category]}
         </Typography>
@@ -77,8 +76,8 @@ function SlotCard({
         </Typography>
         <Typography
           variant="caption"
-          className="truncate text-gray-500"
-          sx={{ fontSize: '0.65rem' }}
+          className="truncate"
+          sx={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}
         >
           {item.subtitle}
         </Typography>

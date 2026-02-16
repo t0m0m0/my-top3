@@ -21,16 +21,16 @@ export default function SearchHistory({
   }
 
   return (
-    <Box className="mt-4 rounded-lg bg-white p-4" aria-label="検索履歴">
+    <Box className="mt-4 rounded-lg p-4" sx={{ backgroundColor: 'var(--color-surface)' }} aria-label="検索履歴">
       <div className="mb-2 flex items-center justify-between">
-        <Typography variant="subtitle2" className="text-gray-700">
+        <Typography variant="subtitle2" sx={{ color: 'var(--color-text-primary)' }}>
           最近の検索
         </Typography>
         <Button
           variant="text"
           size="small"
           onClick={clearHistory}
-          sx={{ textTransform: 'none' }}
+          color="primary"
         >
           すべて削除
         </Button>
