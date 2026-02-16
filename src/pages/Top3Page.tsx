@@ -116,7 +116,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
   if (loading) {
     return (
       <div
-        className="flex flex-1 flex-col items-center rounded-lg border p-4"
+        className="flex flex-1 flex-col items-center rounded-xl border p-4"
         style={{
           borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
@@ -133,7 +133,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
 
   if (error) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-4">
+      <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-4">
         <Typography variant="caption" className="text-red-500">
           {error}
         </Typography>
@@ -154,7 +154,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
   if (!work) {
     return (
       <div
-        className="flex flex-1 flex-col items-center justify-center rounded-lg border p-4"
+        className="flex flex-1 flex-col items-center justify-center rounded-xl border p-4"
         style={{
           borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
@@ -172,36 +172,70 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
 
   return (
     <div
-      className="flex flex-1 flex-col items-center rounded-lg border p-4"
+      className="group relative flex flex-1 flex-col items-center rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
-        borderColor: 'var(--color-border)',
-        backgroundColor: 'var(--color-surface)',
+        background: 'var(--color-surface)',
+        border: '2px solid transparent',
+        backgroundClip: 'padding-box',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
       }}
     >
+      {/* Gradient border via pseudo-element effect with outline */}
       <div
-        className="mb-1 rounded px-2 py-0.5"
-        style={{ backgroundColor: 'var(--color-primary-dark)' }}
+        className="pointer-events-none absolute inset-0 rounded-xl"
+        style={{
+          border: '2px solid var(--color-border)',
+          borderImage:
+            'linear-gradient(135deg, var(--color-primary), var(--color-secondary)) 1',
+          borderRadius: 'inherit',
+          mask: 'linear-gradient(#fff 0 0)',
+          WebkitMask: 'linear-gradient(#fff 0 0)',
+        }}
+      />
+
+      <div
+        className="mb-1.5 rounded-md px-3 py-1"
+        style={{
+          background:
+            'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
+        }}
       >
         <Typography
           variant="caption"
-          className="font-bold uppercase text-white"
-          sx={{ fontSize: '0.6rem', color: 'white' }}
+          className="font-bold uppercase tracking-wider text-white"
+          sx={{ fontSize: '0.65rem', color: 'white', letterSpacing: '0.1em' }}
         >
           {label}
         </Typography>
       </div>
+
+      {/* Rank badge - gold and prominent */}
       <div
-        className="mb-1 rounded px-2 py-0.5"
-        style={{ backgroundColor: 'var(--color-secondary-light)' }}
+        className="mb-2 flex items-center justify-center rounded-full"
+        style={{
+          width: 36,
+          height: 36,
+          background: 'linear-gradient(135deg, #f59e0b, #eab308, #f59e0b)',
+          boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+        }}
       >
-        <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>
+        <Typography
+          variant="caption"
+          sx={{
+            fontSize: '0.8rem',
+            fontWeight: 800,
+            color: '#78350f',
+            lineHeight: 1,
+          }}
+        >
           #1
         </Typography>
       </div>
+
       <img
         src={work.thumbnailUrl}
         alt={work.title}
-        className="mb-2 h-32 w-24 rounded object-cover"
+        className="mb-3 h-32 w-24 rounded-lg object-cover shadow-md transition-transform duration-300 group-hover:scale-105"
         onError={(e) => {
           const img = e.target as HTMLImageElement
           if (img.src !== DEFAULT_THUMBNAIL) {
@@ -211,15 +245,19 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
       />
       <Typography
         variant="body2"
-        className="text-center font-medium"
-        sx={{ fontSize: '0.8rem', lineHeight: 1.3 }}
+        className="text-center font-semibold"
+        sx={{ fontSize: '0.85rem', lineHeight: 1.3 }}
       >
         {work.title}
       </Typography>
       <Typography
         variant="caption"
         className="text-center"
-        sx={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}
+        sx={{
+          fontSize: '0.7rem',
+          color: 'var(--color-text-secondary)',
+          mt: 0.25,
+        }}
       >
         {work.subtitle}
       </Typography>
@@ -228,10 +266,10 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
           href={work.externalUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 text-xs hover:underline"
+          className="mt-2 text-xs transition-colors hover:underline"
           style={{ color: 'var(--color-primary)' }}
         >
-          詳細を見る
+          詳細を見る →
         </a>
       )}
     </div>
@@ -276,31 +314,88 @@ function Top3Page() {
     <div
       className="min-h-screen"
       style={{
-        background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+        background:
+          'linear-gradient(180deg, var(--color-bg) 0%, #f0fdf4 50%, #ecfdf5 100%)',
       }}
     >
       <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        <h1
-          className="text-xl font-extrabold sm:text-2xl"
-          style={{
-            fontFamily: 'var(--font-display)',
-            color: 'var(--color-primary-dark)',
-          }}
-        >
-          My Top 3
-        </h1>
-
-        {params.theme && (
-          <Typography
-            variant="h6"
-            className="mt-2 text-center"
-            sx={{ color: 'var(--color-text-primary)' }}
+        {/* Header with decorative line */}
+        <div className="text-center">
+          <div
+            className="mx-auto mb-2 h-0.5 w-16 rounded-full"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+            }}
+          />
+          <h1
+            className="text-xl font-extrabold sm:text-2xl"
+            style={{
+              fontFamily: 'var(--font-display)',
+              background:
+                'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
           >
-            「{params.theme}」
-          </Typography>
+            My Top 3
+          </h1>
+          <div
+            className="mx-auto mt-2 h-0.5 w-16 rounded-full"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+            }}
+          />
+        </div>
+
+        {/* Theme display with decorative quotes */}
+        {params.theme && (
+          <div className="mt-3 text-center">
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'var(--color-text-primary)',
+                position: 'relative',
+                display: 'inline-block',
+                px: 2,
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  left: -8,
+                  top: -4,
+                  fontSize: '2rem',
+                  color: 'var(--color-primary)',
+                  opacity: 0.3,
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1,
+                }}
+              >
+                “
+              </span>
+              {params.theme}
+              <span
+                style={{
+                  position: 'absolute',
+                  right: -8,
+                  bottom: -8,
+                  fontSize: '2rem',
+                  color: 'var(--color-primary)',
+                  opacity: 0.3,
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1,
+                }}
+              >
+                ”
+              </span>
+            </Typography>
+          </div>
         )}
 
-        <div className="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row">
+        <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:flex-row">
           <WorkCard
             work={book.data}
             loading={book.loading}
@@ -339,9 +434,27 @@ function Top3Page() {
           <ShareButtons theme={params.theme} />
         </div>
 
-        <div className="mt-6 text-center">
-          <Button component={Link} to="/" variant="outlined">
-            トップページに戻る
+        <div className="mt-8 text-center">
+          <Button
+            component={Link}
+            to="/"
+            variant="outlined"
+            sx={{
+              borderRadius: '9999px',
+              px: 4,
+              py: 1,
+              borderColor: 'var(--color-primary)',
+              color: 'var(--color-primary)',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              '&:hover': {
+                borderColor: 'var(--color-primary-dark)',
+                backgroundColor: 'var(--color-primary)',
+                color: '#fff',
+              },
+            }}
+          >
+            ← トップページに戻る
           </Button>
         </div>
       </div>

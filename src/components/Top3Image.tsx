@@ -35,7 +35,7 @@ const TRUNCATED_TEXT: React.CSSProperties = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  maxWidth: 240,
+  maxWidth: 260,
   textAlign: 'center',
 }
 
@@ -68,36 +68,47 @@ function ImageWorkCard({ item, label }: ImageWorkCardProps) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '16px 8px',
-        gap: 8,
+        padding: '16px 12px',
+        gap: 10,
       }}
     >
+      {/* Category label badge */}
       <div
         style={{
-          background: COLORS.badgeBg,
+          background: 'linear-gradient(135deg, #1e3a5f, #1f2937)',
           color: COLORS.textPrimary,
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: 700,
-          padding: '4px 12px',
-          borderRadius: 4,
-          textTransform: 'uppercase',
-          letterSpacing: 1,
+          padding: '5px 16px',
+          borderRadius: 6,
+          textTransform: 'uppercase' as const,
+          letterSpacing: 2,
+          border: '1px solid rgba(255,255,255,0.1)',
         }}
       >
         {label}
       </div>
+
+      {/* Rank badge - larger, gold, with glow */}
       <div
         style={{
-          background: COLORS.rankBadgeBg,
-          color: COLORS.badgeBg,
-          fontSize: 13,
-          fontWeight: 700,
-          padding: '2px 10px',
-          borderRadius: 4,
+          background: 'linear-gradient(135deg, #f59e0b, #eab308, #f59e0b)',
+          color: '#78350f',
+          fontSize: 18,
+          fontWeight: 800,
+          width: 48,
+          height: 48,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 0 20px rgba(250,204,21,0.4), 0 4px 8px rgba(0,0,0,0.3)',
         }}
       >
         #1
       </div>
+
+      {/* Thumbnail with enhanced shadow */}
       <img
         src={item.thumbnailUrl}
         alt={item.title}
@@ -109,27 +120,33 @@ function ImageWorkCard({ item, label }: ImageWorkCardProps) {
           }
         }}
         style={{
-          width: 200,
-          height: 280,
+          width: 210,
+          height: 290,
           objectFit: 'cover',
-          borderRadius: 8,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          borderRadius: 10,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
+          border: '2px solid rgba(255,255,255,0.1)',
         }}
       />
+
+      {/* Title */}
       <span
         style={{
           ...TRUNCATED_TEXT,
-          fontSize: 16,
-          fontWeight: 600,
+          fontSize: 18,
+          fontWeight: 700,
           color: COLORS.textPrimary,
+          letterSpacing: 0.5,
         }}
       >
         {item.title}
       </span>
+
+      {/* Subtitle */}
       <span
         style={{
           ...TRUNCATED_TEXT,
-          fontSize: 13,
+          fontSize: 14,
           color: COLORS.textSecondary,
         }}
       >
@@ -244,31 +261,139 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
           style={{
             width: IMAGE_SIZE,
             height: IMAGE_SIZE,
-            background: `linear-gradient(135deg, ${COLORS.canvasBg} 0%, #1e3a5f 50%, ${COLORS.canvasBg} 100%)`,
+            background: [
+              `radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.15) 0%, transparent 50%)`,
+              `radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.12) 0%, transparent 50%)`,
+              `radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.10) 0%, transparent 50%)`,
+              `radial-gradient(ellipse at 10% 70%, rgba(245,158,11,0.08) 0%, transparent 40%)`,
+              `radial-gradient(ellipse at 90% 60%, rgba(236,72,153,0.08) 0%, transparent 40%)`,
+              `linear-gradient(135deg, ${COLORS.canvasBg} 0%, #1e293b 30%, #1e3a5f 50%, #1e293b 70%, ${COLORS.canvasBg} 100%)`,
+            ].join(', '),
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             fontFamily:
               '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
             transformOrigin: 'top left',
             transform: `scale(${scale})`,
             marginBottom: -IMAGE_SIZE * (1 - scale),
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
+          {/* Decorative top line */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 200,
+              height: 3,
+              background:
+                'linear-gradient(90deg, transparent, rgba(250,204,21,0.6), transparent)',
+              borderRadius: 2,
+            }}
+          />
+
+          {/* Decorative corner dots - top left */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 24,
+              left: 24,
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: 'rgba(250,204,21,0.3)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 24,
+              left: 38,
+              width: 4,
+              height: 4,
+              borderRadius: '50%',
+              background: 'rgba(250,204,21,0.2)',
+            }}
+          />
+
+          {/* Decorative corner dots - top right */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 24,
+              right: 24,
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: 'rgba(250,204,21,0.3)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 24,
+              right: 38,
+              width: 4,
+              height: 4,
+              borderRadius: '50%',
+              background: 'rgba(250,204,21,0.2)',
+            }}
+          />
+
+          {/* Decorative subtle side lines */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 80,
+              left: 20,
+              width: 1,
+              height: 120,
+              background:
+                'linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 80,
+              right: 20,
+              width: 1,
+              height: 120,
+              background:
+                'linear-gradient(180deg, transparent, rgba(255,255,255,0.06), transparent)',
+            }}
+          />
+
           {/* Header */}
           <div
             style={{
               textAlign: 'center',
-              padding: '40px 40px 20px',
+              padding: '48px 40px 16px',
             }}
           >
+            {/* Decorative line above title */}
             <div
               style={{
-                fontSize: 28,
+                width: 60,
+                height: 2,
+                background:
+                  'linear-gradient(90deg, transparent, rgba(250,204,21,0.5), transparent)',
+                margin: '0 auto 16px',
+                borderRadius: 1,
+              }}
+            />
+            <div
+              style={{
+                fontSize: 36,
                 fontWeight: 800,
                 color: COLORS.textPrimary,
-                letterSpacing: 2,
+                letterSpacing: 4,
+                textShadow: '0 2px 12px rgba(0,0,0,0.3)',
               }}
             >
               My Top 3
@@ -276,14 +401,26 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
             {theme && (
               <div
                 style={{
-                  fontSize: 22,
+                  fontSize: 24,
                   color: COLORS.textSubheading,
-                  marginTop: 12,
+                  marginTop: 14,
+                  letterSpacing: 1,
                 }}
               >
-                {`「${theme}」`}
+                {`\u300C${theme}\u300D`}
               </div>
             )}
+            {/* Decorative line below title */}
+            <div
+              style={{
+                width: 60,
+                height: 2,
+                background:
+                  'linear-gradient(90deg, transparent, rgba(250,204,21,0.5), transparent)',
+                margin: '16px auto 0',
+                borderRadius: 1,
+              }}
+            />
           </div>
 
           {/* Works row */}
@@ -292,12 +429,33 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
               display: 'flex',
               flex: 1,
               width: '100%',
-              padding: '0 24px 40px',
+              padding: '0 24px 16px',
             }}
           >
             <ImageWorkCard item={book} label="BOOK" />
             <ImageWorkCard item={music} label="MUSIC" />
             <ImageWorkCard item={movie} label="MOVIE" />
+          </div>
+
+          {/* Branding footer */}
+          <div
+            style={{
+              width: '100%',
+              textAlign: 'center',
+              padding: '12px 0 20px',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                color: 'rgba(255,255,255,0.3)',
+                letterSpacing: 2,
+                fontWeight: 500,
+              }}
+            >
+              my-top3.app
+            </span>
           </div>
         </div>
       </div>
