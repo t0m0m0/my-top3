@@ -1,11 +1,11 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import DownloadIcon from '@mui/icons-material/Download'
-import html2canvas from 'html2canvas'
 import type { SearchResultItem } from '../types/common'
+import { ImageWorkCard, COLORS } from './ImageWorkCard'
+import { useImageCapture } from '../hooks/useImageCapture'
 
 type Top3ImageProps = {
   theme: string
@@ -14,235 +14,19 @@ type Top3ImageProps = {
   movie: SearchResultItem | null
 }
 
-type ImageWorkCardProps = {
-  item: SearchResultItem | null
-  label: string
-}
-
-const IMAGE_SIZE = 1080
-
-const COLORS = {
-  textPrimary: '#fff',
-  textSecondary: '#d1d5db',
-  textMuted: '#9ca3af',
-  textSubheading: '#e5e7eb',
-  badgeBg: '#1f2937',
-  rankBadgeBg: '#facc15',
-  canvasBg: '#111827',
-} as const
-
-const TRUNCATED_TEXT: React.CSSProperties = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  maxWidth: 260,
-  textAlign: 'center',
-}
-
-const NO_IMAGE_SRC =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgZmlsbD0iIzM3NDE1MSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOWNhM2FmIiBmb250LXNpemU9IjE0Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
-
-function ImageWorkCard({ item, label }: ImageWorkCardProps) {
-  if (!item) {
-    return (
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 16,
-        }}
-      >
-        <span style={{ color: COLORS.textMuted, fontSize: 18 }}>{label}</span>
-        <span style={{ color: COLORS.textMuted, fontSize: 14 }}>No Data</span>
-      </div>
-    )
-  }
-
-  return (
-    <div
-      style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '16px 12px',
-        gap: 10,
-      }}
-    >
-      {/* Category label badge */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #1e3a5f, #1f2937)',
-          color: COLORS.textPrimary,
-          fontSize: 15,
-          fontWeight: 700,
-          padding: '5px 16px',
-          borderRadius: 6,
-          textTransform: 'uppercase' as const,
-          letterSpacing: 2,
-          border: '1px solid rgba(255,255,255,0.1)',
-        }}
-      >
-        {label}
-      </div>
-
-      {/* Rank badge - larger, gold, with glow */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #f59e0b, #eab308, #f59e0b)',
-          color: '#78350f',
-          fontSize: 18,
-          fontWeight: 800,
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 0 20px rgba(250,204,21,0.4), 0 4px 8px rgba(0,0,0,0.3)',
-        }}
-      >
-        #1
-      </div>
-
-      {/* Thumbnail with enhanced shadow */}
-      <img
-        src={item.thumbnailUrl}
-        alt={item.title}
-        crossOrigin="anonymous"
-        onError={(e) => {
-          const img = e.target as HTMLImageElement
-          if (img.src !== NO_IMAGE_SRC) {
-            img.src = NO_IMAGE_SRC
-          }
-        }}
-        style={{
-          width: 210,
-          height: 290,
-          objectFit: 'cover',
-          borderRadius: 10,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
-          border: '2px solid rgba(255,255,255,0.1)',
-        }}
-      />
-
-      {/* Title */}
-      <span
-        style={{
-          ...TRUNCATED_TEXT,
-          fontSize: 18,
-          fontWeight: 700,
-          color: COLORS.textPrimary,
-          letterSpacing: 0.5,
-        }}
-      >
-        {item.title}
-      </span>
-
-      {/* Subtitle */}
-      <span
-        style={{
-          ...TRUNCATED_TEXT,
-          fontSize: 14,
-          color: COLORS.textSecondary,
-        }}
-      >
-        {item.subtitle}
-      </span>
-    </div>
-  )
-}
-
-function sanitizeFilename(name: string): string {
-  return name
-    .replace(/[/\\:*?"<>|\0\n\r]/g, '_')
-    .replace(/^\.+/, '')
-    .trim()
-    .slice(0, 50)
-}
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof DOMException && err.name === 'SecurityError') {
-    return '画像の取得に失敗しました。外部画像のCORS設定が原因の可能性があります。'
-  }
-  if (err instanceof DOMException && err.name === 'QuotaExceededError') {
-    return '画像サイズが大きすぎるため生成できませんでした。'
-  }
-  return '画像の生成に失敗しました。もう一度お試しください。'
-}
-
-function formatDate(): string {
-  const d = new Date()
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
-}
-
 function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
-  const captureRef = useRef<HTMLDivElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [successOpen, setSuccessOpen] = useState(false)
-  const [scale, setScale] = useState(0.5)
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const updateScale = () => {
-      const containerWidth = container.clientWidth
-      const newScale =
-        Math.round(Math.min(containerWidth / IMAGE_SIZE, 0.5) * 1000) / 1000
-      setScale(newScale)
-    }
-
-    updateScale()
-
-    const observer = new ResizeObserver(updateScale)
-    observer.observe(container)
-    return () => observer.disconnect()
-  }, [])
-
-  const handleDownload = useCallback(async () => {
-    if (!captureRef.current) return
-
-    setIsGenerating(true)
-    setError(null)
-    try {
-      const canvas = await html2canvas(captureRef.current, {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
-        scale: 1,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: COLORS.canvasBg,
-      })
-
-      const dataUrl = canvas.toDataURL('image/png')
-      if (!dataUrl || dataUrl === 'data:,') {
-        setError('画像の生成に失敗しました。画像データが空です。')
-        return
-      }
-
-      const date = formatDate()
-      const safeTheme = theme ? `-${sanitizeFilename(theme)}` : ''
-      const link = document.createElement('a')
-      link.download = `my-no1s-${date}${safeTheme}.png`
-      link.href = dataUrl
-      link.click()
-      setSuccessOpen(true)
-    } catch (err) {
-      console.error('[Top3Image] Failed to generate image:', err)
-      setError(getErrorMessage(err))
-    } finally {
-      setIsGenerating(false)
-    }
-  }, [theme])
+  const {
+    captureRef,
+    containerRef,
+    isGenerating,
+    error,
+    setError,
+    successOpen,
+    setSuccessOpen,
+    scale,
+    handleDownload,
+    IMAGE_SIZE,
+  } = useImageCapture(theme)
 
   return (
     <div>
