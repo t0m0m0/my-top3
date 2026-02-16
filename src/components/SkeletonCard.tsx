@@ -12,14 +12,16 @@ export default function SkeletonCard() {
     <Card
       sx={{
         display: 'flex',
+        borderLeft: '4px solid',
+        borderLeftColor: 'action.disabled',
       }}
     >
       {/* Thumbnail placeholder */}
       <Skeleton
         variant="rectangular"
         sx={{
-          width: 80,
-          minHeight: 100,
+          width: 100,
+          minHeight: 120,
           flexShrink: 0,
         }}
       />
@@ -37,7 +39,7 @@ export default function SkeletonCard() {
           {/* Subtitle */}
           <Skeleton variant="text" width="60%" height={20} sx={{ mt: 0.5 }} />
           {/* Button */}
-          <Skeleton variant="rounded" width={80} height={30} sx={{ mt: 1 }} />
+          <Skeleton variant="rounded" width={100} height={30} sx={{ mt: 1 }} />
         </CardContent>
       </Box>
     </Card>

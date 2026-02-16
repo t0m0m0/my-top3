@@ -4,10 +4,22 @@ import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
-import type { SearchResultItem } from '../types/common'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import type { SearchResultItem, MediaCategory } from '../types/common'
+import { useSelection } from '../hooks/useSelection'
 
-const NO_IMAGE_PLACEHOLDER =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23e5e7eb' width='120' height='160'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='sans-serif' font-size='12'%3ENo Image%3C/text%3E%3C/svg%3E"
+const NO_IMAGE_PLACEHOLDERS: Record<MediaCategory, string> = {
+  book: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23fef3c7' width='120' height='160'/%3E%3Ctext x='50%25' y='45%25' dominant-baseline='middle' text-anchor='middle' fill='%23d97706' font-family='sans-serif' font-size='32'%3E📖%3C/text%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' fill='%23b45309' font-family='sans-serif' font-size='11'%3ENo Image%3C/text%3E%3C/svg%3E",
+  music: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23dbeafe' width='120' height='160'/%3E%3Ctext x='50%25' y='45%25' dominant-baseline='middle' text-anchor='middle' fill='%232563eb' font-family='sans-serif' font-size='32'%3E🎵%3C/text%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' fill='%231d4ed8' font-family='sans-serif' font-size='11'%3ENo Image%3C/text%3E%3C/svg%3E",
+  movie: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23ede9fe' width='120' height='160'/%3E%3Ctext x='50%25' y='45%25' dominant-baseline='middle' text-anchor='middle' fill='%237c3aed' font-family='sans-serif' font-size='32'%3E🎬%3C/text%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' fill='%236d28d9' font-family='sans-serif' font-size='11'%3ENo Image%3C/text%3E%3C/svg%3E",
+}
+
+const CATEGORY_ACCENT: Record<MediaCategory, string> = {
+  book: '#d97706',
+  music: '#2563eb',
+  movie: '#7c3aed',
+}
 
 type ResultCardProps = {
   item: SearchResultItem
@@ -15,25 +27,45 @@ type ResultCardProps = {
 }
 
 export default function ResultCard({ item, onSelect }: ResultCardProps) {
+  const { selection } = useSelection()
+  const isSelected = selection[item.category]?.id === item.id
+  const accentColor = CATEGORY_ACCENT[item.category]
+  const placeholder = NO_IMAGE_PLACEHOLDERS[item.category]
+
   return (
     <Card
       sx={{
         display: 'flex',
+        borderLeft: `4px solid ${accentColor}`,
+        transition: 'all 0.2s ease',
+        cursor: 'pointer',
+        ...(isSelected && {
+          bgcolor: 'action.selected',
+          borderLeftColor: 'success.main',
+          boxShadow: (theme) =>
+            `0 0 0 1px ${theme.palette.success.main}`,
+        }),
+        ...(!isSelected && {
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: 4,
+          },
+        }),
       }}
     >
       <CardMedia
         component="img"
         sx={{
-          width: 80,
-          minHeight: 100,
+          width: 100,
+          minHeight: 120,
           objectFit: 'cover',
           flexShrink: 0,
         }}
-        image={item.thumbnailUrl || NO_IMAGE_PLACEHOLDER}
+        image={item.thumbnailUrl || placeholder}
         alt={item.title}
         onError={(e) => {
           const target = e.target as HTMLImageElement
-          target.src = NO_IMAGE_PLACEHOLDER
+          target.src = placeholder
         }}
       />
       <Box
@@ -72,18 +104,30 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           >
             {item.subtitle}
           </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            color="primary"
-            onClick={() => onSelect(item)}
-            sx={{
-              mt: 1,
-              fontSize: '0.8rem',
-            }}
-          >
-            #1に選ぶ
-          </Button>
+          {isSelected ? (
+            <Button
+              variant="contained"
+              size="small"
+              color="success"
+              disableElevation
+              startIcon={<CheckCircleIcon />}
+              sx={{ mt: 1, fontSize: '0.8rem', pointerEvents: 'none' }}
+            >
+              選択済み
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              disableElevation
+              startIcon={<AddCircleOutlineIcon />}
+              onClick={() => onSelect(item)}
+              sx={{ mt: 1, fontSize: '0.8rem' }}
+            >
+              #1に選ぶ
+            </Button>
+          )}
         </CardContent>
       </Box>
     </Card>
