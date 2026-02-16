@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { buildTop3Url, parseTop3Params } from './url-params'
 import { createSearchResultItem } from '../test/fixtures'
+import { MAX_THEME_LENGTH } from '../hooks/useTheme'
 
 describe('buildTop3Url', () => {
   it('builds URL with all selections and theme', () => {
@@ -77,6 +78,13 @@ describe('parseTop3Params', () => {
       musicId: '',
       movieId: '',
     })
+  })
+
+  it('truncates theme to MAX_THEME_LENGTH', () => {
+    const longTheme = 'a'.repeat(100)
+    const params = new URLSearchParams(`theme=${longTheme}`)
+    const result = parseTop3Params(params)
+    expect(result.theme.length).toBe(MAX_THEME_LENGTH)
   })
 
   it('round-trips with buildTop3Url', () => {

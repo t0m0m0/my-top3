@@ -1,4 +1,5 @@
 import type { SearchResultItem } from '../types/common'
+import { MAX_THEME_LENGTH } from '../hooks/useTheme'
 
 type Selection = {
   book: SearchResultItem | null
@@ -36,12 +37,10 @@ export function buildTop3Url(selection: Selection, theme: string): string {
   return queryString ? `/my-no1s?${queryString}` : '/my-no1s'
 }
 
-const MAX_THEME_URL_LENGTH = 100
-
 export function parseTop3Params(searchParams: URLSearchParams): Top3Params {
   const rawTheme = searchParams.get('theme') ?? ''
   return {
-    theme: rawTheme.slice(0, MAX_THEME_URL_LENGTH),
+    theme: rawTheme.slice(0, MAX_THEME_LENGTH),
     bookId: searchParams.get('book') ?? '',
     musicId: searchParams.get('music') ?? '',
     movieId: searchParams.get('movie') ?? '',
