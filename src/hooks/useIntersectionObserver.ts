@@ -2,7 +2,8 @@ import { useRef, useCallback, useEffect } from 'react'
 
 export function useIntersectionObserver(
   callback: () => void,
-  options?: IntersectionObserverInit,
+  rootMargin = '200px',
+  threshold = 0,
 ): (node: HTMLDivElement | null) => void {
   const callbackRef = useRef(callback)
   useEffect(() => {
@@ -29,16 +30,15 @@ export function useIntersectionObserver(
         },
         {
           root: null,
-          rootMargin: '200px',
-          threshold: 0,
-          ...options,
+          rootMargin,
+          threshold,
         },
       )
 
       observer.observe(node)
       observerRef.current = observer
     },
-    [options],
+    [rootMargin, threshold],
   )
 
   return sentinelCallbackRef
