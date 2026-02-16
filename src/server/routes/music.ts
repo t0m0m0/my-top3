@@ -52,7 +52,7 @@ app.get('/search', async (c) => {
     )
     const maxResults = Math.max(
       1,
-      Math.min(50, Number(c.req.query('maxResults') ?? '20') || 20),
+      Math.min(10, Number(c.req.query('maxResults') ?? '10') || 10),
     )
 
     const result = await searchMusic(tokenResult.data, query, {
