@@ -121,7 +121,11 @@ export async function searchMovies(
 
   const { total_results, results } = result.data
   const sliced = sliceResultsForOffset(results, startIndex, maxResults)
-  const mapped = sliced.map(mapMovieToSearchResult)
+
+  const directorNames = await fetchDirectorNames(apiKey, sliced, signal)
+  const mapped = sliced.map((movie, i) =>
+    mapMovieToSearchResult(movie, directorNames[i]),
+  )
 
   return {
     ok: true,
@@ -161,15 +165,52 @@ export async function getMovieById(
   return { ok: true, data: mapMovieDetailToSearchResult(result.data) }
 }
 
+// ── Director fetching ───────────────────────────────────────────────
+
+async function fetchDirectorName(
+  apiKey: string,
+  movieId: number,
+  signal?: AbortSignal,
+): Promise<string | undefined> {
+  const params = new URLSearchParams({
+    api_key: apiKey,
+    language: 'ja-JP',
+    append_to_response: 'credits',
+  })
+
+  const result = await fetchJson<TMDbMovieDetail>(
+    `${BASE_URL}/movie/${movieId}?${params.toString()}`,
+    { signal, validate: validateMovieDetail },
+  )
+
+  if (!result.ok) return undefined
+
+  const director = result.data.credits?.crew.find((c) => c.job === 'Director')
+  return director?.name
+}
+
+async function fetchDirectorNames(
+  apiKey: string,
+  movies: TMDbMovie[],
+  signal?: AbortSignal,
+): Promise<(string | undefined)[]> {
+  const results = await Promise.allSettled(
+    movies.map((movie) => fetchDirectorName(apiKey, movie.id, signal)),
+  )
+  return results.map((r) => (r.status === 'fulfilled' ? r.value : undefined))
+}
+
 // ── Mapping ─────────────────────────────────────────────────────────
 
-function mapMovieToSearchResult(movie: TMDbMovie): SearchResultItem {
-  const releaseYear = movie.release_date?.split('-')[0]
+function mapMovieToSearchResult(
+  movie: TMDbMovie,
+  directorName?: string,
+): SearchResultItem {
   return {
     id: String(movie.id),
     category: 'movie',
     title: movie.title || 'タイトル不明',
-    subtitle: releaseYear || '公開日不明',
+    subtitle: directorName ?? '監督不明',
     thumbnailUrl: movie.poster_path
       ? `${IMAGE_BASE_URL}${movie.poster_path}`
       : '',
