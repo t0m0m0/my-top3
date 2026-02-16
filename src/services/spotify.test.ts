@@ -44,6 +44,27 @@ describe('getAccessToken', () => {
     vi.resetModules()
   })
 
+  it('deduplicates concurrent token requests', async () => {
+    let tokenCallCount = 0
+    server.use(
+      http.post(TOKEN_URL, () => {
+        tokenCallCount++
+        return HttpResponse.json(mockTokenResponse())
+      }),
+    )
+    const { getAccessToken } = await import('./spotify')
+    // Call concurrently
+    const results = await Promise.all([
+      getAccessToken('client-id', 'client-secret'),
+      getAccessToken('client-id', 'client-secret'),
+      getAccessToken('client-id', 'client-secret'),
+    ])
+    // All should succeed
+    expect(results.every((r) => r.ok)).toBe(true)
+    // But only 1 actual HTTP request should have been made
+    expect(tokenCallCount).toBe(1)
+  })
+
   it('returns token on success', async () => {
     server.use(
       http.post(TOKEN_URL, () => HttpResponse.json(mockTokenResponse())),

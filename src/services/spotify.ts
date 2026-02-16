@@ -58,6 +58,7 @@ type SpotifyTokenResponse = {
 
 let cachedToken: string | null = null
 let tokenExpiresAt = 0
+let tokenPromise: Promise<Result<string>> | null = null
 
 export async function getAccessToken(
   clientId: string,
@@ -68,6 +69,21 @@ export async function getAccessToken(
     return { ok: true, data: cachedToken }
   }
 
+  if (tokenPromise) {
+    return tokenPromise
+  }
+
+  tokenPromise = fetchNewToken(clientId, clientSecret).finally(() => {
+    tokenPromise = null
+  })
+
+  return tokenPromise
+}
+
+async function fetchNewToken(
+  clientId: string,
+  clientSecret: string,
+): Promise<Result<string>> {
   const credentials = btoa(`${clientId}:${clientSecret}`)
 
   const result = await fetchJson<SpotifyTokenResponse>(TOKEN_URL, {
@@ -83,8 +99,7 @@ export async function getAccessToken(
   if (!result.ok) return result
 
   cachedToken = result.data.access_token
-  // Refresh 60 seconds before actual expiry
-  tokenExpiresAt = now + (result.data.expires_in - 60) * 1000
+  tokenExpiresAt = Date.now() + (result.data.expires_in - 60) * 1000
 
   return { ok: true, data: cachedToken }
 }
