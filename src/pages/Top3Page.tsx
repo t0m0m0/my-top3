@@ -122,27 +122,33 @@ function Top3Page() {
         )}
 
         <div className="mt-4 flex flex-col items-stretch gap-4 sm:mt-6 sm:flex-row">
-          <WorkCard
-            work={book.data}
-            loading={book.loading}
-            error={book.error}
-            label="BOOK"
-            onRetry={book.error ? book.retry : undefined}
-          />
-          <WorkCard
-            work={music.data}
-            loading={music.loading}
-            error={music.error}
-            label="MUSIC"
-            onRetry={music.error ? music.retry : undefined}
-          />
-          <WorkCard
-            work={movie.data}
-            loading={movie.loading}
-            error={movie.error}
-            label="MOVIE"
-            onRetry={movie.error ? movie.retry : undefined}
-          />
+          <div className="animate-fade-in-up flex-1">
+            <WorkCard
+              work={book.data}
+              loading={book.loading}
+              error={book.error}
+              label="BOOK"
+              onRetry={book.error ? book.retry : undefined}
+            />
+          </div>
+          <div className="animate-fade-in-up animate-delay-100 flex-1">
+            <WorkCard
+              work={music.data}
+              loading={music.loading}
+              error={music.error}
+              label="MUSIC"
+              onRetry={music.error ? music.retry : undefined}
+            />
+          </div>
+          <div className="animate-fade-in-up animate-delay-200 flex-1">
+            <WorkCard
+              work={movie.data}
+              loading={movie.loading}
+              error={movie.error}
+              label="MOVIE"
+              onRetry={movie.error ? movie.retry : undefined}
+            />
+          </div>
         </div>
 
         {showImage && (
