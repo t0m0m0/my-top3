@@ -53,6 +53,19 @@ describe('searchBooks', () => {
     }
   })
 
+  it('sends langRestrict=ja parameter', async () => {
+    let capturedUrl = ''
+    server.use(
+      http.get(BOOKS_API, ({ request }) => {
+        capturedUrl = request.url
+        return HttpResponse.json(mockSearchResponse([mockVolume()], 1))
+      }),
+    )
+    await searchBooks('key', 'test')
+    const url = new URL(capturedUrl)
+    expect(url.searchParams.get('langRestrict')).toBe('ja')
+  })
+
   it('upgrades HTTP thumbnails to HTTPS', async () => {
     server.use(
       http.get(BOOKS_API, () =>

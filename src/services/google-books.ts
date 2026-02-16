@@ -88,6 +88,7 @@ export async function searchBooks(
     q: trimmed,
     startIndex: String(startIndex),
     maxResults: String(maxResults),
+    langRestrict: 'ja',
     key: apiKey,
   })
 
