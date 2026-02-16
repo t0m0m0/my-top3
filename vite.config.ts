@@ -3,10 +3,22 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import devServer from '@hono/vite-dev-server'
 
-// https://vite.dev/config/
+const API_ENV_KEYS = [
+  'GOOGLE_BOOKS_API_KEY',
+  'SPOTIFY_CLIENT_ID',
+  'SPOTIFY_CLIENT_SECRET',
+  'TMDB_API_KEY',
+] as const
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  Object.assign(process.env, env)
+
+  // Only set the specific API keys needed by the dev server
+  for (const key of API_ENV_KEYS) {
+    if (env[key]) {
+      process.env[key] = env[key]
+    }
+  }
 
   return {
     server: {
