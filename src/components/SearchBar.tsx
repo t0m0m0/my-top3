@@ -35,9 +35,7 @@ export default function SearchBar({
               <InputAdornment position="start">
                 <SearchIcon
                   sx={{
-                    color: focused
-                      ? 'var(--color-primary)'
-                      : 'action.active',
+                    color: focused ? 'var(--color-primary)' : 'action.active',
                     transition: 'color 0.2s ease',
                   }}
                 />
@@ -63,7 +61,8 @@ export default function SearchBar({
             borderRadius: '12px',
             transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
             '&.Mui-focused': {
-              boxShadow: '0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent)',
+              boxShadow:
+                '0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent)',
             },
           },
         }}

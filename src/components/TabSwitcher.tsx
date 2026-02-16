@@ -8,7 +8,11 @@ import type { ReactElement } from 'react'
 
 const TABS: { label: string; value: MediaCategory; icon: ReactElement }[] = [
   { label: 'Book', value: 'book', icon: <MenuBookOutlined fontSize="small" /> },
-  { label: 'Music', value: 'music', icon: <MusicNoteOutlined fontSize="small" /> },
+  {
+    label: 'Music',
+    value: 'music',
+    icon: <MusicNoteOutlined fontSize="small" />,
+  },
   { label: 'Movie', value: 'movie', icon: <MovieOutlined fontSize="small" /> },
 ]
 

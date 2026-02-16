@@ -67,13 +67,16 @@ export default function SearchHistory({
             onDelete={() => removeHistory(keyword)}
             sx={{
               borderRadius: '8px',
-              backgroundColor: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+              backgroundColor:
+                'color-mix(in srgb, var(--color-primary) 8%, transparent)',
               color: 'var(--color-text-primary)',
               fontWeight: 500,
               border: '1px solid',
-              borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+              borderColor:
+                'color-mix(in srgb, var(--color-primary) 20%, transparent)',
               '&:hover': {
-                backgroundColor: 'color-mix(in srgb, var(--color-primary) 16%, transparent)',
+                backgroundColor:
+                  'color-mix(in srgb, var(--color-primary) 16%, transparent)',
               },
               '& .MuiChip-deleteIcon': {
                 color: 'var(--color-text-secondary)',
