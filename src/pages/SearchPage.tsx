@@ -82,58 +82,86 @@ function SearchPage() {
     <div
       className="min-h-screen"
       style={{
-        background: 'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+        background:
+          'linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)',
       }}
     >
-      <div className="mx-auto max-w-3xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
+      {/* Hero Section */}
+      <div className="px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
         <h1
-          className="text-xl font-extrabold sm:text-2xl"
+          className="text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
             fontFamily: 'var(--font-display)',
-            color: 'var(--color-primary-dark)',
+            color: '#fff',
           }}
         >
           My Top 3
         </h1>
         <p
-          className="mt-1 text-sm sm:mt-2 sm:text-base"
-          style={{ color: 'var(--color-text-secondary)' }}
+          className="mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
+          style={{ color: 'rgba(255,255,255,0.8)' }}
         >
           テーマを決めて、お気に入りの3作品を選ぼう
         </p>
+      </div>
 
-        {/* Theme Input Area */}
-        <div className="mt-6">
+      <div className="mx-auto max-w-3xl px-3 sm:px-4">
+        {/* Theme Input Section */}
+        <div
+          className="rounded-xl p-4 shadow-sm sm:p-5"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
           <ThemeInput value={theme} onChange={setTheme} />
           <ThemeHistory onSelect={handleThemeHistorySelect} />
         </div>
 
-        {/* Selection Area */}
-        <div className="mt-4">
+        {/* Selection Area - Sticky */}
+        <div
+          className="sticky z-30 -mx-3 mt-5 px-3 pb-3 pt-2 sm:-mx-4 sm:px-4"
+          style={{
+            top: 0,
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            backgroundColor: 'rgba(255,255,255,0.75)',
+          }}
+        >
           <SelectionArea theme={theme} onBeforeCreate={handleBeforeCreate} />
         </div>
 
-        {/* Tab Switcher */}
-        <TabSwitcher value={activeTab} onChange={setActiveTab} />
+        {/* Search Section Card */}
+        <div
+          className="mt-4 rounded-xl p-4 shadow-sm sm:p-5"
+          style={{
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          <TabSwitcher value={activeTab} onChange={setActiveTab} />
+          <SearchBar value={currentQuery} onChange={handleQueryChange} />
 
-        {/* Search Bar */}
-        <SearchBar value={currentQuery} onChange={handleQueryChange} />
+          {!currentQuery.trim() && (
+            <SearchHistory
+              category={activeTab}
+              onSearch={handleHistorySearch}
+            />
+          )}
 
-        {/* Search History (shown when search bar is empty) */}
-        {!currentQuery.trim() && (
-          <SearchHistory category={activeTab} onSearch={handleHistorySearch} />
-        )}
+          <SearchResults
+            results={results}
+            isLoading={isLoading}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            onSelect={handleSelect}
+            query={debouncedQuery}
+            error={error}
+          />
+        </div>
 
-        {/* Search Results */}
-        <SearchResults
-          results={results}
-          isLoading={isLoading}
-          hasMore={hasMore}
-          onLoadMore={loadMore}
-          onSelect={handleSelect}
-          query={debouncedQuery}
-          error={error}
-        />
+        {/* Bottom spacer */}
+        <div className="h-8 sm:h-12" />
       </div>
     </div>
   )
