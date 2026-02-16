@@ -1,11 +1,3 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { MediaCategory, SearchResultItem } from '../types/common'
-import { useDebounce } from '../hooks/useDebounce'
-import { useSearch } from '../hooks/useSearch'
-import { useSearchHistory } from '../hooks/useSearchHistory'
-import { useThemeHistory } from '../hooks/useThemeHistory'
-import { useTheme } from '../hooks/useTheme'
-import { useSelection } from '../hooks/useSelection'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
 import SearchHistory from '../components/SearchHistory'
@@ -13,91 +5,29 @@ import SearchResults from '../components/SearchResults'
 import ThemeInput from '../components/ThemeInput'
 import ThemeHistory from '../components/ThemeHistory'
 import SelectionArea from '../components/SelectionArea'
-
-type QueryState = Record<MediaCategory, string>
-
-const INITIAL_QUERIES: QueryState = {
-  book: '',
-  music: '',
-  movie: '',
-}
+import { useSearchPage } from '../hooks/useSearchPage'
 
 function SearchPage() {
-  const [activeTab, setActiveTab] = useState<MediaCategory>('book')
-  const [queries, setQueries] = useState<QueryState>(INITIAL_QUERIES)
-  const { theme, setTheme } = useTheme()
-  const { selectItem } = useSelection()
-  const { addHistory: addThemeHistory } = useThemeHistory()
-
-  const currentQuery = queries[activeTab]
-  const debouncedQuery = useDebounce(currentQuery, 300)
-
-  const { results, isLoading, error, loadMore, hasMore } = useSearch(
+  const {
     activeTab,
+    setActiveTab,
+    currentQuery,
     debouncedQuery,
-  )
-
-  const { addHistory } = useSearchHistory(activeTab)
-  const prevDebouncedQueryRef = useRef(debouncedQuery)
-
-  useEffect(() => {
-    if (
-      debouncedQuery.trim() &&
-      debouncedQuery !== prevDebouncedQueryRef.current
-    ) {
-      addHistory(debouncedQuery.trim())
-    }
-    prevDebouncedQueryRef.current = debouncedQuery
-  }, [debouncedQuery, addHistory])
-
-  const handleQueryChange = useCallback(
-    (value: string) => {
-      setQueries((prev) => ({ ...prev, [activeTab]: value }))
-    },
-    [activeTab],
-  )
-
-  const handleHistorySearch = useCallback(
-    (keyword: string) => {
-      setQueries((prev) => ({ ...prev, [activeTab]: keyword }))
-    },
-    [activeTab],
-  )
-
-  const handleSelect = useCallback(
-    (item: SearchResultItem) => {
-      selectItem(item)
-    },
-    [selectItem],
-  )
-
-  const handleThemeHistorySelect = useCallback(
-    (selectedTheme: string) => {
-      setTheme(selectedTheme)
-    },
-    [setTheme],
-  )
-
-  const [selectionComplete, setSelectionComplete] = useState(false)
-
-  const handleBeforeCreate = useCallback(() => {
-    addThemeHistory(theme)
-  }, [theme, addThemeHistory])
-
-  const handleCompleteChange = useCallback((complete: boolean) => {
-    setSelectionComplete(complete)
-  }, [])
-
-  const mainStyle = useMemo(
-    () => ({
-      background:
-        'linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)',
-      paddingBottom: selectionComplete
-        ? 'calc(72px + env(safe-area-inset-bottom))'
-        : undefined,
-    }),
-    [selectionComplete],
-  )
+    theme,
+    setTheme,
+    results,
+    isLoading,
+    error,
+    loadMore,
+    hasMore,
+    handleQueryChange,
+    handleHistorySearch,
+    handleSelect,
+    handleThemeHistorySelect,
+    handleBeforeCreate,
+    handleCompleteChange,
+    mainStyle,
+  } = useSearchPage()
 
   return (
     <div className="min-h-screen" style={mainStyle}>
