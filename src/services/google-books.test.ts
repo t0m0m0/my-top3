@@ -94,9 +94,7 @@ describe('searchBooks', () => {
         callCount++
         if (callCount === 1) {
           // intitle returns vol1 and vol2WithId
-          return HttpResponse.json(
-            mockSearchResponse([vol1, vol2WithId], 2),
-          )
+          return HttpResponse.json(mockSearchResponse([vol1, vol2WithId], 2))
         }
         // inauthor returns vol1 (duplicate)
         return HttpResponse.json(mockSearchResponse([vol1], 1))
