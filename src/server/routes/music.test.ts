@@ -57,6 +57,12 @@ describe('music routes', () => {
       expect(body.ok).toBe(true)
     })
 
+    it('returns 400 for too long query', async () => {
+      const longQuery = 'a'.repeat(201)
+      const res = await musicApp.request(`/search?q=${longQuery}`)
+      expect(res.status).toBe(400)
+    })
+
     it('returns error when token fetch fails', async () => {
       mockGetAccessToken.mockResolvedValue({
         ok: false,
