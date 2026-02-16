@@ -5,6 +5,10 @@ import {
   searchMusic,
   getMusicById,
 } from '../../services/spotify.ts'
+import {
+  validateSearchQuery,
+  clampStartIndex,
+} from '../middleware/validate-search.ts'
 
 const app = new Hono()
 
@@ -46,10 +50,14 @@ app.get('/search', async (c) => {
     }
 
     const query = c.req.query('q') ?? ''
-    const startIndex = Math.max(
-      0,
-      Number(c.req.query('startIndex') ?? '0') || 0,
-    )
+    const queryError = validateSearchQuery(query)
+    if (queryError) {
+      return c.json(
+        { ok: false, error: { kind: 'unknown', message: queryError } },
+        400,
+      )
+    }
+    const startIndex = clampStartIndex(c.req.query('startIndex') ?? '0')
     const maxResults = Math.max(
       1,
       Math.min(10, Number(c.req.query('maxResults') ?? '10') || 10),

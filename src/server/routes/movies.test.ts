@@ -49,6 +49,12 @@ describe('movies routes', () => {
       expect(body.ok).toBe(true)
     })
 
+    it('returns 400 for too long query', async () => {
+      const longQuery = 'a'.repeat(201)
+      const res = await moviesApp.request(`/search?q=${longQuery}`)
+      expect(res.status).toBe(400)
+    })
+
     it('returns error status on service failure', async () => {
       mockSearchMovies.mockResolvedValue({
         ok: false,

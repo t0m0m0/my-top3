@@ -65,6 +65,12 @@ describe('books routes', () => {
       expect(res.status).toBe(429)
     })
 
+    it('returns 400 for too long query', async () => {
+      const longQuery = 'a'.repeat(201)
+      const res = await booksApp.request(`/search?q=${longQuery}`)
+      expect(res.status).toBe(400)
+    })
+
     it('clamps maxResults between 1-40', async () => {
       mockSearchBooks.mockResolvedValue({
         ok: true,
