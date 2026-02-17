@@ -197,12 +197,12 @@ function buildExternalUrl(
 ): string {
   const isbn10 = identifiers?.find((id) => id.type === 'ISBN_10')
   if (isbn10) {
-    return `https://www.amazon.co.jp/dp/${isbn10.identifier}`
+    return `https://www.amazon.co.jp/dp/${isbn10.identifier}?tag=yuaioiaiu-22`
   }
 
   const isbn13 = identifiers?.find((id) => id.type === 'ISBN_13')
   if (isbn13) {
-    return `https://www.amazon.co.jp/dp/${isbn13.identifier}`
+    return `https://www.amazon.co.jp/dp/${isbn13.identifier}?tag=yuaioiaiu-22`
   }
 
   return `https://books.google.co.jp/books?id=${encodeURIComponent(volumeId)}`
