@@ -45,88 +45,99 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
       {/* Capture target */}
       <div ref={containerRef} style={{ overflow: 'hidden', maxWidth: '100%' }}>
         <div
-          ref={captureRef}
-          data-testid="top3-image-capture"
           style={{
-            width: IMAGE_SIZE,
-            height: IMAGE_SIZE,
-            background: '#0a0a0f',
-            position: 'relative',
+            width: IMAGE_SIZE * scale,
+            height: IMAGE_SIZE * scale,
+            margin: '0 auto',
             overflow: 'hidden',
-            fontFamily:
-              '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
-            transformOrigin: 'top left',
-            transform: `scale(${scale})`,
-            marginBottom: -IMAGE_SIZE * (1 - scale),
           }}
         >
-          <ImageSlot
-            item={items[layout.top]}
-            category={layout.top}
-            slot="top"
-            theme={theme}
-          />
-
-          {/* Horizontal separator */}
           <div
+            ref={captureRef}
+            data-testid="top3-image-capture"
             style={{
-              position: 'absolute',
-              top: HALF,
-              left: 0,
-              right: 0,
-              height: SEP,
-              background: 'rgba(255,255,255,0.06)',
-              zIndex: 10,
-            }}
-          />
-
-          <ImageSlot
-            item={items[layout['bottom-left']]}
-            category={layout['bottom-left']}
-            slot="bottom-left"
-          />
-
-          {/* Vertical separator */}
-          <div
-            style={{
-              position: 'absolute',
-              top: HALF + SEP,
-              left: HALF - SEP / 2,
-              width: SEP,
-              height: HALF - SEP,
-              background: 'rgba(255,255,255,0.06)',
-              zIndex: 10,
-            }}
-          />
-
-          <ImageSlot
-            item={items[layout['bottom-right']]}
-            category={layout['bottom-right']}
-            slot="bottom-right"
-          />
-
-          {/* Branding */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 8,
-              left: 0,
-              right: 0,
-              textAlign: 'center',
-              zIndex: 20,
+              width: IMAGE_SIZE,
+              height: IMAGE_SIZE,
+              background: '#0a0a0f',
+              position: 'relative',
+              overflow: 'hidden',
+              fontFamily:
+                '"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", sans-serif',
+              transformOrigin: 'top left',
+              transform: `scale(${scale})`,
             }}
           >
-            <span
+            {/* Top slot */}
+            <ImageSlot
+              item={items[layout.top]}
+              category={layout.top}
+              slot="top"
+              theme={theme}
+            />
+
+            {/* Horizontal separator */}
+            <div
               style={{
-                fontSize: 11,
-                color: 'rgba(255,255,255,0.18)',
-                letterSpacing: 3,
-                fontWeight: 500,
-                textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                position: 'absolute',
+                top: HALF,
+                left: 0,
+                right: 0,
+                height: SEP,
+                background: 'rgba(255,255,255,0.06)',
+                zIndex: 10,
+              }}
+            />
+
+            {/* Bottom-left slot */}
+            <ImageSlot
+              item={items[layout['bottom-left']]}
+              category={layout['bottom-left']}
+              slot="bottom-left"
+            />
+
+            {/* Vertical separator */}
+            <div
+              style={{
+                position: 'absolute',
+                top: HALF + SEP,
+                left: HALF - SEP / 2,
+                width: SEP,
+                height: HALF - SEP,
+                background: 'rgba(255,255,255,0.06)',
+                zIndex: 10,
+              }}
+            />
+
+            {/* Bottom-right slot */}
+            <ImageSlot
+              item={items[layout['bottom-right']]}
+              category={layout['bottom-right']}
+              slot="bottom-right"
+            />
+
+            {/* Branding */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 8,
+                left: 0,
+                right: 0,
+                textAlign: 'center',
+                zIndex: 20,
               }}
             >
-              my-no1s.app
-            </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.18)',
+                  letterSpacing: 3,
+                  fontWeight: 500,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                }}
+              >
+                my-no1s.app
+              </span>
+            </div>
           </div>
         </div>
       </div>
