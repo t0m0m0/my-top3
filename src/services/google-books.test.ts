@@ -130,7 +130,7 @@ describe('searchBooks', () => {
     const result = await searchBooks('key', 'test')
     if (result.ok) {
       expect(result.data.items[0].externalUrl).toBe(
-        'https://www.amazon.co.jp/dp/1234567890',
+        'https://www.amazon.co.jp/dp/1234567890?tag=yuaioiaiu-22',
       )
     }
   })
