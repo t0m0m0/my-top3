@@ -20,45 +20,52 @@ type SelectionAreaProps = {
   theme: string
   onBeforeCreate?: () => void
   onCompleteChange?: (isComplete: boolean) => void
+  onSlotClick?: (category: MediaCategory) => void
 }
 
 function SlotCard({
   category,
   item,
   onDeselect,
+  onSlotClick,
 }: {
   category: MediaCategory
   item: SearchResultItem | null
   onDeselect: (category: MediaCategory) => void
+  onSlotClick?: (category: MediaCategory) => void
 }) {
   if (!item) {
     return (
-      <div
-        className="gradient-border-slot flex h-20 flex-1 flex-col items-center justify-center rounded-xl p-2 transition-all sm:h-28"
+      <button
+        type="button"
+        className="gradient-border-slot flex h-20 flex-1 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-2 transition-all hover:opacity-80 sm:h-28"
         style={{
           backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)',
         }}
+        onClick={() => onSlotClick?.(category)}
+        aria-label={`${CATEGORY_LABELS_EN[category]}を選ぶ`}
       >
         <span
-          className="pointer-events-none select-none text-2xl opacity-15 sm:text-3xl"
+          className="pointer-events-none select-none text-2xl sm:text-3xl"
+          style={{ opacity: 0.3 }}
           aria-hidden="true"
         >
           {CATEGORY_ICONS[category]}
         </span>
-        <Typography
-          variant="caption"
-          sx={{ fontSize: '0.75rem', fontWeight: 600 }}
+        <span
+          className="text-xs font-semibold"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           {CATEGORY_LABELS_EN[category]}
-        </Typography>
-        <Typography
-          variant="caption"
+        </span>
+        <span
+          className="text-xs"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           未選択
-        </Typography>
-      </div>
+        </span>
+      </button>
     )
   }
 
@@ -118,6 +125,7 @@ function SelectionArea({
   theme,
   onBeforeCreate,
   onCompleteChange,
+  onSlotClick,
 }: SelectionAreaProps) {
   const { selection, deselectItem, isComplete } = useSelection()
   const navigate = useNavigate()
@@ -159,16 +167,19 @@ function SelectionArea({
           category="book"
           item={selection.book}
           onDeselect={deselectItem}
+          onSlotClick={onSlotClick}
         />
         <SlotCard
           category="music"
           item={selection.music}
           onDeselect={deselectItem}
+          onSlotClick={onSlotClick}
         />
         <SlotCard
           category="movie"
           item={selection.movie}
           onDeselect={deselectItem}
+          onSlotClick={onSlotClick}
         />
       </div>
       {isComplete && (

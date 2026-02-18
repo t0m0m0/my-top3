@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '../test/test-utils'
+import userEvent from '@testing-library/user-event'
 import SelectionArea from './SelectionArea'
 
 describe('SelectionArea', () => {
@@ -21,4 +22,13 @@ describe('SelectionArea', () => {
     )
     expect(slotContainer).toBeInTheDocument()
   })
+})
+
+it('calls onSlotClick with category when empty slot is clicked', async () => {
+  const user = userEvent.setup()
+  const onSlotClick = vi.fn()
+  render(<SelectionArea theme="" onSlotClick={onSlotClick} />)
+  const bookSlot = screen.getByRole('button', { name: /Book.*選ぶ/ })
+  await user.click(bookSlot)
+  expect(onSlotClick).toHaveBeenCalledWith('book')
 })

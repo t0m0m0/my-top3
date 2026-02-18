@@ -24,15 +24,20 @@ describe('SearchResults', () => {
     query: '',
   }
 
-  it('shows prompt when query is empty', () => {
+  it('shows emotional prompt with emoji when query is empty', () => {
     render(<SearchResults {...defaultProps} query="" />)
-    expect(screen.getByText('作品名を検索してください')).toBeInTheDocument()
+    expect(
+      screen.getByText('お気に入りの作品を検索してみよう'),
+    ).toBeInTheDocument()
   })
 
-  it('shows no results message', () => {
+  it('shows no results with suggestion message', () => {
     render(<SearchResults {...defaultProps} query="test" />)
     expect(
       screen.getByText('検索結果が見つかりませんでした'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('別のキーワードで試してみよう 🔍'),
     ).toBeInTheDocument()
   })
 

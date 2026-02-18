@@ -103,6 +103,7 @@ function SearchPage() {
             theme={theme}
             onBeforeCreate={handleBeforeCreate}
             onCompleteChange={handleCompleteChange}
+            onSlotClick={setActiveTab}
           />
         </div>
 
