@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { CATEGORY_LABELS_JA, API_ENDPOINTS } from '../constants/category'
+import { MESSAGES } from '../constants/messages'
 
 type WorkState = {
   data: SearchResultItem | null
@@ -15,14 +16,12 @@ async function fetchWork(
   const response = await fetch(`${API_ENDPOINTS[category]}/${id}`)
   if (!response.ok) {
     if (response.status === 404) {
-      throw new Error(
-        `${CATEGORY_LABELS_JA[category]}が見つかりませんでした (ID: ${id})`,
-      )
+      throw new Error(MESSAGES.NOT_FOUND(CATEGORY_LABELS_JA[category], id))
     }
     if (response.status === 429) {
-      throw new Error('しばらく時間をおいて再度お試しください')
+      throw new Error(MESSAGES.RATE_LIMITED)
     }
-    throw new Error(`${CATEGORY_LABELS_JA[category]}の取得に失敗しました`)
+    throw new Error(MESSAGES.FETCH_FAILED(CATEGORY_LABELS_JA[category]))
   }
 
   const result = await response.json()
@@ -31,7 +30,7 @@ async function fetchWork(
   if (!result.ok) {
     throw new Error(
       result.error?.message ??
-        `${CATEGORY_LABELS_JA[category]}の取得に失敗しました`,
+        MESSAGES.FETCH_FAILED(CATEGORY_LABELS_JA[category]),
     )
   }
 
@@ -65,7 +64,7 @@ export function useWorkFetch(category: MediaCategory, id: string) {
             error:
               err instanceof Error
                 ? err.message
-                : `${CATEGORY_LABELS_JA[category]}の取得に失敗しました`,
+                : MESSAGES.FETCH_FAILED(CATEGORY_LABELS_JA[category]),
           })
         }
       })

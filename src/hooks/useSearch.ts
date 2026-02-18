@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { MediaCategory, SearchResultItem } from '../types/common'
+import { MESSAGES } from '../constants/messages'
 
 const MAX_RESULTS = 20
 
@@ -69,7 +70,7 @@ export function useSearch(
 
         if (!response.ok) {
           if (response.status === 429) {
-            throw new Error('しばらく時間をおいて再度お試しください')
+            throw new Error(MESSAGES.RATE_LIMITED)
           }
           throw new Error(`HTTP ${response.status}`)
         }
