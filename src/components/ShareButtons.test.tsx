@@ -119,7 +119,7 @@ describe('ShareButtons', () => {
       expect(screen.queryByLabelText('シェア')).not.toBeInTheDocument()
     })
 
-    it('shares text and URL without image when captureRef is not provided', async () => {
+    it('shares text and URL with theme', async () => {
       const shareMock = vi.fn().mockResolvedValue(undefined)
       Object.assign(navigator, { share: shareMock })
 
@@ -129,7 +129,23 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: 'My No.1s 「雨の日に」 #MyNo1s',
+          text: '「雨の日に」 #MyNo1s',
+          url: window.location.href,
+        })
+      })
+    })
+
+    it('shares text and URL without theme', async () => {
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByLabelText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith({
+          title: 'My No.1s',
+          text: '#MyNo1s',
           url: window.location.href,
         })
       })
@@ -152,7 +168,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            text: 'My No.1s 「テスト」 #MyNo1s',
+            text: '「テスト」 #MyNo1s',
             url: window.location.href,
             files: expect.arrayContaining([expect.any(File)]),
           }),
@@ -204,7 +220,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: 'My No.1s 「テスト」 #MyNo1s',
+          text: '「テスト」 #MyNo1s',
           url: window.location.href,
         })
       })
@@ -224,7 +240,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: 'My No.1s 「テスト」 #MyNo1s',
+          text: '「テスト」 #MyNo1s',
           url: window.location.href,
         })
       })

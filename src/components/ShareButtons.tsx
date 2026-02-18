@@ -15,8 +15,7 @@ type ShareButtonsProps = {
 }
 
 function buildShareText(theme?: string): string {
-  const base = theme ? `My No.1s 「${theme}」` : 'My No.1s'
-  return `${base} #MyNo1s`
+  return theme ? `「${theme}」 #MyNo1s` : '#MyNo1s'
 }
 
 export default function ShareButtons({
