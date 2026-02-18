@@ -5,7 +5,7 @@ vi.mock('../services/google-books.ts', () => ({
   searchBooks: vi.fn(),
   getBookById: vi.fn(),
 }))
-vi.mock('../services/spotify.ts', () => ({
+vi.mock('../services/lastfm.ts', () => ({
   searchMusic: vi.fn(),
   getMusicById: vi.fn(),
 }))

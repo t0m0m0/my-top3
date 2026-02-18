@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 export const ALLOWED_HOSTS = [
   'books.google.com',
   'books.googleusercontent.com',
-  'i.scdn.co',
+  'lastfm.freetls.fastly.net',
   'image.tmdb.org',
 ] as const
 

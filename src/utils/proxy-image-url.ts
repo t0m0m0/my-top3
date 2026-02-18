@@ -1,7 +1,7 @@
 const PROXY_HOSTS = new Set([
   'books.google.com',
   'books.googleusercontent.com',
-  'i.scdn.co',
+  'lastfm.freetls.fastly.net',
   'image.tmdb.org',
 ])
 

@@ -9,8 +9,8 @@ describe('proxyImageUrl', () => {
     )
   })
 
-  it('converts a Spotify CDN URL to proxy URL', () => {
-    const url = 'https://i.scdn.co/image/abc123'
+  it('converts a Last.fm CDN URL to proxy URL', () => {
+    const url = 'https://lastfm.freetls.fastly.net/i/u/300x300/abc123.jpg'
     expect(proxyImageUrl(url)).toBe(
       `/api/image/proxy?url=${encodeURIComponent(url)}`,
     )
@@ -49,7 +49,7 @@ describe('proxyImageUrl', () => {
   })
 
   it('returns http:// URLs unchanged (only https is proxied)', () => {
-    const url = 'http://i.scdn.co/image/abc'
+    const url = 'http://lastfm.freetls.fastly.net/i/u/300x300/abc.jpg'
     expect(proxyImageUrl(url)).toBe(url)
   })
 })

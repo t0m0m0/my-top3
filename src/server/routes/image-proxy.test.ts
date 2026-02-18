@@ -73,7 +73,7 @@ describe('image-proxy route', () => {
         }),
       )
 
-      const url = 'https://i.scdn.co/image/abc123'
+      const url = 'https://lastfm.freetls.fastly.net/image/abc123'
       const res = await imageProxyApp.request(
         `/proxy?url=${encodeURIComponent(url)}`,
       )
@@ -106,7 +106,7 @@ describe('image-proxy route', () => {
         .fn()
         .mockResolvedValue(new Response('Not Found', { status: 404 }))
 
-      const url = 'https://i.scdn.co/image/missing'
+      const url = 'https://lastfm.freetls.fastly.net/image/missing'
       const res = await imageProxyApp.request(
         `/proxy?url=${encodeURIComponent(url)}`,
       )
@@ -119,7 +119,7 @@ describe('image-proxy route', () => {
     it('returns 502 when upstream fetch fails', async () => {
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('network error'))
 
-      const url = 'https://i.scdn.co/image/abc'
+      const url = 'https://lastfm.freetls.fastly.net/image/abc'
       const res = await imageProxyApp.request(
         `/proxy?url=${encodeURIComponent(url)}`,
       )
@@ -129,7 +129,7 @@ describe('image-proxy route', () => {
 
     it('returns 403 for non-https URLs', async () => {
       const res = await imageProxyApp.request(
-        '/proxy?url=http://i.scdn.co/image/abc',
+        '/proxy?url=http://lastfm.freetls.fastly.net/image/abc',
       )
       expect(res.status).toBe(403)
     })
@@ -142,7 +142,7 @@ describe('image-proxy route', () => {
         }),
       )
 
-      const url = 'https://i.scdn.co/image/abc'
+      const url = 'https://lastfm.freetls.fastly.net/image/abc'
       const res = await imageProxyApp.request(
         `/proxy?url=${encodeURIComponent(url)}`,
       )
@@ -157,8 +157,8 @@ describe('image-proxy route', () => {
       expect(ALLOWED_HOSTS).toContain('books.googleusercontent.com')
     })
 
-    it('includes Spotify CDN', () => {
-      expect(ALLOWED_HOSTS).toContain('i.scdn.co')
+    it('includes Last.fm CDN', () => {
+      expect(ALLOWED_HOSTS).toContain('lastfm.freetls.fastly.net')
     })
 
     it('includes TMDB CDN', () => {
