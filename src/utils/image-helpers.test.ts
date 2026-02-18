@@ -11,7 +11,7 @@ describe('generateImageBlob', () => {
   it('returns a PNG Blob from the given element', async () => {
     const fakeBlob = new Blob(['fake'], { type: 'image/png' })
     const fakeCanvas = document.createElement('canvas')
-    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb) => {
+    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb: BlobCallback) => {
       cb(fakeBlob)
     })
     vi.mocked(html2canvas).mockResolvedValue(fakeCanvas)
@@ -34,7 +34,7 @@ describe('generateImageBlob', () => {
     fakeCanvas.width = 0
     fakeCanvas.height = 0
     // toBlob with 0-size canvas returns null
-    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb) => {
+    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb: BlobCallback) => {
       cb(null)
     })
     vi.mocked(html2canvas).mockResolvedValue(fakeCanvas)

@@ -41,13 +41,13 @@ function Top3Image({
   // Use a callback ref to sync both internal and external refs
   const captureRefCallback = React.useCallback(
     (node: HTMLDivElement | null) => {
-      ;(
+      const mutableInternalRef =
         internalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
-      ).current = node
+      mutableInternalRef.current = node
       if (externalCaptureRef && 'current' in externalCaptureRef) {
-        ;(
+        const mutableExternalRef =
           externalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
-        ).current = node
+        mutableExternalRef.current = node
       }
     },
     [internalCaptureRef, externalCaptureRef],

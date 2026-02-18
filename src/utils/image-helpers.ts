@@ -15,7 +15,7 @@ export async function generateImageBlob(element: HTMLElement): Promise<Blob> {
   })
 
   return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((blob) => {
+    canvas.toBlob((blob: Blob | null) => {
       if (!blob) {
         reject(new Error('画像の生成に失敗しました。画像データが空です。'))
         return

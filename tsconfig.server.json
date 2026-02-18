@@ -22,5 +22,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/server", "src/services", "src/types", "src/utils"]
+  "include": ["src/server", "src/services", "src/types", "src/utils"],
+  "exclude": ["src/utils/image-helpers.ts", "src/utils/image-helpers.test.ts", "src/utils/url-params.ts", "src/utils/url-params.test.ts"]
 }
