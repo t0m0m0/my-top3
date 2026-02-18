@@ -1,4 +1,5 @@
 import type { SearchResultItem } from '../types/common'
+import { proxyImageUrl } from '../utils/proxy-image-url'
 
 export type ImageWorkCardProps = {
   item: SearchResultItem | null
@@ -94,7 +95,7 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
 
       {/* Thumbnail with enhanced shadow */}
       <img
-        src={item.thumbnailUrl}
+        src={proxyImageUrl(item.thumbnailUrl)}
         alt={item.title}
         crossOrigin="anonymous"
         onError={(e) => {

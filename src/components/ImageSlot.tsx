@@ -7,6 +7,7 @@ import {
   NO_IMAGE_SRC,
   SLOT_STYLES,
 } from '../constants/image-layout'
+import { proxyImageUrl } from '../utils/proxy-image-url'
 
 export type ImageSlotProps = {
   item: SearchResultItem | null
@@ -69,8 +70,9 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
     >
       {/* Full-bleed thumbnail */}
       <img
-        src={item.thumbnailUrl}
+        src={proxyImageUrl(item.thumbnailUrl)}
         alt={item.title}
+        crossOrigin="anonymous"
         onError={(e) => {
           const img = e.target as HTMLImageElement
           if (img.src !== NO_IMAGE_SRC) {

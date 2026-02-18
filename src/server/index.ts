@@ -4,6 +4,7 @@ import { rateLimiter } from './middleware/rate-limiter.ts'
 import { booksApp } from './routes/books.ts'
 import { musicApp } from './routes/music.ts'
 import { moviesApp } from './routes/movies.ts'
+import { imageProxyApp } from './routes/image-proxy.ts'
 
 if (!process.env['GOOGLE_BOOKS_API_KEY']) {
   console.warn(
@@ -45,5 +46,6 @@ app.use('/api/*', rateLimiter({ windowMs: 60_000, max: 60 }))
 app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)
 app.route('/api/movies', moviesApp)
+app.route('/api/image', imageProxyApp)
 
 export default app
