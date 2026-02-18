@@ -5,7 +5,6 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import XIcon from '@mui/icons-material/X'
 import ShareIcon from '@mui/icons-material/Share'
 import { generateImageBlob } from '../utils/image-helpers'
 
@@ -20,16 +19,6 @@ function buildShareText(theme?: string): string {
   return `${base} #MyNo1s`
 }
 
-function openXIntent(theme?: string) {
-  const url = window.location.href
-  const text = buildShareText(theme)
-  const intentUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
-  const newWindow = window.open(intentUrl, '_blank', 'noopener,noreferrer')
-  if (!newWindow) {
-    window.location.href = intentUrl
-  }
-}
-
 export default function ShareButtons({
   theme,
   captureRef,
@@ -38,21 +27,11 @@ export default function ShareButtons({
   const [copied, setCopied] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
   const [shareFailed, setShareFailed] = useState(false)
-  const [xShareGenerating, setXShareGenerating] = useState(false)
-  const [imageDownloaded, setImageDownloaded] = useState(false)
-  const [imageGenError, setImageGenError] = useState(false)
+  const [shareGenerating, setShareGenerating] = useState(false)
 
   const handleCloseSuccess = useCallback(() => setCopied(false), [])
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
-  const handleCloseImageDownloaded = useCallback(
-    () => setImageDownloaded(false),
-    [],
-  )
-  const handleCloseImageGenError = useCallback(
-    () => setImageGenError(false),
-    [],
-  )
 
   const handleCopyUrl = useCallback(async () => {
     try {
@@ -81,56 +60,29 @@ export default function ShareButtons({
     }
   }, [])
 
-  const handleShareX = useCallback(async () => {
-    // No captureRef: text-only X intent
-    if (!captureRef?.current) {
-      openXIntent(theme)
-      return
-    }
-
-    setXShareGenerating(true)
-    try {
-      const blob =
-        preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
-
-      const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
-
-      // Try Web Share API with files (mobile: opens OS share sheet with image)
-      if (
-        typeof navigator !== 'undefined' &&
-        typeof navigator.canShare === 'function' &&
-        navigator.canShare({ files: [file] })
-      ) {
-        await navigator.share({
-          text: buildShareText(theme),
-          files: [file],
-        })
-        return
-      }
-
-      // Fallback: download image + open X intent (desktop)
-      const dataUrl = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.download = 'my-no1s.png'
-      link.href = dataUrl
-      link.click()
-      URL.revokeObjectURL(dataUrl)
-
-      openXIntent(theme)
-      setImageDownloaded(true)
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        return
-      }
-      console.error('[ShareButtons] X share with image failed:', error)
-      setImageGenError(true)
-    } finally {
-      setXShareGenerating(false)
-    }
-  }, [captureRef, theme, preGeneratedBlob])
-
   const handleWebShare = useCallback(async () => {
+    setShareGenerating(true)
     try {
+      // Try to share with image if captureRef is available and canShare supports files
+      if (captureRef?.current) {
+        const blob =
+          preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
+        const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
+
+        if (
+          typeof navigator.canShare === 'function' &&
+          navigator.canShare({ files: [file] })
+        ) {
+          await navigator.share({
+            text: buildShareText(theme),
+            url: window.location.href,
+            files: [file],
+          })
+          return
+        }
+      }
+
+      // Fallback: text + URL only
       await navigator.share({
         title: 'My No.1s',
         text: buildShareText(theme),
@@ -142,40 +94,16 @@ export default function ShareButtons({
       }
       console.error('[ShareButtons] Web Share API failed:', error)
       setShareFailed(true)
+    } finally {
+      setShareGenerating(false)
     }
-  }, [theme])
+  }, [captureRef, theme, preGeneratedBlob])
 
   const canWebShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   return (
     <div className="flex justify-center gap-3">
-      <Tooltip title="Xでシェア" arrow>
-        <IconButton
-          onClick={handleShareX}
-          aria-label="Xでシェア"
-          disabled={xShareGenerating}
-          sx={{
-            width: 44,
-            height: 44,
-            backgroundColor: '#1a1a1a',
-            color: '#ffffff',
-            '&:hover': { backgroundColor: '#333333' },
-            '&.Mui-disabled': {
-              backgroundColor: '#1a1a1a',
-              color: '#ffffff',
-              opacity: 0.6,
-              pointerEvents: 'auto',
-            },
-          }}
-        >
-          {xShareGenerating ? (
-            <CircularProgress size={18} color="inherit" />
-          ) : (
-            <XIcon fontSize="small" />
-          )}
-        </IconButton>
-      </Tooltip>
       <Tooltip title="URLをコピー" arrow>
         <IconButton
           onClick={handleCopyUrl}
@@ -196,6 +124,7 @@ export default function ShareButtons({
           <IconButton
             onClick={handleWebShare}
             aria-label="シェア"
+            disabled={shareGenerating}
             sx={{
               width: 44,
               height: 44,
@@ -205,9 +134,19 @@ export default function ShareButtons({
                 backgroundColor: 'var(--color-secondary)',
                 filter: 'brightness(0.9)',
               },
+              '&.Mui-disabled': {
+                backgroundColor: 'var(--color-secondary)',
+                color: '#ffffff',
+                opacity: 0.6,
+                pointerEvents: 'auto',
+              },
             }}
           >
-            <ShareIcon fontSize="small" />
+            {shareGenerating ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <ShareIcon fontSize="small" />
+            )}
           </IconButton>
         </Tooltip>
       )}
@@ -246,36 +185,6 @@ export default function ShareButtons({
           onClose={handleCloseShareError}
         >
           シェアに失敗しました。URLをコピーして手動でシェアしてください。
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={imageDownloaded}
-        autoHideDuration={5000}
-        onClose={handleCloseImageDownloaded}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity="info"
-          variant="filled"
-          onClose={handleCloseImageDownloaded}
-        >
-          画像をダウンロードしました。X投稿画面で添付してください。
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={imageGenError}
-        autoHideDuration={5000}
-        onClose={handleCloseImageGenError}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity="error"
-          variant="filled"
-          onClose={handleCloseImageGenError}
-        >
-          画像の生成に失敗しました。もう一度お試しください。
         </Alert>
       </Snackbar>
     </div>
