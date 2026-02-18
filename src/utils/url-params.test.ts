@@ -135,3 +135,32 @@ describe('buildEditUrl', () => {
     expect(params.get('theme')).toBe('夏の思い出')
   })
 })
+
+describe('parseTop3Params - ID validation', () => {
+  it('rejects IDs with special characters', () => {
+    const params = new URLSearchParams(
+      'book=../etc/passwd&music=<script>&movie=1; DROP TABLE',
+    )
+    const result = parseTop3Params(params)
+    expect(result.bookId).toBe('')
+    expect(result.musicId).toBe('')
+    expect(result.movieId).toBe('')
+  })
+
+  it('accepts valid alphanumeric IDs', () => {
+    const params = new URLSearchParams(
+      'book=vol-123_abc&music=4iV5W9uYEdYUVa79Axb7Rh&movie=12345',
+    )
+    const result = parseTop3Params(params)
+    expect(result.bookId).toBe('vol-123_abc')
+    expect(result.musicId).toBe('4iV5W9uYEdYUVa79Axb7Rh')
+    expect(result.movieId).toBe('12345')
+  })
+
+  it('rejects empty-looking malicious IDs', () => {
+    const params = new URLSearchParams('book=   &music=%00null')
+    const result = parseTop3Params(params)
+    expect(result.bookId).toBe('')
+    expect(result.musicId).toBe('')
+  })
+})

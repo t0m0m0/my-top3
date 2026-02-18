@@ -1,6 +1,12 @@
 import type { SearchResultItem } from '../types/common'
 import { MAX_THEME_LENGTH } from '../hooks/useTheme'
 
+/** Validates that an ID contains only safe characters (alphanumeric, hyphen, underscore) */
+function sanitizeId(raw: string): string {
+  const trimmed = raw.trim()
+  return /^[\w-]+$/.test(trimmed) ? trimmed : ''
+}
+
 type Selection = {
   book: SearchResultItem | null
   music: SearchResultItem | null
@@ -41,9 +47,9 @@ export function parseTop3Params(searchParams: URLSearchParams): Top3Params {
   const rawTheme = searchParams.get('theme') ?? ''
   return {
     theme: rawTheme.slice(0, MAX_THEME_LENGTH),
-    bookId: searchParams.get('book') ?? '',
-    musicId: searchParams.get('music') ?? '',
-    movieId: searchParams.get('movie') ?? '',
+    bookId: sanitizeId(searchParams.get('book') ?? ''),
+    musicId: sanitizeId(searchParams.get('music') ?? ''),
+    movieId: sanitizeId(searchParams.get('movie') ?? ''),
   }
 }
 
