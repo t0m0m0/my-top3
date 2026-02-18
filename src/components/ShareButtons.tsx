@@ -99,13 +99,30 @@ export default function ShareButtons({ theme, captureRef }: ShareButtonsProps) {
       // Try Web Share API with files (mobile + X app)
       if (canShareFiles()) {
         const text = buildShareText(theme)
-        await navigator.share({
-          text,
-          url: window.location.href,
-          files: [file],
-        })
-      } else {
-        // Fallback: download image + open X intent
+        try {
+          await navigator.share({
+            text,
+            url: window.location.href,
+            files: [file],
+          })
+          return
+        } catch (shareError) {
+          if (
+            shareError instanceof DOMException &&
+            shareError.name === 'AbortError'
+          ) {
+            return
+          }
+          // NotAllowedError etc. — fall through to download fallback
+          console.warn(
+            '[ShareButtons] navigator.share failed, falling back to download:',
+            shareError,
+          )
+        }
+      }
+
+      // Fallback: download image + open X intent
+      {
         const dataUrl = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.download = 'my-no1s.png'

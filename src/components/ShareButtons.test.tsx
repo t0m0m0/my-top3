@@ -250,6 +250,49 @@ describe('ShareButtons', () => {
       })
     })
 
+    it('falls back to download + intent when navigator.share rejects with NotAllowedError', async () => {
+      vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
+      const notAllowedError = new DOMException(
+        'not allowed by the user agent',
+        'NotAllowedError',
+      )
+      const shareMock = vi.fn().mockRejectedValue(notAllowedError)
+      const canShareMock = vi.fn().mockReturnValue(true)
+      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
+      vi.spyOn(window, 'open').mockReturnValue({} as Window)
+      vi.stubGlobal('URL', {
+        ...globalThis.URL,
+        createObjectURL: vi.fn(() => 'blob:mock-url'),
+        revokeObjectURL: vi.fn(),
+      })
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
+      fireEvent.click(screen.getByLabelText('Xでシェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalled()
+      })
+
+      // Should fall back to X intent
+      await waitFor(() => {
+        expect(window.open).toHaveBeenCalledWith(
+          expect.stringContaining('twitter.com/intent/tweet'),
+          '_blank',
+          'noopener,noreferrer',
+        )
+      })
+
+      // Should show download guidance
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            '画像をダウンロードしました。X投稿画面で添付してください。',
+          ),
+        ).toBeInTheDocument()
+      })
+    })
+
     it('shows error snackbar when image generation fails', async () => {
       vi.mocked(generateImageBlob).mockRejectedValue(
         new Error('generation failed'),
