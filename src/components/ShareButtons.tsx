@@ -20,14 +20,6 @@ function buildShareText(theme?: string): string {
   return `${base} #MyNo1s`
 }
 
-function canShareFiles(): boolean {
-  if (typeof navigator === 'undefined') return false
-  if (typeof navigator.share !== 'function') return false
-  if (typeof navigator.canShare !== 'function') return false
-  const testFile = new File([], 'test.png', { type: 'image/png' })
-  return navigator.canShare({ files: [testFile] })
-}
-
 function openXIntent(theme?: string) {
   const url = window.location.href
   const text = buildShareText(theme)
@@ -100,45 +92,17 @@ export default function ShareButtons({
     try {
       const blob =
         preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
-      const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
 
-      // Try Web Share API with files (mobile + X app)
-      if (canShareFiles()) {
-        const text = buildShareText(theme)
-        try {
-          await navigator.share({
-            text,
-            url: window.location.href,
-            files: [file],
-          })
-          return
-        } catch (shareError) {
-          if (
-            shareError instanceof DOMException &&
-            shareError.name === 'AbortError'
-          ) {
-            return
-          }
-          // NotAllowedError etc. — fall through to download fallback
-          console.warn(
-            '[ShareButtons] navigator.share failed, falling back to download:',
-            shareError,
-          )
-        }
-      }
+      // Always download image + open X intent directly
+      const dataUrl = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.download = 'my-no1s.png'
+      link.href = dataUrl
+      link.click()
+      URL.revokeObjectURL(dataUrl)
 
-      // Fallback: download image + open X intent
-      {
-        const dataUrl = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.download = 'my-no1s.png'
-        link.href = dataUrl
-        link.click()
-        URL.revokeObjectURL(dataUrl)
-
-        openXIntent(theme)
-        setImageDownloaded(true)
-      }
+      openXIntent(theme)
+      setImageDownloaded(true)
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return
