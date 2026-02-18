@@ -12,6 +12,7 @@ import { generateImageBlob } from '../utils/image-helpers'
 type ShareButtonsProps = {
   theme?: string
   captureRef?: RefObject<HTMLDivElement | null>
+  preGeneratedBlob?: Blob | null
 }
 
 function buildShareText(theme?: string): string {
@@ -37,7 +38,11 @@ function openXIntent(theme?: string) {
   }
 }
 
-export default function ShareButtons({ theme, captureRef }: ShareButtonsProps) {
+export default function ShareButtons({
+  theme,
+  captureRef,
+  preGeneratedBlob,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
   const [shareFailed, setShareFailed] = useState(false)
@@ -93,7 +98,8 @@ export default function ShareButtons({ theme, captureRef }: ShareButtonsProps) {
 
     setXShareGenerating(true)
     try {
-      const blob = await generateImageBlob(captureRef.current)
+      const blob =
+        preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
       const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
 
       // Try Web Share API with files (mobile + X app)

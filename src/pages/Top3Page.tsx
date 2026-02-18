@@ -8,6 +8,7 @@ import ShareButtons from '../components/ShareButtons'
 import Top3Image from '../components/Top3Image'
 import WorkCard from '../components/WorkCard'
 import { useWorkFetch } from '../hooks/useWorkFetch'
+import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
 
 function Top3Page() {
   const [searchParams] = useSearchParams()
@@ -23,6 +24,10 @@ function Top3Page() {
   const noErrors = !book.error && !music.error && !movie.error
   const hasAnyData = !!(book.data || music.data || movie.data)
   const showImage = allLoaded && noErrors && hasAnyData
+
+  const preGeneratedBlob = usePreGeneratedImage(
+    showImage ? captureRef : undefined,
+  )
 
   if (!hasAnyId) {
     return (
@@ -169,6 +174,7 @@ function Top3Page() {
           <ShareButtons
             theme={params.theme}
             captureRef={showImage ? captureRef : undefined}
+            preGeneratedBlob={preGeneratedBlob}
           />
         </div>
 

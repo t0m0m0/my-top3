@@ -311,6 +311,34 @@ describe('ShareButtons', () => {
       })
     })
 
+    it('uses preGeneratedBlob without calling generateImageBlob when available', async () => {
+      const preBlob = new Blob(['pre-generated'], { type: 'image/png' })
+      vi.mocked(generateImageBlob).mockClear()
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      const canShareMock = vi.fn().mockReturnValue(true)
+      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
+
+      render(
+        <ShareButtons
+          theme="テスト"
+          captureRef={mockCaptureRef}
+          preGeneratedBlob={preBlob}
+        />,
+      )
+      fireEvent.click(screen.getByLabelText('Xでシェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            files: expect.arrayContaining([expect.any(File)]),
+          }),
+        )
+      })
+
+      // Should NOT have called generateImageBlob since preGeneratedBlob was provided
+      expect(generateImageBlob).not.toHaveBeenCalled()
+    })
+
     it('falls back to text-only X intent when captureRef is not provided', () => {
       vi.mocked(generateImageBlob).mockClear()
       vi.spyOn(window, 'open').mockReturnValue({} as Window)
