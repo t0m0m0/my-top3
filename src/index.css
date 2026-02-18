@@ -62,7 +62,7 @@ body {
 /* Gradient border for slots */
 .gradient-border-slot {
   position: relative;
-  border: none !important;
+  border: none;
   background: var(--color-surface);
 }
 .gradient-border-slot::before {
@@ -91,7 +91,7 @@ body {
 /* Selected slot glow */
 .slot-selected {
   box-shadow: var(--shadow-primary);
-  border-color: var(--color-primary-light) !important;
+  border-color: var(--color-primary-light);
 }
 
 /* Animations */
