@@ -1,7 +1,7 @@
 import { useSearchParams, Link } from 'react-router-dom'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
-import { parseTop3Params } from '../utils/url-params'
+import { parseTop3Params, buildEditUrl } from '../utils/url-params'
 import ErrorMessage from '../components/ErrorMessage'
 import ShareButtons from '../components/ShareButtons'
 import Top3Image from '../components/Top3Image'
@@ -169,7 +169,7 @@ function Top3Page() {
         <div className="mt-8 text-center">
           <Button
             component={Link}
-            to="/"
+            to={buildEditUrl(params)}
             variant="outlined"
             sx={{
               borderRadius: '9999px',
