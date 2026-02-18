@@ -1,13 +1,12 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
-import html2canvas from 'html2canvas'
 import {
+  generateImageBlob,
   sanitizeFilename,
   getImageErrorMessage,
   formatDate,
 } from '../utils/image-helpers'
 
 const IMAGE_SIZE = 1080
-const CANVAS_BG = '#111827'
 
 export function useImageCapture(theme: string) {
   const captureRef = useRef<HTMLDivElement>(null)
@@ -41,20 +40,8 @@ export function useImageCapture(theme: string) {
     setIsGenerating(true)
     setError(null)
     try {
-      const canvas = await html2canvas(captureRef.current, {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
-        scale: 1,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: CANVAS_BG,
-      })
-
-      const dataUrl = canvas.toDataURL('image/png')
-      if (!dataUrl || dataUrl === 'data:,') {
-        setError('画像の生成に失敗しました。画像データが空です。')
-        return
-      }
+      const blob = await generateImageBlob(captureRef.current)
+      const dataUrl = URL.createObjectURL(blob)
 
       const date = formatDate()
       const safeTheme = theme ? `-${sanitizeFilename(theme)}` : ''
@@ -62,6 +49,7 @@ export function useImageCapture(theme: string) {
       link.download = `my-no1s-${date}${safeTheme}.png`
       link.href = dataUrl
       link.click()
+      URL.revokeObjectURL(dataUrl)
       setSuccessOpen(true)
     } catch (err) {
       console.error('[Top3Image] Failed to generate image:', err)

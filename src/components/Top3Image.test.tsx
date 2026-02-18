@@ -3,12 +3,17 @@ import { render, screen, fireEvent, waitFor } from '../test/test-utils'
 import Top3Image from './Top3Image'
 import type { SearchResultItem } from '../types/common'
 
+const fakeBlob = new Blob(['fake-image'], { type: 'image/png' })
+
+function createMockCanvas() {
+  return {
+    toDataURL: () => 'data:image/png;base64,mock',
+    toBlob: (cb: (blob: Blob | null) => void) => cb(fakeBlob),
+  }
+}
+
 vi.mock('html2canvas', () => ({
-  default: vi.fn(() =>
-    Promise.resolve({
-      toDataURL: () => 'data:image/png;base64,mock',
-    }),
-  ),
+  default: vi.fn(() => Promise.resolve(createMockCanvas())),
 }))
 
 class MockResizeObserver {
@@ -49,6 +54,14 @@ const originalCreateElement = document.createElement.bind(document)
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.stubGlobal(
+    'URL',
+    {
+      ...globalThis.URL,
+      createObjectURL: vi.fn(() => 'blob:mock-url'),
+      revokeObjectURL: vi.fn(),
+    },
+  )
 })
 
 afterEach(() => {
@@ -411,9 +424,7 @@ describe('Top3Image', () => {
       })
       expect(screen.getByRole('button', { name: /生成中/ })).toBeDisabled()
 
-      resolveCanvas({
-        toDataURL: () => 'data:image/png;base64,mock',
-      } as unknown as HTMLCanvasElement)
+      resolveCanvas(createMockCanvas() as unknown as HTMLCanvasElement)
 
       await waitFor(() => {
         expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
@@ -423,11 +434,13 @@ describe('Top3Image', () => {
       ).toBeEnabled()
     })
 
-    it('shows error when toDataURL returns empty', async () => {
+    it('shows error when toBlob returns null', async () => {
       const html2canvas = (await import('html2canvas')).default
       vi.mocked(html2canvas).mockResolvedValueOnce({
         toDataURL: () => 'data:,',
+        toBlob: (cb: (blob: Blob | null) => void) => cb(null),
       } as unknown as HTMLCanvasElement)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
 
       render(
         <Top3Image
@@ -442,7 +455,7 @@ describe('Top3Image', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('画像の生成に失敗しました。画像データが空です。'),
+          screen.getByText('画像の生成に失敗しました。もう一度お試しください。'),
         ).toBeInTheDocument()
       })
     })
@@ -548,9 +561,9 @@ describe('Top3Image', () => {
         ).toBeInTheDocument()
       })
 
-      vi.mocked(html2canvas).mockResolvedValueOnce({
-        toDataURL: () => 'data:image/png;base64,mock',
-      } as unknown as HTMLCanvasElement)
+      vi.mocked(html2canvas).mockResolvedValueOnce(
+        createMockCanvas() as unknown as HTMLCanvasElement,
+      )
 
       fireEvent.click(screen.getByText('画像をダウンロード'))
 
