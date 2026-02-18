@@ -2,6 +2,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { imageProxyApp, ALLOWED_HOSTS } from './image-proxy.ts'
 
+type ErrorResponse = { ok: false; error: { kind: string; message: string } }
+
 // Mock global fetch
 const originalFetch = globalThis.fetch
 
@@ -18,7 +20,7 @@ describe('image-proxy route', () => {
     it('returns 400 when url query parameter is missing', async () => {
       const res = await imageProxyApp.request('/proxy')
       expect(res.status).toBe(400)
-      const json = await res.json()
+      const json = (await res.json()) as ErrorResponse
       expect(json.ok).toBe(false)
       expect(json.error.message).toMatch(/url/i)
     })
@@ -26,7 +28,7 @@ describe('image-proxy route', () => {
     it('returns 400 when url is not a valid URL', async () => {
       const res = await imageProxyApp.request('/proxy?url=not-a-url')
       expect(res.status).toBe(400)
-      const json = await res.json()
+      const json = (await res.json()) as ErrorResponse
       expect(json.ok).toBe(false)
     })
 
@@ -35,7 +37,7 @@ describe('image-proxy route', () => {
         '/proxy?url=https://evil.example.com/image.jpg',
       )
       expect(res.status).toBe(403)
-      const json = await res.json()
+      const json = (await res.json()) as ErrorResponse
       expect(json.ok).toBe(false)
       expect(json.error.message).toMatch(/許可/)
     })
@@ -110,7 +112,7 @@ describe('image-proxy route', () => {
       )
 
       expect(res.status).toBe(502)
-      const json = await res.json()
+      const json = (await res.json()) as ErrorResponse
       expect(json.ok).toBe(false)
     })
 
