@@ -1,14 +1,18 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type RefObject } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import XIcon from '@mui/icons-material/X'
 import ShareIcon from '@mui/icons-material/Share'
+import { generateImageBlob } from '../utils/image-helpers'
 
 type ShareButtonsProps = {
   theme?: string
+  captureRef?: RefObject<HTMLDivElement | null>
+  preGeneratedBlob?: Blob | null
 }
 
 function buildShareText(theme?: string): string {
@@ -16,14 +20,47 @@ function buildShareText(theme?: string): string {
   return `${base} #MyNo1s`
 }
 
-export default function ShareButtons({ theme }: ShareButtonsProps) {
+function canShareFiles(): boolean {
+  if (typeof navigator === 'undefined') return false
+  if (typeof navigator.share !== 'function') return false
+  if (typeof navigator.canShare !== 'function') return false
+  const testFile = new File([], 'test.png', { type: 'image/png' })
+  return navigator.canShare({ files: [testFile] })
+}
+
+function openXIntent(theme?: string) {
+  const url = window.location.href
+  const text = buildShareText(theme)
+  const intentUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
+  const newWindow = window.open(intentUrl, '_blank', 'noopener,noreferrer')
+  if (!newWindow) {
+    window.location.href = intentUrl
+  }
+}
+
+export default function ShareButtons({
+  theme,
+  captureRef,
+  preGeneratedBlob,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
   const [shareFailed, setShareFailed] = useState(false)
+  const [xShareGenerating, setXShareGenerating] = useState(false)
+  const [imageDownloaded, setImageDownloaded] = useState(false)
+  const [imageGenError, setImageGenError] = useState(false)
 
   const handleCloseSuccess = useCallback(() => setCopied(false), [])
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
+  const handleCloseImageDownloaded = useCallback(
+    () => setImageDownloaded(false),
+    [],
+  )
+  const handleCloseImageGenError = useCallback(
+    () => setImageGenError(false),
+    [],
+  )
 
   const handleCopyUrl = useCallback(async () => {
     try {
@@ -52,15 +89,66 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
     }
   }, [])
 
-  const handleShareX = useCallback(() => {
-    const url = window.location.href
-    const text = buildShareText(theme)
-    const intentUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
-    const newWindow = window.open(intentUrl, '_blank', 'noopener,noreferrer')
-    if (!newWindow) {
-      window.location.href = intentUrl
+  const handleShareX = useCallback(async () => {
+    // No captureRef: text-only X intent
+    if (!captureRef?.current) {
+      openXIntent(theme)
+      return
     }
-  }, [theme])
+
+    setXShareGenerating(true)
+    try {
+      const blob =
+        preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
+      const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
+
+      // Try Web Share API with files (mobile + X app)
+      if (canShareFiles()) {
+        const text = buildShareText(theme)
+        try {
+          await navigator.share({
+            text,
+            url: window.location.href,
+            files: [file],
+          })
+          return
+        } catch (shareError) {
+          if (
+            shareError instanceof DOMException &&
+            shareError.name === 'AbortError'
+          ) {
+            return
+          }
+          // NotAllowedError etc. — fall through to download fallback
+          console.warn(
+            '[ShareButtons] navigator.share failed, falling back to download:',
+            shareError,
+          )
+        }
+      }
+
+      // Fallback: download image + open X intent
+      {
+        const dataUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.download = 'my-no1s.png'
+        link.href = dataUrl
+        link.click()
+        URL.revokeObjectURL(dataUrl)
+
+        openXIntent(theme)
+        setImageDownloaded(true)
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return
+      }
+      console.error('[ShareButtons] X share with image failed:', error)
+      setImageGenError(true)
+    } finally {
+      setXShareGenerating(false)
+    }
+  }, [captureRef, theme, preGeneratedBlob])
 
   const handleWebShare = useCallback(async () => {
     try {
@@ -87,15 +175,26 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
         <IconButton
           onClick={handleShareX}
           aria-label="Xでシェア"
+          disabled={xShareGenerating}
           sx={{
             width: 44,
             height: 44,
             backgroundColor: '#1a1a1a',
             color: '#ffffff',
             '&:hover': { backgroundColor: '#333333' },
+            '&.Mui-disabled': {
+              backgroundColor: '#1a1a1a',
+              color: '#ffffff',
+              opacity: 0.6,
+              pointerEvents: 'auto',
+            },
           }}
         >
-          <XIcon fontSize="small" />
+          {xShareGenerating ? (
+            <CircularProgress size={18} color="inherit" />
+          ) : (
+            <XIcon fontSize="small" />
+          )}
         </IconButton>
       </Tooltip>
       <Tooltip title="URLをコピー" arrow>
@@ -168,6 +267,36 @@ export default function ShareButtons({ theme }: ShareButtonsProps) {
           onClose={handleCloseShareError}
         >
           シェアに失敗しました。URLをコピーして手動でシェアしてください。
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={imageDownloaded}
+        autoHideDuration={5000}
+        onClose={handleCloseImageDownloaded}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity="info"
+          variant="filled"
+          onClose={handleCloseImageDownloaded}
+        >
+          画像をダウンロードしました。X投稿画面で添付してください。
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={imageGenError}
+        autoHideDuration={5000}
+        onClose={handleCloseImageGenError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={handleCloseImageGenError}
+        >
+          画像の生成に失敗しました。もう一度お試しください。
         </Alert>
       </Snackbar>
     </div>

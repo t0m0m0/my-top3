@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '../test/test-utils'
+import { render, screen } from '../test/test-utils'
 import { ImageSlot } from './ImageSlot'
 import type { SearchResultItem } from '../types/common'
-import { NO_IMAGE_SRC, SLOT_STYLES } from '../constants/image-layout'
+import { SLOT_STYLES } from '../constants/image-layout'
 
 const mockBook: SearchResultItem = {
   id: 'book1',
@@ -43,31 +43,13 @@ describe('ImageSlot', () => {
       expect(screen.getByText('Author Name')).toBeInTheDocument()
     })
 
-    it('renders thumbnail image', () => {
+    it('renders thumbnail as background image', () => {
       render(<ImageSlot item={mockBook} category="book" slot="top" />)
       const img = screen.getByRole('img')
-      expect(img).toHaveAttribute('src', 'https://example.com/book.jpg')
-    })
-
-    it('falls back to NO_IMAGE_SRC on image error', () => {
-      render(<ImageSlot item={mockBook} category="book" slot="top" />)
-      const img = screen.getByRole('img')
-      fireEvent.error(img)
-      expect(img).toHaveAttribute('src', NO_IMAGE_SRC)
-    })
-
-    it('does not loop fallback if already NO_IMAGE_SRC', () => {
-      render(
-        <ImageSlot
-          item={{ ...mockBook, thumbnailUrl: NO_IMAGE_SRC }}
-          category="book"
-          slot="top"
-        />,
+      expect(img.style.backgroundImage).toContain(
+        'https://example.com/book.jpg',
       )
-      const img = screen.getByRole('img')
-      // Trigger error; src should remain NO_IMAGE_SRC
-      fireEvent.error(img)
-      expect(img).toHaveAttribute('src', NO_IMAGE_SRC)
+      expect(img.style.backgroundSize).toBe('cover')
     })
 
     it('renders category badge', () => {

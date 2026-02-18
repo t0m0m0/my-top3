@@ -1,3 +1,4 @@
+import React from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
@@ -10,16 +11,27 @@ import { useLayoutSwap } from '../hooks/useLayoutSwap'
 import { ImageSlot } from './ImageSlot'
 import { LayoutSelector } from './LayoutSelector'
 
+type CaptureRefProp =
+  | React.RefObject<HTMLDivElement | null>
+  | ((node: HTMLDivElement | null) => void)
+
 type Top3ImageProps = {
   theme: string
   book: SearchResultItem | null
   music: SearchResultItem | null
   movie: SearchResultItem | null
+  captureRef?: CaptureRefProp
 }
 
-function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
+function Top3Image({
+  theme,
+  book,
+  music,
+  movie,
+  captureRef: externalCaptureRef,
+}: Top3ImageProps) {
   const {
-    captureRef,
+    captureRef: internalCaptureRef,
     containerRef,
     isGenerating,
     error,
@@ -29,6 +41,22 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
     scale,
     handleDownload,
   } = useImageCapture(theme)
+
+  // Use a callback ref to sync both internal and external refs
+  const captureRefCallback = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      const mutableInternalRef =
+        internalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
+      mutableInternalRef.current = node
+      if (typeof externalCaptureRef === 'function') {
+        externalCaptureRef(node)
+      } else if (externalCaptureRef && 'current' in externalCaptureRef) {
+        // Assign via Object.assign to avoid lint immutability error on props
+        Object.assign(externalCaptureRef, { current: node })
+      }
+    },
+    [internalCaptureRef, externalCaptureRef],
+  )
 
   const { layout, handleLayoutChange } = useLayoutSwap()
 
@@ -53,7 +81,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
           }}
         >
           <div
-            ref={captureRef}
+            ref={captureRefCallback}
             data-testid="top3-image-capture"
             style={{
               width: IMAGE_SIZE,

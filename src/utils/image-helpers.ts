@@ -1,4 +1,41 @@
+import html2canvas from 'html2canvas'
 import { MESSAGES } from '../constants/messages'
+
+const IMAGE_SIZE = 1080
+const CANVAS_BG = '#111827'
+
+export async function generateImageBlob(element: HTMLElement): Promise<Blob> {
+  // Temporarily reset CSS transform so html2canvas captures at full size
+  const origTransform = element.style.transform
+  const origTransformOrigin = element.style.transformOrigin
+  element.style.transform = 'none'
+  element.style.transformOrigin = ''
+
+  try {
+    const canvas = await html2canvas(element, {
+      width: IMAGE_SIZE,
+      height: IMAGE_SIZE,
+      scale: 1,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: CANVAS_BG,
+    })
+
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob: Blob | null) => {
+        if (!blob) {
+          reject(new Error('画像の生成に失敗しました。画像データが空です。'))
+          return
+        }
+        resolve(blob)
+      }, 'image/png')
+    })
+  } finally {
+    // Restore original transform
+    element.style.transform = origTransform
+    element.style.transformOrigin = origTransformOrigin
+  }
+}
 
 export function sanitizeFilename(name: string): string {
   return name
