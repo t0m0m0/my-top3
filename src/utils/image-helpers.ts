@@ -1,3 +1,5 @@
+import { MESSAGES } from '../constants/messages'
+
 export function sanitizeFilename(name: string): string {
   return name
     .replace(/[/\\:*?"<>|\0\n\r]/g, '_')
@@ -8,7 +10,7 @@ export function sanitizeFilename(name: string): string {
 
 export function getImageErrorMessage(err: unknown): string {
   if (err instanceof DOMException && err.name === 'SecurityError') {
-    return '画像の取得に失敗しました。外部画像のCORS設定が原因の可能性があります。'
+    return MESSAGES.IMAGE_CORS_ERROR
   }
   if (err instanceof DOMException && err.name === 'QuotaExceededError') {
     return '画像サイズが大きすぎるため生成できませんでした。'
