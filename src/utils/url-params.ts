@@ -46,3 +46,23 @@ export function parseTop3Params(searchParams: URLSearchParams): Top3Params {
     movieId: searchParams.get('movie') ?? '',
   }
 }
+
+export function buildEditUrl(params: Top3Params): string {
+  const sp = new URLSearchParams()
+  sp.set('edit', '1')
+
+  if (params.theme) {
+    sp.set('theme', params.theme)
+  }
+  if (params.bookId) {
+    sp.set('book', params.bookId)
+  }
+  if (params.musicId) {
+    sp.set('music', params.musicId)
+  }
+  if (params.movieId) {
+    sp.set('movie', params.movieId)
+  }
+
+  return `/?${sp.toString()}`
+}

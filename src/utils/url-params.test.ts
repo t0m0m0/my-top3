@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildTop3Url, parseTop3Params } from './url-params'
+import { buildTop3Url, parseTop3Params, buildEditUrl } from './url-params'
 import { createSearchResultItem } from '../test/fixtures'
 import { MAX_THEME_LENGTH } from '../hooks/useTheme'
 
@@ -100,5 +100,38 @@ describe('parseTop3Params', () => {
     expect(parsed.musicId).toBe('m1')
     expect(parsed.movieId).toBe('v1')
     expect(parsed.theme).toBe('テスト')
+  })
+})
+
+describe('buildEditUrl', () => {
+  it('builds URL with edit flag and IDs', () => {
+    const url = buildEditUrl({
+      theme: 'test',
+      bookId: 'b1',
+      musicId: 'm1',
+      movieId: 'v1',
+    })
+    expect(url).toBe('/?edit=1&theme=test&book=b1&music=m1&movie=v1')
+  })
+
+  it('omits empty IDs', () => {
+    const url = buildEditUrl({
+      theme: '',
+      bookId: 'b1',
+      musicId: '',
+      movieId: '',
+    })
+    expect(url).toBe('/?edit=1&book=b1')
+  })
+
+  it('includes theme when present', () => {
+    const url = buildEditUrl({
+      theme: '夏の思い出',
+      bookId: '',
+      musicId: '',
+      movieId: '',
+    })
+    const params = new URLSearchParams(url.split('?')[1])
+    expect(params.get('theme')).toBe('夏の思い出')
   })
 })
