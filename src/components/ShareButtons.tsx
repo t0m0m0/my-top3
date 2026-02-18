@@ -93,7 +93,22 @@ export default function ShareButtons({
       const blob =
         preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
 
-      // Always download image + open X intent directly
+      const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
+
+      // Try Web Share API with files (mobile: opens OS share sheet with image)
+      if (
+        typeof navigator !== 'undefined' &&
+        typeof navigator.canShare === 'function' &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          text: buildShareText(theme),
+          files: [file],
+        })
+        return
+      }
+
+      // Fallback: download image + open X intent (desktop)
       const dataUrl = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.download = 'my-no1s.png'

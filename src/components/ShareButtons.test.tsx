@@ -167,17 +167,11 @@ describe('ShareButtons', () => {
     } as RefObject<HTMLDivElement>
     const fakeBlob = new Blob(['fake-image'], { type: 'image/png' })
 
-    it('downloads image and opens X intent when captureRef is provided (even when Web Share API supports files)', async () => {
+    it('uses Web Share API with files when canShare supports it', async () => {
       vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
       const shareMock = vi.fn().mockResolvedValue(undefined)
       const canShareMock = vi.fn().mockReturnValue(true)
       Object.assign(navigator, { share: shareMock, canShare: canShareMock })
-      vi.spyOn(window, 'open').mockReturnValue({} as Window)
-      vi.stubGlobal('URL', {
-        ...globalThis.URL,
-        createObjectURL: vi.fn(() => 'blob:mock-url'),
-        revokeObjectURL: vi.fn(),
-      })
 
       render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
       fireEvent.click(screen.getByLabelText('Xでシェア'))
@@ -186,23 +180,13 @@ describe('ShareButtons', () => {
         expect(generateImageBlob).toHaveBeenCalledWith(mockCaptureRef.current)
       })
 
-      // Should NOT use navigator.share — always open X intent directly
-      expect(shareMock).not.toHaveBeenCalled()
-
       await waitFor(() => {
-        expect(window.open).toHaveBeenCalledWith(
-          expect.stringContaining('twitter.com/intent/tweet'),
-          '_blank',
-          'noopener,noreferrer',
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: 'My No.1s 「テスト」 #MyNo1s',
+            files: expect.arrayContaining([expect.any(File)]),
+          }),
         )
-      })
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            '画像をダウンロードしました。X投稿画面で添付してください。',
-          ),
-        ).toBeInTheDocument()
       })
     })
 
@@ -267,39 +251,22 @@ describe('ShareButtons', () => {
       })
     })
 
-    it('never uses navigator.share for X share — always downloads + opens intent', async () => {
+    it('handles AbortError gracefully when user cancels Web Share', async () => {
       vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
-      const shareMock = vi.fn().mockResolvedValue(undefined)
+      const abortError = new DOMException('Share canceled', 'AbortError')
+      const shareMock = vi.fn().mockRejectedValue(abortError)
       const canShareMock = vi.fn().mockReturnValue(true)
       Object.assign(navigator, { share: shareMock, canShare: canShareMock })
-      vi.spyOn(window, 'open').mockReturnValue({} as Window)
-      vi.stubGlobal('URL', {
-        ...globalThis.URL,
-        createObjectURL: vi.fn(() => 'blob:mock-url'),
-        revokeObjectURL: vi.fn(),
-      })
 
       render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
       fireEvent.click(screen.getByLabelText('Xでシェア'))
 
       await waitFor(() => {
-        expect(window.open).toHaveBeenCalledWith(
-          expect.stringContaining('twitter.com/intent/tweet'),
-          '_blank',
-          'noopener,noreferrer',
-        )
+        expect(shareMock).toHaveBeenCalled()
       })
 
-      // navigator.share should never be called from the X button
-      expect(shareMock).not.toHaveBeenCalled()
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            '画像をダウンロードしました。X投稿画面で添付してください。',
-          ),
-        ).toBeInTheDocument()
-      })
+      // AbortError should not show error snackbar
+      expect(screen.queryByText(/画像の生成に失敗/)).not.toBeInTheDocument()
     })
 
     it('shows error snackbar when image generation fails', async () => {
@@ -323,6 +290,8 @@ describe('ShareButtons', () => {
     it('uses preGeneratedBlob without calling generateImageBlob when available', async () => {
       const preBlob = new Blob(['pre-generated'], { type: 'image/png' })
       vi.mocked(generateImageBlob).mockClear()
+      // No Web Share API support — falls back to download + intent
+      Object.assign(navigator, { share: undefined, canShare: undefined })
       vi.spyOn(window, 'open').mockReturnValue({} as Window)
       vi.stubGlobal('URL', {
         ...globalThis.URL,
