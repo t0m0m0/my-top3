@@ -5,7 +5,6 @@ import { booksApp } from './routes/books.ts'
 import { musicApp } from './routes/music.ts'
 import { moviesApp } from './routes/movies.ts'
 import { imageProxyApp } from './routes/image-proxy.ts'
-import { debugLogApp } from './routes/debug-log.ts'
 
 if (!process.env['GOOGLE_BOOKS_API_KEY']) {
   console.warn(
@@ -48,6 +47,5 @@ app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)
 app.route('/api/movies', moviesApp)
 app.route('/api/image', imageProxyApp)
-app.route('/api/debug/log', debugLogApp)
 
 export default app
