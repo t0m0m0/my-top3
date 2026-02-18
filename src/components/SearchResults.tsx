@@ -42,22 +42,39 @@ export default function SearchResults({
 
   if (!query.trim()) {
     return (
-      <Box className="mt-8 text-center">
-        <Typography color="text.secondary">作品名を検索してください</Typography>
-      </Box>
+      <div className="mt-8 text-center">
+        <p className="text-4xl" aria-hidden="true">
+          🎨
+        </p>
+        <p
+          className="mt-2 text-sm font-medium"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          お気に入りの作品を検索してみよう
+        </p>
+      </div>
     )
   }
 
   if (!isLoading && results.length === 0) {
     return (
-      <Box className="mt-8 text-center">
-        <Typography color="text.secondary">
+      <div className="mt-8 text-center">
+        <p className="text-4xl" aria-hidden="true">
+          😔
+        </p>
+        <p
+          className="mt-2 text-sm font-medium"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           検索結果が見つかりませんでした
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          別のキーワードでお試しください
-        </Typography>
-      </Box>
+        </p>
+        <p
+          className="mt-1 text-xs"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          別のキーワードで試してみよう 🔍
+        </p>
+      </div>
     )
   }
 
