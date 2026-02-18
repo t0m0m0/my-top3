@@ -83,3 +83,38 @@ describe('SearchPage - search history integration', () => {
     expect(mockAddHistory).not.toHaveBeenCalled()
   })
 })
+
+describe('SearchPage - mobile layout: sticky tab & search bar', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('selection area should not be sticky on mobile', () => {
+    render(<SearchPage />)
+    const selectionHeading = screen.getByText('選択中の作品')
+    // SelectionArea の親カードが sticky でないことを確認
+    const selectionCard = selectionHeading.closest(
+      '[data-testid="selection-area-wrapper"]',
+    )
+    expect(selectionCard).toBeInTheDocument()
+    // クラス名をスペースで分割し、単独の 'sticky' がないことを確認
+    const classes = selectionCard?.className.split(/\s+/) ?? []
+    expect(classes).not.toContain('sticky')
+    // sm:sticky はデスクトップ用なので含まれているべき
+    expect(selectionCard?.className).toContain('sm:sticky')
+  })
+
+  it('tab and search bar should be sticky on mobile', () => {
+    render(<SearchPage />)
+    const stickySearchHeader = screen.getByTestId('search-sticky-header')
+    expect(stickySearchHeader).toBeInTheDocument()
+    // モバイルでは sticky、デスクトップでは static
+    expect(stickySearchHeader.className).toMatch(/(?<![\w-])sticky(?![\w-])/)
+    expect(stickySearchHeader.className).toContain('sm:static')
+  })
+})

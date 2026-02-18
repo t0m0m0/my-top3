@@ -90,11 +90,11 @@ function SearchPage() {
           </div>
         </div>
 
-        {/* Selection Area - Sticky */}
+        {/* Selection Area - Sticky on desktop only */}
         <div
-          className="sticky z-30 mt-4 rounded-xl p-4 shadow-md sm:p-5"
+          data-testid="selection-area-wrapper"
+          className="mt-4 rounded-xl p-4 shadow-md sm:sticky sm:top-0 sm:z-30 sm:p-5"
           style={{
-            top: 0,
             backgroundColor: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
           }}
@@ -115,8 +115,17 @@ function SearchPage() {
             border: '1px solid var(--color-border)',
           }}
         >
-          <TabSwitcher value={activeTab} onChange={setActiveTab} />
-          <SearchBar value={currentQuery} onChange={handleQueryChange} />
+          {/* Tab + SearchBar: sticky on mobile, static on desktop */}
+          <div
+            data-testid="search-sticky-header"
+            className="sticky top-0 z-30 -mx-4 -mt-4 mb-2 rounded-t-xl px-4 pb-2 pt-4 sm:static sm:z-auto sm:mx-0 sm:mt-0 sm:mb-0 sm:rounded-none sm:px-0 sm:pb-0 sm:pt-0"
+            style={{
+              backgroundColor: 'var(--color-surface)',
+            }}
+          >
+            <TabSwitcher value={activeTab} onChange={setActiveTab} />
+            <SearchBar value={currentQuery} onChange={handleQueryChange} />
+          </div>
 
           {!currentQuery.trim() && (
             <SearchHistory
