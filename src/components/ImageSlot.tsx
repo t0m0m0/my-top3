@@ -4,7 +4,6 @@ import {
   CATEGORY_COLORS,
   CATEGORY_BORDER_COLORS,
   CATEGORY_LABELS,
-  NO_IMAGE_SRC,
   SLOT_STYLES,
 } from '../constants/image-layout'
 import { proxyImageUrl } from '../utils/proxy-image-url'
@@ -68,23 +67,17 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
         overflow: 'hidden',
       }}
     >
-      {/* Full-bleed thumbnail */}
-      <img
-        src={proxyImageUrl(item.thumbnailUrl)}
-        alt={item.title}
-        crossOrigin="anonymous"
-        onError={(e) => {
-          const img = e.target as HTMLImageElement
-          if (img.src !== NO_IMAGE_SRC) {
-            img.src = NO_IMAGE_SRC
-          }
-        }}
+      {/* Full-bleed thumbnail (background-image for html2canvas compatibility) */}
+      <div
+        role="img"
+        aria-label={item.title}
         style={{
           position: 'absolute',
           inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
+          backgroundImage: `url(${proxyImageUrl(item.thumbnailUrl)})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           filter: slot === 'top' ? 'none' : 'brightness(0.7)',
         }}
       />

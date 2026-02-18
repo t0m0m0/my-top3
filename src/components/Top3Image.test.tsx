@@ -308,10 +308,10 @@ describe('Top3Image', () => {
         />,
       )
       const images = screen.getAllByRole('img')
-      const srcs = images.map((img) => img.getAttribute('src'))
-      expect(srcs).toContain('https://example.com/book.jpg')
-      expect(srcs).toContain('https://example.com/music.jpg')
-      expect(srcs).toContain('https://example.com/movie.jpg')
+      const bgs = images.map((img) => img.style.backgroundImage)
+      expect(bgs.some((bg) => bg.includes('example.com/book.jpg'))).toBe(true)
+      expect(bgs.some((bg) => bg.includes('example.com/music.jpg'))).toBe(true)
+      expect(bgs.some((bg) => bg.includes('example.com/movie.jpg'))).toBe(true)
     })
   })
 
