@@ -54,14 +54,11 @@ const originalCreateElement = document.createElement.bind(document)
 
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.stubGlobal(
-    'URL',
-    {
-      ...globalThis.URL,
-      createObjectURL: vi.fn(() => 'blob:mock-url'),
-      revokeObjectURL: vi.fn(),
-    },
-  )
+  vi.stubGlobal('URL', {
+    ...globalThis.URL,
+    createObjectURL: vi.fn(() => 'blob:mock-url'),
+    revokeObjectURL: vi.fn(),
+  })
 })
 
 afterEach(() => {
@@ -455,7 +452,9 @@ describe('Top3Image', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('画像の生成に失敗しました。もう一度お試しください。'),
+          screen.getByText(
+            '画像の生成に失敗しました。もう一度お試しください。',
+          ),
         ).toBeInTheDocument()
       })
     })

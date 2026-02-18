@@ -4,9 +4,7 @@ import { MESSAGES } from '../constants/messages'
 const IMAGE_SIZE = 1080
 const CANVAS_BG = '#111827'
 
-export async function generateImageBlob(
-  element: HTMLElement,
-): Promise<Blob> {
+export async function generateImageBlob(element: HTMLElement): Promise<Blob> {
   const canvas = await html2canvas(element, {
     width: IMAGE_SIZE,
     height: IMAGE_SIZE,

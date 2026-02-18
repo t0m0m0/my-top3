@@ -1,3 +1,4 @@
+import React from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
@@ -15,11 +16,18 @@ type Top3ImageProps = {
   book: SearchResultItem | null
   music: SearchResultItem | null
   movie: SearchResultItem | null
+  captureRef?: React.RefObject<HTMLDivElement | null>
 }
 
-function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
+function Top3Image({
+  theme,
+  book,
+  music,
+  movie,
+  captureRef: externalCaptureRef,
+}: Top3ImageProps) {
   const {
-    captureRef,
+    captureRef: internalCaptureRef,
     containerRef,
     isGenerating,
     error,
@@ -29,6 +37,21 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
     scale,
     handleDownload,
   } = useImageCapture(theme)
+
+  // Use a callback ref to sync both internal and external refs
+  const captureRefCallback = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      ;(
+        internalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
+      ).current = node
+      if (externalCaptureRef && 'current' in externalCaptureRef) {
+        ;(
+          externalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
+        ).current = node
+      }
+    },
+    [internalCaptureRef, externalCaptureRef],
+  )
 
   const { layout, handleLayoutChange } = useLayoutSwap()
 
@@ -53,7 +76,7 @@ function Top3Image({ theme, book, music, movie }: Top3ImageProps) {
           }}
         >
           <div
-            ref={captureRef}
+            ref={captureRefCallback}
             data-testid="top3-image-capture"
             style={{
               width: IMAGE_SIZE,

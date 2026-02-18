@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -11,6 +12,7 @@ import { useWorkFetch } from '../hooks/useWorkFetch'
 function Top3Page() {
   const [searchParams] = useSearchParams()
   const params = parseTop3Params(searchParams)
+  const captureRef = useRef<HTMLDivElement>(null)
 
   const book = useWorkFetch('book', params.bookId)
   const music = useWorkFetch('music', params.musicId)
@@ -158,12 +160,16 @@ function Top3Page() {
               book={book.data}
               music={music.data}
               movie={movie.data}
+              captureRef={captureRef}
             />
           </div>
         )}
 
         <div className="mt-6">
-          <ShareButtons theme={params.theme} />
+          <ShareButtons
+            theme={params.theme}
+            captureRef={showImage ? captureRef : undefined}
+          />
         </div>
 
         <div className="mt-8 text-center">
