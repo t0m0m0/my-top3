@@ -167,11 +167,17 @@ describe('ShareButtons', () => {
     } as RefObject<HTMLDivElement>
     const fakeBlob = new Blob(['fake-image'], { type: 'image/png' })
 
-    it('uses Web Share API with files when captureRef is provided and share supports files', async () => {
+    it('downloads image and opens X intent when captureRef is provided (even when Web Share API supports files)', async () => {
       vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
       const shareMock = vi.fn().mockResolvedValue(undefined)
       const canShareMock = vi.fn().mockReturnValue(true)
       Object.assign(navigator, { share: shareMock, canShare: canShareMock })
+      vi.spyOn(window, 'open').mockReturnValue({} as Window)
+      vi.stubGlobal('URL', {
+        ...globalThis.URL,
+        createObjectURL: vi.fn(() => 'blob:mock-url'),
+        revokeObjectURL: vi.fn(),
+      })
 
       render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
       fireEvent.click(screen.getByLabelText('Xでシェア'))
@@ -180,12 +186,23 @@ describe('ShareButtons', () => {
         expect(generateImageBlob).toHaveBeenCalledWith(mockCaptureRef.current)
       })
 
+      // Should NOT use navigator.share — always open X intent directly
+      expect(shareMock).not.toHaveBeenCalled()
+
       await waitFor(() => {
-        expect(shareMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            files: expect.arrayContaining([expect.any(File)]),
-          }),
+        expect(window.open).toHaveBeenCalledWith(
+          expect.stringContaining('twitter.com/intent/tweet'),
+          '_blank',
+          'noopener,noreferrer',
         )
+      })
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            '画像をダウンロードしました。X投稿画面で添付してください。',
+          ),
+        ).toBeInTheDocument()
       })
     })
 
@@ -250,13 +267,9 @@ describe('ShareButtons', () => {
       })
     })
 
-    it('falls back to download + intent when navigator.share rejects with NotAllowedError', async () => {
+    it('never uses navigator.share for X share — always downloads + opens intent', async () => {
       vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
-      const notAllowedError = new DOMException(
-        'not allowed by the user agent',
-        'NotAllowedError',
-      )
-      const shareMock = vi.fn().mockRejectedValue(notAllowedError)
+      const shareMock = vi.fn().mockResolvedValue(undefined)
       const canShareMock = vi.fn().mockReturnValue(true)
       Object.assign(navigator, { share: shareMock, canShare: canShareMock })
       vi.spyOn(window, 'open').mockReturnValue({} as Window)
@@ -265,16 +278,10 @@ describe('ShareButtons', () => {
         createObjectURL: vi.fn(() => 'blob:mock-url'),
         revokeObjectURL: vi.fn(),
       })
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
 
       render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
       fireEvent.click(screen.getByLabelText('Xでシェア'))
 
-      await waitFor(() => {
-        expect(shareMock).toHaveBeenCalled()
-      })
-
-      // Should fall back to X intent
       await waitFor(() => {
         expect(window.open).toHaveBeenCalledWith(
           expect.stringContaining('twitter.com/intent/tweet'),
@@ -283,7 +290,9 @@ describe('ShareButtons', () => {
         )
       })
 
-      // Should show download guidance
+      // navigator.share should never be called from the X button
+      expect(shareMock).not.toHaveBeenCalled()
+
       await waitFor(() => {
         expect(
           screen.getByText(
@@ -314,9 +323,12 @@ describe('ShareButtons', () => {
     it('uses preGeneratedBlob without calling generateImageBlob when available', async () => {
       const preBlob = new Blob(['pre-generated'], { type: 'image/png' })
       vi.mocked(generateImageBlob).mockClear()
-      const shareMock = vi.fn().mockResolvedValue(undefined)
-      const canShareMock = vi.fn().mockReturnValue(true)
-      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
+      vi.spyOn(window, 'open').mockReturnValue({} as Window)
+      vi.stubGlobal('URL', {
+        ...globalThis.URL,
+        createObjectURL: vi.fn(() => 'blob:mock-url'),
+        revokeObjectURL: vi.fn(),
+      })
 
       render(
         <ShareButtons
@@ -328,10 +340,10 @@ describe('ShareButtons', () => {
       fireEvent.click(screen.getByLabelText('Xでシェア'))
 
       await waitFor(() => {
-        expect(shareMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            files: expect.arrayContaining([expect.any(File)]),
-          }),
+        expect(window.open).toHaveBeenCalledWith(
+          expect.stringContaining('twitter.com/intent/tweet'),
+          '_blank',
+          'noopener,noreferrer',
         )
       })
 
