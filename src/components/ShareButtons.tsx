@@ -148,7 +148,7 @@ export default function ShareButtons({
     } finally {
       setXShareGenerating(false)
     }
-  }, [captureRef, theme])
+  }, [captureRef, theme, preGeneratedBlob])
 
   const handleWebShare = useCallback(async () => {
     try {

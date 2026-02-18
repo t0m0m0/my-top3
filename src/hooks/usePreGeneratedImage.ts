@@ -1,23 +1,23 @@
-import { useState, useEffect, type RefObject } from 'react'
+import { useState, useEffect } from 'react'
 import { generateImageBlob } from '../utils/image-helpers'
 
 /**
- * Pre-generates an image blob from the given captureRef element.
+ * Pre-generates an image blob from the given DOM element.
  * Returns the cached Blob when ready, or null while generating / on error.
  *
  * This allows navigator.share({ files }) to be called synchronously
  * within a user gesture without waiting for html2canvas.
  */
 export function usePreGeneratedImage(
-  captureRef: RefObject<HTMLDivElement | null> | undefined,
+  element: HTMLDivElement | null | undefined,
 ): Blob | null {
   const [blob, setBlob] = useState<Blob | null>(null)
 
   useEffect(() => {
-    const element = captureRef?.current
     if (!element) {
-      setBlob(null)
-      return
+      // Use setTimeout to avoid synchronous setState in effect body
+      const t = setTimeout(() => setBlob(null), 0)
+      return () => clearTimeout(t)
     }
 
     let cancelled = false
@@ -40,7 +40,7 @@ export function usePreGeneratedImage(
       cancelled = true
       clearTimeout(timer)
     }
-  }, [captureRef?.current]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [element])
 
   return blob
 }

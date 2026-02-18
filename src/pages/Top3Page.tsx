@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -14,6 +14,14 @@ function Top3Page() {
   const [searchParams] = useSearchParams()
   const params = parseTop3Params(searchParams)
   const captureRef = useRef<HTMLDivElement>(null)
+  const [captureElement, setCaptureElement] = useState<HTMLDivElement | null>(
+    null,
+  )
+  const captureRefCallback = useCallback((node: HTMLDivElement | null) => {
+    ;(captureRef as React.MutableRefObject<HTMLDivElement | null>).current =
+      node
+    setCaptureElement(node)
+  }, [])
 
   const book = useWorkFetch('book', params.bookId)
   const music = useWorkFetch('music', params.musicId)
@@ -26,7 +34,7 @@ function Top3Page() {
   const showImage = allLoaded && noErrors && hasAnyData
 
   const preGeneratedBlob = usePreGeneratedImage(
-    showImage ? captureRef : undefined,
+    showImage ? captureElement : null,
   )
 
   if (!hasAnyId) {
@@ -165,7 +173,7 @@ function Top3Page() {
               book={book.data}
               music={music.data}
               movie={movie.data}
-              captureRef={captureRef}
+              captureRef={captureRefCallback}
             />
           </div>
         )}

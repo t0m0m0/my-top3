@@ -11,12 +11,16 @@ import { useLayoutSwap } from '../hooks/useLayoutSwap'
 import { ImageSlot } from './ImageSlot'
 import { LayoutSelector } from './LayoutSelector'
 
+type CaptureRefProp =
+  | React.RefObject<HTMLDivElement | null>
+  | ((node: HTMLDivElement | null) => void)
+
 type Top3ImageProps = {
   theme: string
   book: SearchResultItem | null
   music: SearchResultItem | null
   movie: SearchResultItem | null
-  captureRef?: React.RefObject<HTMLDivElement | null>
+  captureRef?: CaptureRefProp
 }
 
 function Top3Image({
@@ -44,10 +48,11 @@ function Top3Image({
       const mutableInternalRef =
         internalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
       mutableInternalRef.current = node
-      if (externalCaptureRef && 'current' in externalCaptureRef) {
-        const mutableExternalRef =
-          externalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
-        mutableExternalRef.current = node
+      if (typeof externalCaptureRef === 'function') {
+        externalCaptureRef(node)
+      } else if (externalCaptureRef && 'current' in externalCaptureRef) {
+        // Assign via Object.assign to avoid lint immutability error on props
+        Object.assign(externalCaptureRef, { current: node })
       }
     },
     [internalCaptureRef, externalCaptureRef],
