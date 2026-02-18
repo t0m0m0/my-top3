@@ -1,3 +1,4 @@
+import StepGuide from '../components/StepGuide'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
 import SearchHistory from '../components/SearchHistory'
@@ -69,6 +70,9 @@ function SearchPage() {
         >
           テーマを決めて、お気に入りの3作品を選ぼう
         </p>
+        <div className="animate-fade-in-up animate-delay-400 relative mt-6">
+          <StepGuide />
+        </div>
       </div>
 
       <div className="mx-auto max-w-5xl px-3 sm:px-4">
