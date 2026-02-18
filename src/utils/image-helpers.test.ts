@@ -22,6 +22,42 @@ describe('generateImageBlob', () => {
     expect(blob).toBe(fakeBlob)
   })
 
+  it('temporarily resets CSS transform during capture', async () => {
+    const fakeBlob = new Blob(['fake'], { type: 'image/png' })
+    const fakeCanvas = document.createElement('canvas')
+    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb: BlobCallback) => {
+      cb(fakeBlob)
+    })
+
+    let capturedTransform: string | undefined
+    vi.mocked(html2canvas).mockImplementation(async (el) => {
+      capturedTransform = (el as HTMLElement).style.transform
+      return fakeCanvas
+    })
+
+    const el = document.createElement('div')
+    el.style.transform = 'scale(0.5)'
+    el.style.transformOrigin = 'top left'
+
+    await generateImageBlob(el)
+
+    // During capture, transform should be 'none'
+    expect(capturedTransform).toBe('none')
+    // After capture, transform should be restored
+    expect(el.style.transform).toBe('scale(0.5)')
+    expect(el.style.transformOrigin).toBe('top left')
+  })
+
+  it('restores transform even when html2canvas throws', async () => {
+    vi.mocked(html2canvas).mockRejectedValue(new Error('canvas error'))
+
+    const el = document.createElement('div')
+    el.style.transform = 'scale(0.3)'
+
+    await expect(generateImageBlob(el)).rejects.toThrow('canvas error')
+    expect(el.style.transform).toBe('scale(0.3)')
+  })
+
   it('throws when html2canvas fails', async () => {
     vi.mocked(html2canvas).mockRejectedValue(new Error('canvas error'))
 
