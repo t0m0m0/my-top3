@@ -3,6 +3,7 @@ import { SelectionProvider } from './contexts/SelectionContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import SearchPage from './pages/SearchPage'
 import Top3Page from './pages/Top3Page'
+import ShortUrlPage from './pages/ShortUrlPage'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<SearchPage />} />
           <Route path="/my-no1s" element={<Top3Page />} />
+          <Route path="/s/:id" element={<ShortUrlPage />} />
         </Routes>
       </SelectionProvider>
     </ErrorBoundary>

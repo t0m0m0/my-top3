@@ -7,11 +7,20 @@ import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import ShareIcon from '@mui/icons-material/Share'
 import { generateImageBlob } from '../utils/image-helpers'
+import { createShortUrl } from '../utils/share-url'
+
+type ShareParams = {
+  theme: string
+  bookId: string
+  musicId: string
+  movieId: string
+}
 
 type ShareButtonsProps = {
   theme?: string
   captureRef?: RefObject<HTMLDivElement | null>
   preGeneratedBlob?: Blob | null
+  shareParams?: ShareParams
 }
 
 function buildShareText(theme?: string): string {
@@ -22,24 +31,42 @@ export default function ShareButtons({
   theme,
   captureRef,
   preGeneratedBlob,
+  shareParams,
 }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
   const [shareFailed, setShareFailed] = useState(false)
   const [shareGenerating, setShareGenerating] = useState(false)
+  const [cachedShortUrl, setCachedShortUrl] = useState<string | null>(null)
 
   const handleCloseSuccess = useCallback(() => setCopied(false), [])
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
 
+  const resolveShareUrl = useCallback(async (): Promise<string> => {
+    if (cachedShortUrl) return cachedShortUrl
+    if (!shareParams) return window.location.href
+    try {
+      const shortPath = await createShortUrl(shareParams)
+      const fullUrl = `${window.location.origin}${shortPath}`
+      setCachedShortUrl(fullUrl)
+      return fullUrl
+    } catch {
+      // Fallback to current URL if short URL creation fails
+      return window.location.href
+    }
+  }, [shareParams, cachedShortUrl])
+
   const handleCopyUrl = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      const url = await resolveShareUrl()
+      await navigator.clipboard.writeText(url)
       setCopied(true)
     } catch (error) {
       console.warn('Clipboard API failed, attempting fallback:', error)
+      const url = cachedShortUrl ?? window.location.href
       const textarea = document.createElement('textarea')
-      textarea.value = window.location.href
+      textarea.value = url
       textarea.style.position = 'fixed'
       textarea.style.opacity = '0'
       document.body.appendChild(textarea)
@@ -57,11 +84,13 @@ export default function ShareButtons({
         document.body.removeChild(textarea)
       }
     }
-  }, [])
+  }, [resolveShareUrl, cachedShortUrl])
 
   const handleWebShare = useCallback(async () => {
     setShareGenerating(true)
     try {
+      const shareUrl = await resolveShareUrl()
+
       // Try to share with image if captureRef is available and canShare supports files
       if (captureRef?.current) {
         const blob =
@@ -74,7 +103,7 @@ export default function ShareButtons({
         ) {
           await navigator.share({
             text: buildShareText(theme),
-            url: window.location.href,
+            url: shareUrl,
             files: [file],
           })
           return
@@ -85,7 +114,7 @@ export default function ShareButtons({
       await navigator.share({
         title: 'My No.1s',
         text: buildShareText(theme),
-        url: window.location.href,
+        url: shareUrl,
       })
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
@@ -96,7 +125,7 @@ export default function ShareButtons({
     } finally {
       setShareGenerating(false)
     }
-  }, [captureRef, theme, preGeneratedBlob])
+  }, [captureRef, theme, preGeneratedBlob, resolveShareUrl])
 
   const canWebShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'

@@ -6,6 +6,12 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import api from './index.ts'
 import { injectOgpTags } from './ogp.ts'
+import { createShareStore } from './share-store.ts'
+
+const sharesDataPath =
+  process.env['SHARES_DATA_PATH'] ||
+  path.resolve(process.cwd(), 'data', 'shares.json')
+const shareStore = createShareStore(sharesDataPath)
 
 const app = new Hono()
 
@@ -31,6 +37,37 @@ app.get('/my-no1s', async (c) => {
   } catch (e) {
     console.error('[ogp] Failed to inject OGP tags:', e)
     // Return original HTML without OGP tags rather than failing
+  }
+
+  return c.html(html)
+})
+
+// OGP meta tag injection for short share URLs
+app.get('/s/:id', async (c) => {
+  const indexPath = path.resolve('./dist/index.html')
+  let html: string
+  try {
+    html = fs.readFileSync(indexPath, 'utf-8')
+  } catch {
+    return c.notFound()
+  }
+
+  const id = c.req.param('id')
+  const params = shareStore.get(id)
+
+  if (params) {
+    // Build equivalent search params for OGP injection
+    const searchParams = new URLSearchParams()
+    if (params.theme) searchParams.set('theme', params.theme)
+    if (params.bookId) searchParams.set('book', params.bookId)
+    if (params.musicId) searchParams.set('music', params.musicId)
+    if (params.movieId) searchParams.set('movie', params.movieId)
+
+    try {
+      html = await injectOgpTags(html, c.req.url, searchParams)
+    } catch (e) {
+      console.error('[ogp] Failed to inject OGP tags for short URL:', e)
+    }
   }
 
   return c.html(html)
