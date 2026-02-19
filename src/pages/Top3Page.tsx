@@ -44,7 +44,7 @@ function Top3Page() {
         className="min-h-screen"
         style={{
           background:
-            'linear-gradient(180deg, var(--color-bg) 0%, #ecfdf5 100%)',
+            'linear-gradient(180deg, var(--color-bg) 0%, #eef2ff 100%)',
         }}
       >
         <div className="mx-auto max-w-4xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
@@ -63,7 +63,7 @@ function Top3Page() {
       className="min-h-screen"
       style={{
         background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #f0fdf4 50%, #ecfdf5 100%)',
+          'linear-gradient(180deg, var(--color-bg) 0%, #eef2ff 50%, #e0e7ff 100%)',
       }}
     >
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
