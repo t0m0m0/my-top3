@@ -44,7 +44,7 @@ app.use('/api/*', rateLimiter({ windowMs: 60_000, max: 60 }))
 
 const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
-  path.resolve(process.cwd(), 'data', 'shares.json')
+  path.resolve(process.cwd(), 'data', 'shares.db')
 
 app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)

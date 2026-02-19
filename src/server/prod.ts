@@ -10,7 +10,7 @@ import { createShareStore } from './share-store.ts'
 
 const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
-  path.resolve(process.cwd(), 'data', 'shares.json')
+  path.resolve(process.cwd(), 'data', 'shares.db')
 const shareStore = createShareStore(sharesDataPath)
 
 const app = new Hono()
