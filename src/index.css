@@ -175,3 +175,51 @@ body {
     animation: none !important;
   }
 }
+
+/* ========================================
+   Search History Chip & Theme Quote Styles
+   ======================================== */
+
+.chip-search-history {
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  transition: background-color 0.2s ease;
+}
+
+.chip-search-history:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+
+.theme-quote {
+  position: relative;
+  display: inline-block;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.theme-quote::before {
+  content: '\201C';
+  position: absolute;
+  left: -4px;
+  top: -8px;
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  opacity: 0.3;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.theme-quote::after {
+  content: '\201D';
+  position: absolute;
+  right: -4px;
+  bottom: -12px;
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  opacity: 0.3;
+  font-family: Georgia, serif;
+  line-height: 1;
+}

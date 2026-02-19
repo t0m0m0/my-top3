@@ -1,7 +1,5 @@
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
-import Typography from '@mui/material/Typography'
 import HistoryIcon from '@mui/icons-material/History'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { useSearchHistory } from '../hooks/useSearchHistory'
@@ -23,12 +21,11 @@ export default function SearchHistory({
   }
 
   return (
-    <Box
-      className="mt-4 rounded-xl p-4"
-      sx={{
+    <div
+      className="mt-4 rounded-xl border p-4"
+      style={{
         backgroundColor: 'var(--color-surface)',
-        border: '1px solid',
-        borderColor: 'divider',
+        borderColor: 'var(--color-border)',
       }}
       aria-label="検索履歴"
     >
@@ -38,12 +35,12 @@ export default function SearchHistory({
             fontSize="small"
             sx={{ color: 'var(--color-text-secondary)' }}
           />
-          <Typography
-            variant="subtitle2"
-            sx={{ color: 'var(--color-text-primary)', fontWeight: 600 }}
+          <span
+            className="text-sm font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
           >
             最近の検索
-          </Typography>
+          </span>
         </div>
         <Button
           variant="text"
@@ -63,21 +60,10 @@ export default function SearchHistory({
             label={keyword}
             size="small"
             clickable
+            className="chip-search-history"
             onClick={() => onSearch(keyword)}
             onDelete={() => removeHistory(keyword)}
             sx={{
-              borderRadius: '8px',
-              backgroundColor:
-                'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-              color: 'var(--color-text-primary)',
-              fontWeight: 500,
-              border: '1px solid',
-              borderColor:
-                'color-mix(in srgb, var(--color-primary) 20%, transparent)',
-              '&:hover': {
-                backgroundColor:
-                  'color-mix(in srgb, var(--color-primary) 16%, transparent)',
-              },
               '& .MuiChip-deleteIcon': {
                 color: 'var(--color-text-secondary)',
                 '&:hover': {
@@ -88,6 +74,6 @@ export default function SearchHistory({
           />
         ))}
       </div>
-    </Box>
+    </div>
   )
 }

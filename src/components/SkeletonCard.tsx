@@ -1,6 +1,5 @@
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import Box from '@mui/material/Box'
 import Skeleton from '@mui/material/Skeleton'
 
 /**
@@ -10,9 +9,8 @@ import Skeleton from '@mui/material/Skeleton'
 export default function SkeletonCard() {
   return (
     <Card
+      className="flex border-l-4"
       sx={{
-        display: 'flex',
-        borderLeft: '4px solid',
         borderLeftColor: 'action.disabled',
       }}
     >
@@ -25,14 +23,7 @@ export default function SkeletonCard() {
           flexShrink: 0,
         }}
       />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
+      <div className="flex flex-col flex-1 min-w-0">
         <CardContent sx={{ flex: 1, py: 1.5, '&:last-child': { pb: 1.5 } }}>
           {/* Title */}
           <Skeleton variant="text" width="80%" height={24} />
@@ -41,7 +32,7 @@ export default function SkeletonCard() {
           {/* Button */}
           <Skeleton variant="rounded" width={100} height={30} sx={{ mt: 1 }} />
         </CardContent>
-      </Box>
+      </div>
     </Card>
   )
 }

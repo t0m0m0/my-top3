@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
@@ -177,9 +176,9 @@ function MobileCollapsedBar({
         </span>
       </div>
       <ExpandMoreIcon
-        sx={{
+        className="transition-transform duration-300"
+        style={{
           color: 'var(--color-text-secondary)',
-          transition: 'transform 0.3s',
           transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
           fontSize: 22,
         }}
@@ -222,7 +221,7 @@ function SelectionArea({
   }
 
   return (
-    <Box>
+    <div>
       {/* Desktop: always show full view */}
       <div className="hidden sm:block">
         <div className="mb-2 flex items-center justify-between">
@@ -285,21 +284,12 @@ function SelectionArea({
 
       {/* Mobile floating bar: progressive button (only when >= 1 selected) */}
       {selectedCount >= 1 && (
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1200,
-            display: { xs: 'flex', sm: 'none' },
-            justifyContent: 'center',
-            pb: `max(12px, env(safe-area-inset-bottom))`,
-            pt: 1.5,
-            px: 2,
+        <div
+          className="fixed inset-x-0 bottom-0 z-[1200] flex justify-center px-2 pt-1.5 pointer-events-none sm:hidden"
+          style={{
+            paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
             background:
               'linear-gradient(transparent, rgba(255,255,255,0.95) 30%)',
-            pointerEvents: 'none',
           }}
         >
           <Button
@@ -307,8 +297,8 @@ function SelectionArea({
             onClick={handleCreate}
             disabled={!isComplete}
             size="large"
+            className={`pointer-events-auto ${isComplete ? 'animate-scale-in animate-pulse-soft' : ''}`}
             sx={{
-              pointerEvents: 'auto',
               minHeight: 48,
               minWidth: 200,
               fontSize: '1rem',
@@ -317,9 +307,6 @@ function SelectionArea({
               boxShadow: isComplete
                 ? '0 4px 14px rgba(0,0,0,0.25)'
                 : '0 2px 8px rgba(0,0,0,0.12)',
-              ...(isComplete && {
-                animation: 'scaleIn 0.3s ease-out, pulse-soft 0.4s ease-in-out',
-              }),
               '&:hover': {
                 boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
               },
@@ -334,9 +321,9 @@ function SelectionArea({
               </span>
             )}
           </Button>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 

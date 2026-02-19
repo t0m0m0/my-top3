@@ -1,6 +1,4 @@
 import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
 import ResultCard from './ResultCard'
 import SkeletonCard from './SkeletonCard'
 import ErrorMessage from './ErrorMessage'
@@ -34,9 +32,9 @@ export default function SearchResults({
 
   if (error) {
     return (
-      <Box className="mt-8">
+      <div className="mt-8">
         <ErrorMessage message={error} onRetry={onRetry} />
-      </Box>
+      </div>
     )
   }
 
@@ -95,9 +93,9 @@ export default function SearchResults({
             <SkeletonCard key={`skeleton-${i}`} />
           ))
         : isLoading && (
-            <Box className="col-span-full flex justify-center py-6">
+            <div className="col-span-full flex justify-center py-6">
               <CircularProgress size={32} />
-            </Box>
+            </div>
           )}
 
       {!isLoading && hasMore && (
@@ -109,11 +107,14 @@ export default function SearchResults({
       )}
 
       {!isLoading && !hasMore && results.length > 0 && (
-        <Box className="col-span-full py-4 text-center">
-          <Typography variant="body2" color="text.secondary">
+        <div className="col-span-full py-4 text-center">
+          <p
+            className="text-sm"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             全件表示しました
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
     </div>
   )
