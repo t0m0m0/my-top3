@@ -6,6 +6,7 @@ import SearchResults from '../components/SearchResults'
 import ThemeInput from '../components/ThemeInput'
 import ThemeHistory from '../components/ThemeHistory'
 import SelectionArea from '../components/SelectionArea'
+import DataCredits from '../components/DataCredits'
 import { useSearchPage } from '../hooks/useSearchPage'
 
 function SearchPage() {
@@ -144,10 +145,9 @@ function SearchPage() {
             error={error}
           />
         </div>
-
-        {/* Bottom spacer */}
-        <div className="h-8 sm:h-12" />
       </div>
+
+      <DataCredits />
     </div>
   )
 }
