@@ -14,16 +14,15 @@ type ShareData = {
 
 function ShortUrlPage() {
   const { id } = useParams<{ id: string }>()
+  const hasId = !!id
   const [data, setData] = useState<ShareData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(hasId)
+  const [error, setError] = useState<string | null>(
+    hasId ? null : '共有リンクが見つかりません。',
+  )
 
   useEffect(() => {
-    if (!id) {
-      setError('共有リンクが見つかりません。')
-      setLoading(false)
-      return
-    }
+    if (!id) return
 
     let cancelled = false
 
