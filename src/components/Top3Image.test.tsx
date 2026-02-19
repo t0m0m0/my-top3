@@ -173,9 +173,10 @@ describe('Top3Image', () => {
           movie={mockMovie}
         />,
       )
-      expect(screen.getByText('BOOK')).toBeInTheDocument()
-      expect(screen.getByText('MUSIC')).toBeInTheDocument()
-      expect(screen.getByText('MOVIE')).toBeInTheDocument()
+      // Category labels appear in both LayoutSelector toggles and image slots
+      expect(screen.getAllByText('BOOK').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('MUSIC').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('MOVIE').length).toBeGreaterThanOrEqual(1)
     })
 
     it('does not display #1 badges', () => {
@@ -281,9 +282,10 @@ describe('Top3Image', () => {
           movie={mockMovie}
         />,
       )
-      // Click the top slot select and change to book
-      const topSelect = screen.getByTestId('select-top')
-      fireEvent.change(topSelect, { target: { value: 'book' } })
+      // Click the BOOK button in the top slot toggle group
+      const topGroup = screen.getByTestId('layout-slot-top')
+      const bookButton = topGroup.querySelector('[value="book"]') as HTMLElement
+      fireEvent.click(bookButton)
 
       const topSlot = screen.getByTestId('slot-top')
       expect(topSlot).toHaveTextContent('Test Book')
@@ -300,8 +302,9 @@ describe('Top3Image', () => {
       )
       // Default: top=music, bottom-left=book, bottom-right=movie
       // Change top to book → music should go to bottom-left (where book was)
-      const topSelect = screen.getByTestId('select-top')
-      fireEvent.change(topSelect, { target: { value: 'book' } })
+      const topGroup = screen.getByTestId('layout-slot-top')
+      const bookButton = topGroup.querySelector('[value="book"]') as HTMLElement
+      fireEvent.click(bookButton)
 
       const topSlot = screen.getByTestId('slot-top')
       const bottomLeftSlot = screen.getByTestId('slot-bottom-left')

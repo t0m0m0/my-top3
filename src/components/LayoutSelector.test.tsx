@@ -16,11 +16,11 @@ describe('LayoutSelector', () => {
     expect(screen.getByTestId('layout-selector')).toBeInTheDocument()
   })
 
-  it('renders select elements for all three slots', () => {
+  it('renders toggle button groups for all three slots', () => {
     render(<LayoutSelector layout={defaultLayout} onLayoutChange={vi.fn()} />)
-    expect(screen.getByTestId('select-top')).toBeInTheDocument()
-    expect(screen.getByTestId('select-bottom-left')).toBeInTheDocument()
-    expect(screen.getByTestId('select-bottom-right')).toBeInTheDocument()
+    expect(screen.getByTestId('layout-slot-top')).toBeInTheDocument()
+    expect(screen.getByTestId('layout-slot-bottom-left')).toBeInTheDocument()
+    expect(screen.getByTestId('layout-slot-bottom-right')).toBeInTheDocument()
   })
 
   it('displays Japanese slot labels', () => {
@@ -30,21 +30,44 @@ describe('LayoutSelector', () => {
     expect(screen.getByText('右下:')).toBeInTheDocument()
   })
 
-  it('reflects current layout in select values', () => {
+  it('renders category buttons with labels for each slot', () => {
     render(<LayoutSelector layout={defaultLayout} onLayoutChange={vi.fn()} />)
-    expect(screen.getByTestId('select-top')).toHaveValue('music')
-    expect(screen.getByTestId('select-bottom-left')).toHaveValue('book')
-    expect(screen.getByTestId('select-bottom-right')).toHaveValue('movie')
+    // Each slot has 3 category buttons → 9 total
+    const bookButtons = screen.getAllByText('BOOK')
+    const musicButtons = screen.getAllByText('MUSIC')
+    const movieButtons = screen.getAllByText('MOVIE')
+    expect(bookButtons).toHaveLength(3)
+    expect(musicButtons).toHaveLength(3)
+    expect(movieButtons).toHaveLength(3)
   })
 
-  it('calls onLayoutChange with slot and category when changed', () => {
+  it('reflects current layout as selected toggle buttons', () => {
+    render(<LayoutSelector layout={defaultLayout} onLayoutChange={vi.fn()} />)
+    // top slot: music is selected
+    const topGroup = screen.getByTestId('layout-slot-top')
+    const topSelected = topGroup.querySelector('[aria-pressed="true"]')
+    expect(topSelected).toHaveTextContent('MUSIC')
+
+    // bottom-left slot: book is selected
+    const blGroup = screen.getByTestId('layout-slot-bottom-left')
+    const blSelected = blGroup.querySelector('[aria-pressed="true"]')
+    expect(blSelected).toHaveTextContent('BOOK')
+
+    // bottom-right slot: movie is selected
+    const brGroup = screen.getByTestId('layout-slot-bottom-right')
+    const brSelected = brGroup.querySelector('[aria-pressed="true"]')
+    expect(brSelected).toHaveTextContent('MOVIE')
+  })
+
+  it('calls onLayoutChange with slot and category when a toggle button is clicked', () => {
     const onLayoutChange = vi.fn()
     render(
       <LayoutSelector layout={defaultLayout} onLayoutChange={onLayoutChange} />,
     )
-    fireEvent.change(screen.getByTestId('select-top'), {
-      target: { value: 'book' },
-    })
+    // Click BOOK in the top slot (top is currently music)
+    const topGroup = screen.getByTestId('layout-slot-top')
+    const bookButton = topGroup.querySelector('[value="book"]') as HTMLElement
+    fireEvent.click(bookButton)
     expect(onLayoutChange).toHaveBeenCalledWith('top', 'book')
   })
 
@@ -54,9 +77,31 @@ describe('LayoutSelector', () => {
     render(
       <LayoutSelector layout={defaultLayout} onLayoutChange={onLayoutChange} />,
     )
-    fireEvent.change(screen.getByTestId('select-bottom-right'), {
-      target: { value: 'music' },
-    })
+    // Click MUSIC in the bottom-right slot (bottom-right is currently movie)
+    const brGroup = screen.getByTestId('layout-slot-bottom-right')
+    const musicButton = brGroup.querySelector('[value="music"]') as HTMLElement
+    fireEvent.click(musicButton)
     expect(onLayoutChange).toHaveBeenCalledWith('bottom-right', 'music')
+  })
+
+  it('does not call onLayoutChange when clicking the already-selected category', () => {
+    const onLayoutChange = vi.fn()
+    render(
+      <LayoutSelector layout={defaultLayout} onLayoutChange={onLayoutChange} />,
+    )
+    // Click MUSIC in top slot (already selected)
+    const topGroup = screen.getByTestId('layout-slot-top')
+    const musicButton = topGroup.querySelector('[value="music"]') as HTMLElement
+    fireEvent.click(musicButton)
+    expect(onLayoutChange).not.toHaveBeenCalled()
+  })
+
+  it('renders color indicators for each category button', () => {
+    render(<LayoutSelector layout={defaultLayout} onLayoutChange={vi.fn()} />)
+    const topGroup = screen.getByTestId('layout-slot-top')
+    const indicators = topGroup.querySelectorAll(
+      '[data-testid="color-indicator"]',
+    )
+    expect(indicators).toHaveLength(3)
   })
 })
