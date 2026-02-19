@@ -1,4 +1,4 @@
-import { useState, useCallback, type RefObject } from 'react'
+import { useState, useCallback, useEffect, useRef, type RefObject } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Snackbar from '@mui/material/Snackbar'
@@ -38,34 +38,41 @@ export default function ShareButtons({
   const [copyFailed, setCopyFailed] = useState(false)
   const [shareFailed, setShareFailed] = useState(false)
   const [shareGenerating, setShareGenerating] = useState(false)
-  const [cachedShortUrl, setCachedShortUrl] = useState<string | null>(null)
+  const resolvedUrlRef = useRef<string | null>(null)
 
   const handleCloseSuccess = useCallback(() => setCopied(false), [])
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
 
-  const resolveShareUrl = useCallback(async (): Promise<string> => {
-    if (cachedShortUrl) return cachedShortUrl
-    if (!shareParams) return window.location.href
-    try {
-      const shortPath = await createShortUrl(shareParams)
-      const fullUrl = `${window.location.origin}${shortPath}`
-      setCachedShortUrl(fullUrl)
-      return fullUrl
-    } catch {
-      // Fallback to current URL if short URL creation fails
-      return window.location.href
+  // Pre-resolve short URL on mount so it's ready when user taps share
+  useEffect(() => {
+    if (!shareParams) return
+    let cancelled = false
+    createShortUrl(shareParams)
+      .then((shortPath) => {
+        if (!cancelled) {
+          resolvedUrlRef.current = `${window.location.origin}${shortPath}`
+        }
+      })
+      .catch(() => {
+        // Fallback: will use window.location.href
+      })
+    return () => {
+      cancelled = true
     }
-  }, [shareParams, cachedShortUrl])
+  }, [shareParams])
+
+  const getShareUrl = useCallback((): string => {
+    return resolvedUrlRef.current ?? window.location.href
+  }, [])
 
   const handleCopyUrl = useCallback(async () => {
+    const url = getShareUrl()
     try {
-      const url = await resolveShareUrl()
       await navigator.clipboard.writeText(url)
       setCopied(true)
     } catch (error) {
       console.warn('Clipboard API failed, attempting fallback:', error)
-      const url = cachedShortUrl ?? window.location.href
       const textarea = document.createElement('textarea')
       textarea.value = url
       textarea.style.position = 'fixed'
@@ -85,12 +92,12 @@ export default function ShareButtons({
         document.body.removeChild(textarea)
       }
     }
-  }, [resolveShareUrl, cachedShortUrl])
+  }, [getShareUrl])
 
   const handleWebShare = useCallback(async () => {
     setShareGenerating(true)
     try {
-      const shareUrl = await resolveShareUrl()
+      const shareUrl = getShareUrl()
 
       // Try to share with image if captureRef is available and canShare supports files
       if (captureRef?.current) {
@@ -102,12 +109,24 @@ export default function ShareButtons({
           typeof navigator.canShare === 'function' &&
           navigator.canShare({ files: [file] })
         ) {
-          await navigator.share({
-            text: buildShareText(theme, shareUrl),
-            url: shareUrl,
-            files: [file],
-          })
-          return
+          try {
+            await navigator.share({
+              text: buildShareText(theme, shareUrl),
+              url: shareUrl,
+              files: [file],
+            })
+            return
+          } catch (fileShareError) {
+            // If image share was rejected (e.g. NotAllowedError due to gesture timeout),
+            // retry with text-only share below
+            if (
+              fileShareError instanceof DOMException &&
+              fileShareError.name === 'AbortError'
+            ) {
+              return
+            }
+            // Fall through to text-only share
+          }
         }
       }
 
@@ -126,7 +145,7 @@ export default function ShareButtons({
     } finally {
       setShareGenerating(false)
     }
-  }, [captureRef, theme, preGeneratedBlob, resolveShareUrl])
+  }, [captureRef, theme, preGeneratedBlob, getShareUrl])
 
   const canWebShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'

@@ -11,7 +11,12 @@ vi.mock('../utils/image-helpers', async (importOriginal) => {
   }
 })
 
+vi.mock('../utils/share-url', () => ({
+  createShortUrl: vi.fn(),
+}))
+
 import { generateImageBlob } from '../utils/image-helpers'
+import { createShortUrl } from '../utils/share-url'
 
 describe('ShareButtons', () => {
   let originalClipboard: Clipboard
@@ -327,6 +332,107 @@ describe('ShareButtons', () => {
             'シェアに失敗しました。URLをコピーして手動でシェアしてください。',
           ),
         ).toBeInTheDocument()
+      })
+    })
+
+    it('retries with text-only share when image share fails with NotAllowedError', async () => {
+      const preBlob = new Blob(['pre-generated'], { type: 'image/png' })
+      const shareMock = vi
+        .fn()
+        .mockRejectedValueOnce(
+          new DOMException('not allowed', 'NotAllowedError'),
+        )
+        .mockResolvedValueOnce(undefined)
+      const canShareMock = vi.fn().mockReturnValue(true)
+      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
+
+      const mockCaptureRef = {
+        current: document.createElement('div'),
+      } as RefObject<HTMLDivElement>
+
+      render(
+        <ShareButtons
+          theme="テスト"
+          captureRef={mockCaptureRef}
+          preGeneratedBlob={preBlob}
+        />,
+      )
+      fireEvent.click(screen.getByLabelText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledTimes(2)
+        expect(shareMock).toHaveBeenLastCalledWith({
+          title: 'My No.1s',
+          text: `「テスト」 #MyNo1s\n${window.location.href}`,
+          url: window.location.href,
+        })
+      })
+    })
+  })
+
+  describe('Short URL pre-resolution', () => {
+    it('pre-resolves short URL on mount when shareParams are provided', async () => {
+      vi.mocked(createShortUrl).mockResolvedValue('/s/abc123')
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      const shareParams = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+      }
+
+      render(<ShareButtons theme="テスト" shareParams={shareParams} />)
+
+      // Wait for pre-resolution to complete
+      await waitFor(() => {
+        expect(createShortUrl).toHaveBeenCalledWith(shareParams)
+      })
+
+      // Now click share — should use the pre-resolved URL, not call createShortUrl again
+      fireEvent.click(screen.getByLabelText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: `「テスト」 #MyNo1s\n${window.location.origin}/s/abc123`,
+            url: `${window.location.origin}/s/abc123`,
+          }),
+        )
+      })
+
+      // createShortUrl should only have been called once (on mount), not again on share
+      expect(createShortUrl).toHaveBeenCalledTimes(1)
+    })
+
+    it('falls back to current URL when pre-resolution fails', async () => {
+      vi.mocked(createShortUrl).mockRejectedValue(new Error('network error'))
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      const shareParams = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+      }
+
+      render(<ShareButtons theme="テスト" shareParams={shareParams} />)
+
+      // Wait for the failed pre-resolution attempt
+      await waitFor(() => {
+        expect(createShortUrl).toHaveBeenCalled()
+      })
+
+      fireEvent.click(screen.getByLabelText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: window.location.href,
+          }),
+        )
       })
     })
   })
