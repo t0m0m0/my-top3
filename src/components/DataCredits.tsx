@@ -56,6 +56,13 @@ function DataCredits() {
           This product uses the TMDB API but is not endorsed or certified by
           TMDB. Music data is provided by Last.fm.
         </p>
+
+        <p
+          className="mt-2 text-xs leading-relaxed"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          Amazonのアソシエイトとして、当サイトは適格販売により収入を得ています。
+        </p>
       </div>
     </footer>
   )

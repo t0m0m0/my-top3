@@ -45,3 +45,12 @@ describe('DataCredits', () => {
     expect(img).toBeInTheDocument()
   })
 })
+
+it('renders Amazon associate disclosure text', () => {
+  render(<DataCredits />)
+  expect(
+    screen.getByText(
+      /Amazonのアソシエイトとして.*適格販売により収入を得ています/,
+    ),
+  ).toBeInTheDocument()
+})
