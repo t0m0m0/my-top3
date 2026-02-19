@@ -7,9 +7,9 @@ const DEFAULT_THUMBNAIL =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="176" fill="%23e5e7eb"><rect width="128" height="176"/><text x="64" y="92" text-anchor="middle" fill="%239ca3af" font-size="12">No Image</text></svg>'
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  BOOK: { bg: '#3b82f6', text: '#ffffff' },
+  BOOK: { bg: '#6366f1', text: '#ffffff' },
   MUSIC: { bg: '#8b5cf6', text: '#ffffff' },
-  MOVIE: { bg: '#ef4444', text: '#ffffff' },
+  MOVIE: { bg: '#f43f5e', text: '#ffffff' },
 }
 
 type WorkCardProps = {
@@ -126,8 +126,8 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             style={{
               width: 36,
               height: 36,
-              background: 'linear-gradient(135deg, #f59e0b, #eab308, #f59e0b)',
-              boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+              background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24)',
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
             }}
           >
             <Typography

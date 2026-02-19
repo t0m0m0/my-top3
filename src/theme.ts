@@ -1,10 +1,9 @@
 import { createTheme } from '@mui/material/styles'
 
-const fontFamily = ['"Noto Sans JP"', '"Sora"', 'sans-serif'].join(',')
+const fontFamily = ['"Inter"', '"Noto Sans JP"', 'sans-serif'].join(',')
 
 const displayFontFamily = [
-  '"Sora"',
-  '"Outfit"',
+  '"Plus Jakarta Sans"',
   '"Noto Sans JP"',
   'sans-serif',
 ].join(',')
@@ -12,27 +11,27 @@ const displayFontFamily = [
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#0d9488', // teal-600
-      light: '#14b8a6', // teal-500
-      dark: '#0f766e', // teal-700
+      main: '#6366f1', // indigo-500
+      light: '#818cf8', // indigo-400
+      dark: '#4f46e5', // indigo-600
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#f59e0b', // amber-500 (warm gold)
-      light: '#fbbf24', // amber-400
-      dark: '#d97706', // amber-600
+      main: '#f43f5e', // rose-500
+      light: '#fb7185', // rose-400
+      dark: '#e11d48', // rose-600
       contrastText: '#ffffff',
     },
     error: {
       main: '#ef4444',
     },
     background: {
-      default: '#f8fafc', // slate-50
+      default: '#fafafa', // zinc-50
       paper: '#ffffff',
     },
     text: {
-      primary: '#1e293b', // slate-800
-      secondary: '#64748b', // slate-500
+      primary: '#18181b', // zinc-900
+      secondary: '#71717a', // zinc-500
     },
   },
   typography: {
@@ -70,11 +69,11 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)',
-          boxShadow: '0 4px 14px rgba(13, 148, 136, 0.25)',
+          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)',
-            boxShadow: '0 6px 20px rgba(13, 148, 136, 0.35)',
+            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+            boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
           },
         },
       },
@@ -84,7 +83,7 @@ const theme = createTheme({
         root: {
           borderRadius: 14,
           boxShadow:
-            '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.04)',
+            '0 1px 3px 0 rgb(0 0 0 / 0.05), 0 4px 12px rgb(0 0 0 / 0.03)',
           transition: 'box-shadow 0.2s ease, transform 0.2s ease',
         },
       },
@@ -119,7 +118,7 @@ const theme = createTheme({
         root: {
           borderRadius: 10,
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#0d9488',
+            borderColor: '#6366f1',
           },
         },
       },

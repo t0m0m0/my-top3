@@ -2,35 +2,35 @@
 
 /* Design System: CSS Custom Properties */
 :root {
-  /* Primary - Teal */
-  --color-primary: #0d9488;
-  --color-primary-light: #14b8a6;
-  --color-primary-dark: #0f766e;
+  /* Primary - Indigo */
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-primary-dark: #4f46e5;
 
-  /* Secondary - Warm Gold */
-  --color-secondary: #f59e0b;
-  --color-secondary-light: #fbbf24;
-  --color-secondary-dark: #d97706;
+  /* Secondary - Rose */
+  --color-secondary: #f43f5e;
+  --color-secondary-light: #fb7185;
+  --color-secondary-dark: #e11d48;
 
-  /* Accent - Coral */
-  --color-accent: #f97316;
-  --color-accent-light: #fb923c;
-  --color-accent-dark: #ea580c;
+  /* Accent - Amber Gold */
+  --color-accent: #f59e0b;
+  --color-accent-light: #fbbf24;
+  --color-accent-dark: #d97706;
 
   /* Neutrals */
-  --color-bg: #f8fafc;
+  --color-bg: #fafafa;
   --color-surface: #ffffff;
-  --color-text-primary: #1e293b;
-  --color-text-secondary: #64748b;
-  --color-border: #e2e8f0;
+  --color-text-primary: #18181b;
+  --color-text-secondary: #71717a;
+  --color-border: #e4e4e7;
 
   /* Fonts */
-  --font-display: 'Sora', 'Outfit', 'Noto Sans JP', sans-serif;
-  --font-body: 'Noto Sans JP', 'Sora', sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+  --font-body: 'Inter', 'Noto Sans JP', sans-serif;
 
   /* Colored Shadows */
-  --shadow-primary: 0 4px 14px rgba(13, 148, 136, 0.15);
-  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.04);
+  --shadow-primary: 0 4px 14px rgba(99, 102, 241, 0.18);
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.05), 0 4px 12px rgb(0 0 0 / 0.03);
 }
 
 /* Base styles */
@@ -53,7 +53,7 @@ body {
 
 /* Gradient text utility */
 .gradient-text {
-  background: linear-gradient(135deg, #0d9488 0%, #059669 50%, #14b8a6 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
