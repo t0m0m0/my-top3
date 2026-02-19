@@ -119,7 +119,7 @@ describe('ShareButtons', () => {
       expect(screen.queryByLabelText('シェア')).not.toBeInTheDocument()
     })
 
-    it('shares text and URL with theme', async () => {
+    it('shares text and URL with theme (URL embedded in text)', async () => {
       const shareMock = vi.fn().mockResolvedValue(undefined)
       Object.assign(navigator, { share: shareMock })
 
@@ -129,13 +129,13 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: '「雨の日に」 #MyNo1s',
+          text: `「雨の日に」 #MyNo1s\n${window.location.href}`,
           url: window.location.href,
         })
       })
     })
 
-    it('shares text and URL without theme', async () => {
+    it('shares text and URL without theme (URL embedded in text)', async () => {
       const shareMock = vi.fn().mockResolvedValue(undefined)
       Object.assign(navigator, { share: shareMock })
 
@@ -145,7 +145,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: '#MyNo1s',
+          text: `#MyNo1s\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -168,7 +168,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            text: '「テスト」 #MyNo1s',
+            text: `「テスト」 #MyNo1s\n${window.location.href}`,
             url: window.location.href,
             files: expect.arrayContaining([expect.any(File)]),
           }),
@@ -220,7 +220,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: '「テスト」 #MyNo1s',
+          text: `「テスト」 #MyNo1s\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -240,7 +240,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
           title: 'My No.1s',
-          text: '「テスト」 #MyNo1s',
+          text: `「テスト」 #MyNo1s\n${window.location.href}`,
           url: window.location.href,
         })
       })
