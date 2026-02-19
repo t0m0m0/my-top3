@@ -56,7 +56,12 @@ function validateSearchResponse(data: unknown): TMDbSearchResponse {
   const obj = assertObject(data, 'TMDb search API')
   assertField<number>(obj, 'total_results', 'number', 'TMDb search response')
   assertField<number>(obj, 'page', 'number', 'TMDb search response')
-  assertArray(obj, 'results', 'TMDb search response')
+  const results = assertArray(obj, 'results', 'TMDb search response')
+  for (const item of results) {
+    const movie = assertObject(item, 'TMDb search result item')
+    assertField<number>(movie, 'id', 'number', 'TMDb search result item')
+    assertField<string>(movie, 'title', 'string', 'TMDb search result item')
+  }
   return data as TMDbSearchResponse
 }
 

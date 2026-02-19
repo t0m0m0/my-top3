@@ -21,6 +21,12 @@ describe('assertObject', () => {
   it('throws for undefined', () => {
     expect(() => assertObject(undefined, 'test')).toThrow('Expected object')
   })
+  it('throws for array', () => {
+    expect(() => assertObject([1, 2, 3], 'test')).toThrow('Expected object')
+  })
+  it('throws for empty array', () => {
+    expect(() => assertObject([], 'test')).toThrow('Expected object')
+  })
 })
 
 describe('assertField', () => {

@@ -167,6 +167,24 @@ describe('searchMusic', () => {
     }
   })
 
+  it('returns validation error when album items lack name', async () => {
+    server.use(
+      http.get(LASTFM_BASE, () =>
+        HttpResponse.json(
+          mockAlbumSearchResponse([
+            { artist: 'Test', mbid: '', url: '', image: [] },
+          ]),
+        ),
+      ),
+    )
+    const { searchMusic } = await import('./lastfm')
+    const result = await searchMusic('api-key', 'test')
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).toMatch(/name/)
+    }
+  })
+
   it('filters out albums with no images', async () => {
     server.use(
       http.get(LASTFM_BASE, () =>
