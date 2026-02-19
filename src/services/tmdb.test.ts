@@ -43,7 +43,7 @@ describe('searchMovies', () => {
     })
   })
 
-  it('maps TMDb response correctly with director name', async () => {
+  it('maps TMDb response correctly with release year as subtitle', async () => {
     server.use(
       http.get(`${BASE_URL}/search/movie`, () =>
         HttpResponse.json({
@@ -52,9 +52,6 @@ describe('searchMovies', () => {
           total_pages: 1,
           total_results: 1,
         }),
-      ),
-      http.get(`${BASE_URL}/movie/:id`, () =>
-        HttpResponse.json(mockMovieDetail()),
       ),
     )
     const result = await searchMovies('key', 'test')
@@ -64,11 +61,11 @@ describe('searchMovies', () => {
       expect(result.data.items[0].category).toBe('movie')
       expect(result.data.items[0].title).toBe('Test Movie')
       expect(result.data.items[0].thumbnailUrl).toContain('/poster.jpg')
-      expect(result.data.items[0].subtitle).toBe('Test Director')
+      expect(result.data.items[0].subtitle).toBe('2024')
     }
   })
 
-  it('shows 監督不明 when credits fetch fails', async () => {
+  it('shows empty subtitle when release_date is missing', async () => {
     server.use(
       http.get(`${BASE_URL}/search/movie`, () =>
         HttpResponse.json({
@@ -78,31 +75,10 @@ describe('searchMovies', () => {
           total_results: 1,
         }),
       ),
-      http.get(`${BASE_URL}/movie/:id`, () => HttpResponse.error()),
     )
     const result = await searchMovies('key', 'test')
     if (result.ok) {
-      expect(result.data.items[0].subtitle).toBe('監督不明')
-    }
-  })
-
-  it('shows 監督不明 when no Director in crew', async () => {
-    server.use(
-      http.get(`${BASE_URL}/search/movie`, () =>
-        HttpResponse.json({
-          page: 1,
-          results: [mockMovie()],
-          total_pages: 1,
-          total_results: 1,
-        }),
-      ),
-      http.get(`${BASE_URL}/movie/:id`, () =>
-        HttpResponse.json(mockMovieDetail({ credits: { crew: [] } })),
-      ),
-    )
-    const result = await searchMovies('key', 'test')
-    if (result.ok) {
-      expect(result.data.items[0].subtitle).toBe('監督不明')
+      expect(result.data.items[0].subtitle).toBe('')
     }
   })
 
@@ -116,9 +92,6 @@ describe('searchMovies', () => {
           total_results: 1,
         }),
       ),
-      http.get(`${BASE_URL}/movie/:id`, () =>
-        HttpResponse.json(mockMovieDetail()),
-      ),
     )
     const result = await searchMovies('key', 'test')
     if (result.ok) {
@@ -126,10 +99,10 @@ describe('searchMovies', () => {
     }
   })
 
-  it('fetches director info for multiple movies in parallel', async () => {
+  it('does not make additional API calls for director info', async () => {
     const movies = [
-      mockMovie({ id: 1, title: 'Movie A' }),
-      mockMovie({ id: 2, title: 'Movie B' }),
+      mockMovie({ id: 1, title: 'Movie A', release_date: '2023-05-15' }),
+      mockMovie({ id: 2, title: 'Movie B', release_date: '2024-11-20' }),
     ]
     server.use(
       http.get(`${BASE_URL}/search/movie`, () =>
@@ -140,35 +113,19 @@ describe('searchMovies', () => {
           total_results: 2,
         }),
       ),
-      http.get(`${BASE_URL}/movie/1`, () =>
-        HttpResponse.json(
-          mockMovieDetail({
-            id: 1,
-            title: 'Movie A',
-            credits: {
-              crew: [{ id: 10, name: 'Director A', job: 'Director' }],
-            },
-          }),
-        ),
-      ),
-      http.get(`${BASE_URL}/movie/2`, () =>
-        HttpResponse.json(
-          mockMovieDetail({
-            id: 2,
-            title: 'Movie B',
-            credits: {
-              crew: [{ id: 20, name: 'Director B', job: 'Director' }],
-            },
-          }),
-        ),
-      ),
+      // No movie/:id handler — should NOT be called
+      http.get(`${BASE_URL}/movie/:id`, () => {
+        throw new Error(
+          'Should not fetch individual movie details during search',
+        )
+      }),
     )
     const result = await searchMovies('key', 'test')
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.data.items).toHaveLength(2)
-      expect(result.data.items[0].subtitle).toBe('Director A')
-      expect(result.data.items[1].subtitle).toBe('Director B')
+      expect(result.data.items[0].subtitle).toBe('2023')
+      expect(result.data.items[1].subtitle).toBe('2024')
     }
   })
 })

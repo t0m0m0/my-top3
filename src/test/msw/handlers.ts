@@ -102,7 +102,7 @@ export const handlers = [
             id: 'movie-1',
             category: 'movie',
             title: `Movie: ${q}`,
-            subtitle: 'Director Name',
+            subtitle: '2024',
             thumbnailUrl: 'https://example.com/movie.jpg',
             externalUrl: 'https://www.imdb.com/title/tt1234567',
           },
