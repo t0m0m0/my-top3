@@ -63,6 +63,11 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           border: (theme) => `2px solid ${theme.palette.primary.main}`,
           opacity: 0.85,
         }),
+        '&:focus-visible': {
+          outline: '2px solid',
+          outlineColor: 'primary.main',
+          outlineOffset: '2px',
+        },
         ...(!isSelected && {
           '&:hover': {
             transform: 'translateY(-2px) scale(1.02)',

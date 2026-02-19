@@ -132,7 +132,7 @@ export default function ShareButtons({
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   return (
-    <div className="flex justify-center gap-3">
+    <div className="flex justify-center gap-4">
       <Tooltip title="URLをコピー" arrow>
         <IconButton
           onClick={handleCopyUrl}
