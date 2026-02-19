@@ -68,14 +68,10 @@ async function fetchWorkTitle(
       if (!apiKey) return null
       result = await getBookById(apiKey, id)
     } else if (category === 'music') {
-      const clientId = process.env['SPOTIFY_CLIENT_ID'] ?? ''
-      const clientSecret = process.env['SPOTIFY_CLIENT_SECRET'] ?? ''
-      if (!clientId || !clientSecret) return null
-      const { getAccessToken, getMusicById } =
-        await import('../services/spotify.ts')
-      const token = await getAccessToken(clientId, clientSecret)
-      if (!token.ok) return null
-      result = await getMusicById(token.data, id)
+      const apiKey = process.env['LASTFM_API_KEY'] ?? ''
+      if (!apiKey) return null
+      const { getMusicById } = await import('../services/lastfm.ts')
+      result = await getMusicById(apiKey, id)
     } else {
       const apiKey = process.env['TMDB_API_KEY'] ?? ''
       if (!apiKey) return null

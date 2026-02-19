@@ -62,7 +62,7 @@ export const handlers = [
             title: `Album: ${q}`,
             subtitle: 'Artist Name',
             thumbnailUrl: 'https://example.com/album.jpg',
-            externalUrl: 'https://open.spotify.com/album/123',
+            externalUrl: 'https://www.last.fm/music/Artist/Album',
           },
         ],
         totalItems: 1,
@@ -80,7 +80,7 @@ export const handlers = [
         title: 'Test Album',
         subtitle: 'Test Artist',
         thumbnailUrl: 'https://example.com/album.jpg',
-        externalUrl: 'https://open.spotify.com/album/123',
+        externalUrl: 'https://www.last.fm/music/Artist/Album',
       },
     })
   }),
