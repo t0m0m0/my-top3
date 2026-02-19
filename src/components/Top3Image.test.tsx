@@ -219,6 +219,19 @@ describe('Top3Image', () => {
       expect(screen.getAllByText('No Data')).toHaveLength(3)
     })
 
+    it('displays data credits text in the capture area', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      const captureArea = screen.getByTestId('top3-image-capture')
+      expect(captureArea).toHaveTextContent('Data by TMDb & Last.fm')
+    })
+
     it('handles mixed null and non-null items', () => {
       render(
         <Top3Image theme="" book={mockBook} music={null} movie={mockMovie} />,

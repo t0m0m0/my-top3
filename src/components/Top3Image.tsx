@@ -143,7 +143,7 @@ function Top3Image({
               slot="bottom-right"
             />
 
-            {/* Branding */}
+            {/* Branding & Data Credits */}
             <div
               style={{
                 position: 'absolute',
@@ -165,6 +165,18 @@ function Top3Image({
               >
                 my-no1s.app
               </span>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: 'rgba(255,255,255,0.15)',
+                  letterSpacing: 1,
+                  fontWeight: 400,
+                  marginTop: 2,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                }}
+              >
+                Data by TMDb &amp; Last.fm
+              </div>
             </div>
           </div>
         </div>
