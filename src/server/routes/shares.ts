@@ -33,7 +33,7 @@ export function createSharesApp(dbPath: string) {
     }
 
     const params: ShareParams = {
-      theme: typeof body.theme === 'string' ? body.theme.slice(0, 50) : '',
+      theme: typeof body.theme === 'string' ? body.theme : '',
       bookId: typeof body.bookId === 'string' ? body.bookId : '',
       musicId: typeof body.musicId === 'string' ? body.musicId : '',
       movieId: typeof body.movieId === 'string' ? body.movieId : '',

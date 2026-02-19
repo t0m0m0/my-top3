@@ -88,6 +88,26 @@ describe('shares route', () => {
       })
       expect(res.status).toBe(400)
     })
+
+    it('returns 400 for theme exceeding max length', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'あ'.repeat(51),
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      expect(res.status).toBe(400)
+      const json = (await res.json()) as {
+        ok: boolean
+        error: { message: string }
+      }
+      expect(json.ok).toBe(false)
+      expect(json.error.message).toMatch(/theme/)
+    })
   })
 
   describe('GET /:id', () => {

@@ -43,12 +43,13 @@ db.exec(`
     music_id TEXT NOT NULL DEFAULT '',
     movie_id TEXT NOT NULL DEFAULT '',
     created_at INTEGER NOT NULL DEFAULT (unixepoch())
-  )
+  );
+  CREATE INDEX IF NOT EXISTS idx_shares_created_at ON shares(created_at);
 `)
 
 const insert = db.prepare(`
-  INSERT OR IGNORE INTO shares (id, theme, book_id, music_id, movie_id)
-  VALUES (?, ?, ?, ?, ?)
+  INSERT OR IGNORE INTO shares (id, theme, book_id, music_id, movie_id, created_at)
+  VALUES (?, ?, ?, ?, ?, ?)
 `)
 
 const insertMany = db.transaction(
@@ -59,15 +60,30 @@ const insertMany = db.transaction(
       bookId: string
       musicId: string
       movieId: string
+      createdAt: number
     }>,
   ) => {
     for (const row of rows) {
-      insert.run(row.id, row.theme, row.bookId, row.musicId, row.movieId)
+      insert.run(
+        row.id,
+        row.theme,
+        row.bookId,
+        row.musicId,
+        row.movieId,
+        row.createdAt,
+      )
     }
   },
 )
 
-const rows = entries.map(([id, params]) => ({ id, ...params }))
+// Assign sequential timestamps so that record order is preserved for eviction.
+// Original JSON has no timestamps, so we use a base time and increment by 1 second.
+const baseTime = Math.floor(Date.now() / 1000) - entries.length
+const rows = entries.map(([id, params], index) => ({
+  id,
+  ...params,
+  createdAt: baseTime + index,
+}))
 insertMany(rows)
 
 db.close()

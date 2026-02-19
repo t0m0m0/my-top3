@@ -72,7 +72,8 @@ export function createShareStore(
       music_id TEXT NOT NULL DEFAULT '',
       movie_id TEXT NOT NULL DEFAULT '',
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
-    )
+    );
+    CREATE INDEX IF NOT EXISTS idx_shares_created_at ON shares(created_at);
   `)
 
   const insertStmt = db.prepare(`
@@ -92,34 +93,41 @@ export function createShareStore(
     )
   `)
 
+  const saveTransaction = db.transaction((params: ShareParams): string => {
+    let id = generateId()
+    // Ensure uniqueness (extremely unlikely collision but safe)
+    while (selectStmt.get(id)) {
+      id = generateId()
+    }
+
+    // Evict oldest records if at capacity
+    const { cnt } = countStmt.get() as { cnt: number }
+    if (cnt >= maxRecords) {
+      const excess = cnt - maxRecords + 1
+      deleteOldestStmt.run(excess)
+    }
+
+    insertStmt.run(
+      id,
+      params.theme,
+      params.bookId,
+      params.musicId,
+      params.movieId,
+    )
+    return id
+  })
+
   return {
     save(params: ShareParams): string {
       validateParams(params)
-
-      let id = generateId()
-      // Ensure uniqueness (extremely unlikely collision but safe)
-      while (selectStmt.get(id)) {
-        id = generateId()
-      }
-
-      // Evict oldest records if at capacity
-      const { cnt } = countStmt.get() as { cnt: number }
-      if (cnt >= maxRecords) {
-        const excess = cnt - maxRecords + 1
-        deleteOldestStmt.run(excess)
-      }
-
-      insertStmt.run(
-        id,
-        params.theme,
-        params.bookId,
-        params.musicId,
-        params.movieId,
-      )
-      return id
+      return saveTransaction(params)
     },
 
     get(id: string): ShareParams | null {
+      // Generated IDs are 8 chars of base64url; reject obviously invalid input early
+      if (id.length === 0 || id.length > 12 || CONTROL_CHAR_RE.test(id)) {
+        return null
+      }
       const row = selectStmt.get(id) as
         | { theme: string; book_id: string; music_id: string; movie_id: string }
         | undefined
