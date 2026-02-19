@@ -199,16 +199,20 @@ function SelectionArea({
 }: SelectionAreaProps) {
   const { selection, deselectItem, isComplete } = useSelection()
   const navigate = useNavigate()
-  const [mobileExpanded, setMobileExpanded] = useState(true)
 
   const selectedCount = CATEGORIES.filter((c) => selection[c]).length
 
-  // Auto-collapse on mobile after first selection
-  useEffect(() => {
-    if (selectedCount > 0) {
-      setMobileExpanded(false)
-    }
-  }, [selectedCount])
+  // null = no manual override; derive from selection count
+  const [manualExpanded, setManualExpanded] = useState<boolean | null>(null)
+  const [prevCount, setPrevCount] = useState(selectedCount)
+  // Reset manual override when selection count changes
+  // (React-recommended "adjusting state during rendering" pattern)
+  if (prevCount !== selectedCount) {
+    setPrevCount(selectedCount)
+    setManualExpanded(null)
+  }
+  // Auto: collapsed when items selected, expanded when empty
+  const mobileExpanded = manualExpanded ?? selectedCount === 0
 
   useEffect(() => {
     onCompleteChange?.(isComplete)
@@ -263,7 +267,9 @@ function SelectionArea({
         <MobileCollapsedBar
           selectedCount={selectedCount}
           expanded={mobileExpanded}
-          onToggle={() => setMobileExpanded((prev) => !prev)}
+          onToggle={() =>
+            setManualExpanded((prev) => !(prev ?? mobileExpanded))
+          }
         />
         <Collapse in={mobileExpanded} timeout={300}>
           <div className="flex flex-col gap-2 pt-2">
