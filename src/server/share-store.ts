@@ -27,6 +27,16 @@ function generateId(): string {
   return crypto.randomBytes(6).toString('base64url')
 }
 
+function computeParamsHash(params: ShareParams): string {
+  const payload = [
+    params.theme,
+    params.bookId,
+    params.musicId,
+    params.movieId,
+  ].join('\0')
+  return crypto.createHash('sha256').update(payload).digest('base64url')
+}
+
 function validateField(name: string, value: string, maxLen: number): void {
   if (value.length > maxLen) {
     throw new Error(`${name} exceeds maximum length of ${maxLen}`)
@@ -71,18 +81,38 @@ export function createShareStore(
       book_id TEXT NOT NULL DEFAULT '',
       music_id TEXT NOT NULL DEFAULT '',
       movie_id TEXT NOT NULL DEFAULT '',
+      params_hash TEXT NOT NULL DEFAULT '',
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
     );
     CREATE INDEX IF NOT EXISTS idx_shares_created_at ON shares(created_at);
   `)
 
+  // Migration: add params_hash column if missing (existing DBs before this change)
+  const columns = db.prepare("PRAGMA table_info('shares')").all() as {
+    name: string
+  }[]
+  if (!columns.some((c) => c.name === 'params_hash')) {
+    db.exec(
+      "ALTER TABLE shares ADD COLUMN params_hash TEXT NOT NULL DEFAULT ''",
+    )
+  }
+
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_shares_params_hash
+      ON shares(params_hash) WHERE params_hash != '';
+  `)
+
   const insertStmt = db.prepare(`
-    INSERT INTO shares (id, theme, book_id, music_id, movie_id, created_at)
-    VALUES (?, ?, ?, ?, ?, unixepoch())
+    INSERT INTO shares (id, theme, book_id, music_id, movie_id, params_hash, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, unixepoch())
   `)
 
   const selectStmt = db.prepare(`
     SELECT theme, book_id, music_id, movie_id FROM shares WHERE id = ?
+  `)
+
+  const selectByHashStmt = db.prepare(`
+    SELECT id FROM shares WHERE params_hash = ?
   `)
 
   const countStmt = db.prepare(`SELECT COUNT(*) as cnt FROM shares`)
@@ -94,6 +124,14 @@ export function createShareStore(
   `)
 
   const saveTransaction = db.transaction((params: ShareParams): string => {
+    const hash = computeParamsHash(params)
+
+    // Return existing ID if the same params were already saved
+    const existing = selectByHashStmt.get(hash) as { id: string } | undefined
+    if (existing) {
+      return existing.id
+    }
+
     let id = generateId()
     // Ensure uniqueness (extremely unlikely collision but safe)
     while (selectStmt.get(id)) {
@@ -113,6 +151,7 @@ export function createShareStore(
       params.bookId,
       params.musicId,
       params.movieId,
+      hash,
     )
     return id
   })

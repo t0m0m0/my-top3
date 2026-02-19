@@ -98,6 +98,32 @@ describe('share-store', () => {
     })
   })
 
+  describe('idempotency', () => {
+    it('returns the same id for identical params', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save(sampleParams)
+      const id2 = store.save(sampleParams)
+      expect(id1).toBe(id2)
+      store.close()
+    })
+
+    it('returns different ids for different params', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save(sampleParams)
+      const id2 = store.save({ ...sampleParams, theme: '別のテーマ' })
+      expect(id1).not.toBe(id2)
+      store.close()
+    })
+
+    it('returns different ids when only one field differs', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save(sampleParams)
+      const id2 = store.save({ ...sampleParams, bookId: 'different' })
+      expect(id1).not.toBe(id2)
+      store.close()
+    })
+  })
+
   describe('input validation', () => {
     it('rejects bookId exceeding max length', () => {
       const store = createShareStore(dbPath)
