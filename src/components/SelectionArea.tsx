@@ -280,57 +280,59 @@ function SelectionArea({
         </Collapse>
       </div>
 
-      {/* Mobile floating bar: progressive button */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1200,
-          display: { xs: selectedCount >= 1 ? 'flex' : 'none', sm: 'none' },
-          justifyContent: 'center',
-          pb: `max(12px, env(safe-area-inset-bottom))`,
-          pt: 1.5,
-          px: 2,
-          background:
-            'linear-gradient(transparent, rgba(255,255,255,0.95) 30%)',
-          pointerEvents: 'none',
-        }}
-      >
-        <Button
-          variant="contained"
-          onClick={handleCreate}
-          disabled={!isComplete}
-          size="large"
+      {/* Mobile floating bar: progressive button (only when >= 1 selected) */}
+      {selectedCount >= 1 && (
+        <Box
           sx={{
-            pointerEvents: 'auto',
-            minHeight: 48,
-            minWidth: 200,
-            fontSize: '1rem',
-            fontWeight: 700,
-            borderRadius: '9999px',
-            boxShadow: isComplete
-              ? '0 4px 14px rgba(0,0,0,0.25)'
-              : '0 2px 8px rgba(0,0,0,0.12)',
-            ...(isComplete && {
-              animation: 'scaleIn 0.3s ease-out, pulse-soft 0.4s ease-in-out',
-            }),
-            '&:hover': {
-              boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
-            },
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1200,
+            display: { xs: 'flex', sm: 'none' },
+            justifyContent: 'center',
+            pb: `max(12px, env(safe-area-inset-bottom))`,
+            pt: 1.5,
+            px: 2,
+            background:
+              'linear-gradient(transparent, rgba(255,255,255,0.95) 30%)',
+            pointerEvents: 'none',
           }}
         >
-          {isComplete ? (
-            'Top3を作成 🎉'
-          ) : (
-            <span className="flex items-center gap-2">
-              あと{3 - selectedCount}つ選ぼう
-              <ProgressDots selectedCount={selectedCount} />
-            </span>
-          )}
-        </Button>
-      </Box>
+          <Button
+            variant="contained"
+            onClick={handleCreate}
+            disabled={!isComplete}
+            size="large"
+            sx={{
+              pointerEvents: 'auto',
+              minHeight: 48,
+              minWidth: 200,
+              fontSize: '1rem',
+              fontWeight: 700,
+              borderRadius: '9999px',
+              boxShadow: isComplete
+                ? '0 4px 14px rgba(0,0,0,0.25)'
+                : '0 2px 8px rgba(0,0,0,0.12)',
+              ...(isComplete && {
+                animation: 'scaleIn 0.3s ease-out, pulse-soft 0.4s ease-in-out',
+              }),
+              '&:hover': {
+                boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+              },
+            }}
+          >
+            {isComplete ? (
+              'Top3を作成 🎉'
+            ) : (
+              <span className="flex items-center gap-2">
+                あと{3 - selectedCount}つ選ぼう
+                <ProgressDots selectedCount={selectedCount} />
+              </span>
+            )}
+          </Button>
+        </Box>
+      )}
     </Box>
   )
 }
