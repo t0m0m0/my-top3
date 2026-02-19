@@ -16,7 +16,7 @@ export async function createShortUrl(params: ShareParams): Promise<string> {
     throw new Error('短縮URLの作成に失敗しました')
   }
 
-  const json = await res.json()
+  const json = (await res.json()) as { ok: boolean; id?: string }
   if (!json.ok || !json.id) {
     throw new Error('短縮URLの作成に失敗しました')
   }

@@ -31,7 +31,7 @@ describe('shares route', () => {
         }),
       })
       expect(res.status).toBe(201)
-      const json = await res.json()
+      const json = (await res.json()) as { ok: boolean; id: string }
       expect(json.ok).toBe(true)
       expect(typeof json.id).toBe('string')
       expect(json.id.length).toBeGreaterThan(0)
@@ -68,11 +68,19 @@ describe('shares route', () => {
           movieId: 'm1',
         }),
       })
-      const { id } = await createRes.json()
+      const createJson = (await createRes.json()) as { id: string }
 
-      const res = await app.request(`/${id}`)
+      const res = await app.request(`/${createJson.id}`)
       expect(res.status).toBe(200)
-      const json = await res.json()
+      const json = (await res.json()) as {
+        ok: boolean
+        data: {
+          theme: string
+          bookId: string
+          musicId: string
+          movieId: string
+        }
+      }
       expect(json.ok).toBe(true)
       expect(json.data).toEqual({
         theme: '\u30c6\u30b9\u30c8',
@@ -85,7 +93,7 @@ describe('shares route', () => {
     it('returns 404 for unknown id', async () => {
       const res = await app.request('/nonexistent')
       expect(res.status).toBe(404)
-      const json = await res.json()
+      const json = (await res.json()) as { ok: boolean }
       expect(json.ok).toBe(false)
     })
   })
