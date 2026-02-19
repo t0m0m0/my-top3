@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
 import CloseIcon from '@mui/icons-material/Close'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useNavigate } from 'react-router-dom'
 import { useSelection } from '../hooks/useSelection'
 import { buildTop3Url } from '../utils/url-params'
@@ -15,6 +16,8 @@ const CATEGORY_ICONS: Record<MediaCategory, string> = {
   music: '🎵',
   movie: '🎬',
 }
+
+const CATEGORIES: MediaCategory[] = ['book', 'music', 'movie']
 
 type SelectionAreaProps = {
   theme: string
@@ -96,28 +99,95 @@ function SlotCard({
         }}
       />
       <div className="min-w-0 flex-1 pr-4">
-        <Typography
-          variant="caption"
-          sx={{ fontSize: '0.65rem', color: 'var(--color-primary)' }}
+        <span
+          className="text-xs font-semibold"
+          style={{ color: 'var(--color-primary)', fontSize: '0.65rem' }}
         >
           {CATEGORY_LABELS_EN[category]}
-        </Typography>
-        <Typography
-          variant="body2"
-          className="truncate font-medium"
-          sx={{ fontSize: '0.75rem', lineHeight: 1.3 }}
-        >
+        </span>
+        <p className="truncate text-xs font-medium" style={{ lineHeight: 1.3 }}>
           {item.title}
-        </Typography>
-        <Typography
-          variant="caption"
-          className="truncate"
-          sx={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)' }}
+        </p>
+        <span
+          className="block truncate text-xs"
+          style={{ color: 'var(--color-text-secondary)', fontSize: '0.65rem' }}
         >
           {item.subtitle}
-        </Typography>
+        </span>
       </div>
     </div>
+  )
+}
+
+/** Compact progress dots for collapsed mobile header */
+function ProgressDots({ selectedCount }: { selectedCount: number }) {
+  return (
+    <span className="flex items-center gap-1" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="inline-block h-2.5 w-2.5 rounded-full transition-all"
+          style={{
+            backgroundColor:
+              i < selectedCount
+                ? 'var(--color-primary)'
+                : 'var(--color-border)',
+          }}
+        />
+      ))}
+    </span>
+  )
+}
+
+/** Collapsible header bar for mobile */
+function MobileCollapsedBar({
+  selectedCount,
+  expanded,
+  onToggle,
+}: {
+  selectedCount: number
+  expanded: boolean
+  onToggle: () => void
+}) {
+  const label =
+    selectedCount === 0
+      ? '作品を選ぼう'
+      : selectedCount < 3
+        ? `あと${3 - selectedCount}つ選ぼう`
+        : '準備完了！'
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-center justify-between py-1"
+      aria-expanded={expanded}
+      aria-label="選択エリアを展開・折りたたむ"
+    >
+      <div className="flex items-center gap-2.5">
+        <ProgressDots selectedCount={selectedCount} />
+        <span
+          className="text-sm font-bold"
+          style={{ color: 'var(--color-primary-dark)' }}
+        >
+          選択中 {selectedCount}/3
+        </span>
+        <span
+          className="text-xs"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          {label}
+        </span>
+      </div>
+      <ExpandMoreIcon
+        sx={{
+          color: 'var(--color-text-secondary)',
+          transition: 'transform 0.3s',
+          transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          fontSize: 22,
+        }}
+      />
+    </button>
   )
 }
 
@@ -130,9 +200,19 @@ function SelectionArea({
   const { selection, deselectItem, isComplete } = useSelection()
   const navigate = useNavigate()
 
-  const selectedCount = (
-    [selection.book, selection.music, selection.movie] as const
-  ).filter(Boolean).length
+  const selectedCount = CATEGORIES.filter((c) => selection[c]).length
+
+  // null = no manual override; derive from selection count
+  const [manualExpanded, setManualExpanded] = useState<boolean | null>(null)
+  const [prevCount, setPrevCount] = useState(selectedCount)
+  // Reset manual override when selection count changes
+  // (React-recommended "adjusting state during rendering" pattern)
+  if (prevCount !== selectedCount) {
+    setPrevCount(selectedCount)
+    setManualExpanded(null)
+  }
+  // Auto: collapsed when items selected, expanded when empty
+  const mobileExpanded = manualExpanded ?? selectedCount === 0
 
   useEffect(() => {
     onCompleteChange?.(isComplete)
@@ -146,57 +226,68 @@ function SelectionArea({
 
   return (
     <Box>
-      <div className="mb-2 flex items-center justify-between">
-        <Typography
-          variant="subtitle2"
-          sx={{ fontWeight: 700, fontSize: '0.85rem' }}
-          style={{ color: 'var(--color-primary-dark)' }}
-        >
-          選択中の作品
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{ fontWeight: 600, fontSize: '0.75rem' }}
-          style={{ color: 'var(--color-primary)' }}
-        >
-          {selectedCount} / 3
-        </Typography>
-      </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <SlotCard
-          category="book"
-          item={selection.book}
-          onDeselect={deselectItem}
-          onSlotClick={onSlotClick}
-        />
-        <SlotCard
-          category="music"
-          item={selection.music}
-          onDeselect={deselectItem}
-          onSlotClick={onSlotClick}
-        />
-        <SlotCard
-          category="movie"
-          item={selection.movie}
-          onDeselect={deselectItem}
-          onSlotClick={onSlotClick}
-        />
-      </div>
-      {isComplete && (
-        <div className="mt-3 text-center">
-          <Button
-            variant="contained"
-            onClick={handleCreate}
-            size="medium"
-            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+      {/* Desktop: always show full view */}
+      <div className="hidden sm:block">
+        <div className="mb-2 flex items-center justify-between">
+          <span
+            className="text-sm font-bold"
+            style={{ color: 'var(--color-primary-dark)' }}
           >
-            Top3を作成
-          </Button>
+            選択中の作品
+          </span>
+          <span
+            className="text-xs font-semibold"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            {selectedCount} / 3
+          </span>
         </div>
-      )}
+        <div className="flex gap-2">
+          {CATEGORIES.map((cat) => (
+            <SlotCard
+              key={cat}
+              category={cat}
+              item={selection[cat]}
+              onDeselect={deselectItem}
+              onSlotClick={onSlotClick}
+            />
+          ))}
+        </div>
+        {isComplete && (
+          <div className="mt-3 text-center">
+            <Button variant="contained" onClick={handleCreate} size="medium">
+              Top3を作成
+            </Button>
+          </div>
+        )}
+      </div>
 
-      {/* Floating action button - fixed at bottom for mobile */}
-      {isComplete && (
+      {/* Mobile: collapsible view */}
+      <div className="sm:hidden">
+        <MobileCollapsedBar
+          selectedCount={selectedCount}
+          expanded={mobileExpanded}
+          onToggle={() =>
+            setManualExpanded((prev) => !(prev ?? mobileExpanded))
+          }
+        />
+        <Collapse in={mobileExpanded} timeout={300}>
+          <div className="flex flex-col gap-2 pt-2">
+            {CATEGORIES.map((cat) => (
+              <SlotCard
+                key={cat}
+                category={cat}
+                item={selection[cat]}
+                onDeselect={deselectItem}
+                onSlotClick={onSlotClick}
+              />
+            ))}
+          </div>
+        </Collapse>
+      </div>
+
+      {/* Mobile floating bar: progressive button (only when >= 1 selected) */}
+      {selectedCount >= 1 && (
         <Box
           sx={{
             position: 'fixed',
@@ -217,6 +308,7 @@ function SelectionArea({
           <Button
             variant="contained"
             onClick={handleCreate}
+            disabled={!isComplete}
             size="large"
             sx={{
               pointerEvents: 'auto',
@@ -225,13 +317,25 @@ function SelectionArea({
               fontSize: '1rem',
               fontWeight: 700,
               borderRadius: '9999px',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+              boxShadow: isComplete
+                ? '0 4px 14px rgba(0,0,0,0.25)'
+                : '0 2px 8px rgba(0,0,0,0.12)',
+              ...(isComplete && {
+                animation: 'scaleIn 0.3s ease-out, pulse-soft 0.4s ease-in-out',
+              }),
               '&:hover': {
                 boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
               },
             }}
           >
-            Top3を作成 🎉
+            {isComplete ? (
+              'Top3を作成 🎉'
+            ) : (
+              <span className="flex items-center gap-2">
+                あと{3 - selectedCount}つ選ぼう
+                <ProgressDots selectedCount={selectedCount} />
+              </span>
+            )}
           </Button>
         </Box>
       )}
