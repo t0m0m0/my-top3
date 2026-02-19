@@ -12,12 +12,9 @@ if (!process.env['GOOGLE_BOOKS_API_KEY']) {
   )
 }
 
-if (
-  !process.env['SPOTIFY_CLIENT_ID'] ||
-  !process.env['SPOTIFY_CLIENT_SECRET']
-) {
+if (!process.env['LASTFM_API_KEY']) {
   console.warn(
-    '[server] WARNING: SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set. /api/music endpoints will return 500.',
+    '[server] WARNING: LASTFM_API_KEY is not set. /api/music endpoints will return 500.',
   )
 }
 
