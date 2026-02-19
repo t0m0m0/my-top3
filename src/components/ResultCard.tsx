@@ -1,9 +1,7 @@
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
-import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
-import Box from '@mui/material/Box'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import type { SearchResultItem, MediaCategory } from '../types/common'
@@ -54,14 +52,13 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           handleCardClick()
         }
       }}
+      className={`flex transition-all duration-200 ease-in-out ${
+        isSelected ? 'cursor-default opacity-[0.85]' : 'cursor-pointer'
+      }`}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
       sx={{
-        display: 'flex',
-        transition: 'all 0.2s ease',
-        cursor: isSelected ? 'default' : 'pointer',
-        WebkitTapHighlightColor: 'transparent',
         ...(isSelected && {
           border: (theme) => `2px solid ${theme.palette.primary.main}`,
-          opacity: 0.85,
         }),
         '&:focus-visible': {
           outline: '2px solid',
@@ -79,7 +76,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
         }),
       }}
     >
-      <Box sx={{ position: 'relative', flexShrink: 0 }}>
+      <div className="relative shrink-0">
         <CardMedia
           component="img"
           sx={{
@@ -95,56 +92,19 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           }}
         />
         {isSelected && (
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'rgba(0, 0, 0, 0.4)',
-            }}
-          >
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
             <CheckCircleIcon sx={{ color: 'white', fontSize: 32 }} />
-          </Box>
+          </div>
         )}
-      </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
+      </div>
+      <div className="flex flex-col flex-1 min-w-0">
         <CardContent sx={{ flex: 1, py: 1.5, '&:last-child': { pb: 1.5 } }}>
-          <Typography
-            variant="subtitle1"
-            component="h3"
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.3,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
+          <h3 className="text-base font-semibold leading-[1.3] overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] [display:-webkit-box]">
             {item.title}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              mt: 0.5,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          </h3>
+          <p className="mt-1 text-sm text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">
             {item.subtitle}
-          </Typography>
+          </p>
           {isSelected ? (
             <Button
               variant="contained"
@@ -178,7 +138,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
             </Button>
           )}
         </CardContent>
-      </Box>
+      </div>
     </Card>
   )
 }

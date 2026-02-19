@@ -1,5 +1,4 @@
 import Skeleton from '@mui/material/Skeleton'
-import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import type { SearchResultItem } from '../types/common'
 
@@ -42,9 +41,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
   if (error) {
     return (
       <div className="flex min-h-[280px] flex-1 flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-4">
-        <Typography variant="caption" className="text-red-500">
-          {error}
-        </Typography>
+        <span className="text-xs text-red-500">{error}</span>
         {onRetry && (
           <Button
             size="small"
@@ -68,12 +65,12 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
           backgroundColor: 'var(--color-surface)',
         }}
       >
-        <Typography
-          variant="caption"
+        <span
+          className="text-xs"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           {label} - データなし
-        </Typography>
+        </span>
       </div>
     )
   }
@@ -106,17 +103,12 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             color: categoryColor.text,
           }}
         >
-          <Typography
-            variant="caption"
-            sx={{
-              fontSize: '0.6rem',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              color: 'inherit',
-            }}
+          <span
+            className="text-[0.6rem] font-bold tracking-widest"
+            style={{ color: 'inherit' }}
           >
             {label}
-          </Typography>
+          </span>
         </div>
 
         {/* Rank badge overlapping image top */}
@@ -130,17 +122,12 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
               boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                color: '#78350f',
-                lineHeight: 1,
-              }}
+            <span
+              className="text-[0.8rem] font-extrabold leading-none"
+              style={{ color: '#78350f' }}
             >
               #1
-            </Typography>
+            </span>
           </div>
         </div>
 
@@ -155,24 +142,15 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             }
           }}
         />
-        <Typography
-          variant="body2"
-          className="text-center font-semibold"
-          sx={{ fontSize: '0.85rem', lineHeight: 1.3 }}
-        >
+        <p className="text-center text-[0.85rem] font-semibold leading-tight">
           {work.title}
-        </Typography>
-        <Typography
-          variant="caption"
-          className="text-center"
-          sx={{
-            fontSize: '0.7rem',
-            color: 'var(--color-text-secondary)',
-            mt: 0.25,
-          }}
+        </p>
+        <span
+          className="mt-1 text-center text-[0.7rem]"
+          style={{ color: 'var(--color-text-secondary)' }}
         >
           {work.subtitle}
-        </Typography>
+        </span>
         {work.externalUrl && (
           <a
             href={work.externalUrl}

@@ -1,7 +1,5 @@
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
-import Typography from '@mui/material/Typography'
 import { useThemeHistory } from '../hooks/useThemeHistory'
 
 type ThemeHistoryProps = {
@@ -16,18 +14,18 @@ export default function ThemeHistory({ onSelect }: ThemeHistoryProps) {
   }
 
   return (
-    <Box
+    <div
       className="mt-2 rounded-lg p-3"
-      sx={{ backgroundColor: 'var(--color-surface)' }}
+      style={{ backgroundColor: 'var(--color-surface)' }}
       aria-label="テーマ履歴"
     >
       <div className="mb-2 flex items-center justify-between">
-        <Typography
-          variant="subtitle2"
-          sx={{ color: 'var(--color-text-primary)' }}
+        <span
+          className="text-sm font-medium"
+          style={{ color: 'var(--color-text-primary)' }}
         >
           最近のテーマ
-        </Typography>
+        </span>
         <Button
           variant="text"
           size="small"
@@ -50,6 +48,6 @@ export default function ThemeHistory({ onSelect }: ThemeHistoryProps) {
           />
         ))}
       </div>
-    </Box>
+    </div>
   )
 }

@@ -1,6 +1,5 @@
 import { useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { buildEditUrl } from '../utils/url-params'
 import ErrorMessage from './ErrorMessage'
@@ -110,39 +109,12 @@ export default function Top3Content({ params }: Props) {
         {/* Theme display with decorative quotes via CSS pseudo-elements */}
         {params.theme && (
           <div className="mt-3 text-center">
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'var(--color-text-primary)',
-                display: 'inline-block',
-                px: 3,
-                position: 'relative',
-                '&::before': {
-                  content: '"\\201C"',
-                  position: 'absolute',
-                  left: -4,
-                  top: -8,
-                  fontSize: '2.5rem',
-                  color: 'var(--color-primary)',
-                  opacity: 0.3,
-                  fontFamily: 'Georgia, serif',
-                  lineHeight: 1,
-                },
-                '&::after': {
-                  content: '"\\201D"',
-                  position: 'absolute',
-                  right: -4,
-                  bottom: -12,
-                  fontSize: '2.5rem',
-                  color: 'var(--color-primary)',
-                  opacity: 0.3,
-                  fontFamily: 'Georgia, serif',
-                  lineHeight: 1,
-                },
-              }}
+            <h2
+              className="theme-quote text-xl font-medium"
+              style={{ color: 'var(--color-text-primary)' }}
             >
               {params.theme}
-            </Typography>
+            </h2>
           </div>
         )}
 
