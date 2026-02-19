@@ -30,6 +30,18 @@ export default defineConfig(({ mode }) => {
         entry: 'src/server/index.ts',
         exclude: [/^\/(?!api\/).*/],
       }),
+      // Fallback: ensure /s/:id routes are handled by SPA
+      {
+        name: 'spa-fallback-short-url',
+        configureServer(server) {
+          server.middlewares.use((req, _res, next) => {
+            if (req.url && /^\/s\/[A-Za-z0-9_-]+$/.test(req.url)) {
+              req.url = '/'
+            }
+            next()
+          })
+        },
+      },
     ],
   }
 })

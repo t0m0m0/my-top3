@@ -38,3 +38,5 @@ CLAUDE.md
 coverage
 playwright-report
 test-results
+# Share data
+data/
