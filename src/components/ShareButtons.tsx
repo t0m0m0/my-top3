@@ -23,8 +23,9 @@ type ShareButtonsProps = {
   shareParams?: ShareParams
 }
 
-function buildShareText(theme?: string): string {
-  return theme ? `「${theme}」 #MyNo1s` : '#MyNo1s'
+function buildShareText(theme?: string, url?: string): string {
+  const base = theme ? `「${theme}」 #MyNo1s` : '#MyNo1s'
+  return url ? `${base}\n${url}` : base
 }
 
 export default function ShareButtons({
@@ -102,7 +103,7 @@ export default function ShareButtons({
           navigator.canShare({ files: [file] })
         ) {
           await navigator.share({
-            text: buildShareText(theme),
+            text: buildShareText(theme, shareUrl),
             url: shareUrl,
             files: [file],
           })
@@ -113,7 +114,7 @@ export default function ShareButtons({
       // Fallback: text + URL only
       await navigator.share({
         title: 'My No.1s',
-        text: buildShareText(theme),
+        text: buildShareText(theme, shareUrl),
         url: shareUrl,
       })
     } catch (error) {
