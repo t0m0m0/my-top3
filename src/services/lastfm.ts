@@ -149,12 +149,18 @@ export async function getMusicById(
     }
   }
 
+  const fallback = decodeFallbackId(mbid)
   const params = new URLSearchParams({
     method: 'album.getinfo',
-    mbid,
     api_key: apiKey,
     format: 'json',
   })
+  if (fallback) {
+    params.set('artist', fallback.artist)
+    params.set('album', fallback.album)
+  } else {
+    params.set('mbid', mbid)
+  }
 
   const result = await fetchJson<LastfmAlbumInfo>(
     `${BASE_URL}?${params.toString()}`,
@@ -183,7 +189,7 @@ export async function getMusicById(
 // ── Mapping ─────────────────────────────────────────────────────────
 
 function mapSearchAlbumToResult(album: LastfmAlbumSearch): SearchResultItem {
-  const id = album.mbid || generateFallbackId(album.name, album.artist)
+  const id = album.mbid || encodeFallbackId(album.name, album.artist)
   return {
     id,
     category: 'music',
@@ -205,12 +211,40 @@ function getBestImage(images: LastfmImage[]): string {
   return ''
 }
 
-function generateFallbackId(name: string, artist: string): string {
-  const raw = `${artist}::${name}`
-  // Simple hash for uniqueness
-  let hash = 0
-  for (let i = 0; i < raw.length; i++) {
-    hash = (hash * 31 + raw.charCodeAt(i)) | 0
+const FALLBACK_PREFIX = 'lastfm-'
+const FALLBACK_SEPARATOR = '::'
+
+/** URL-safe Base64 encode (no padding, +→-, /→_) */
+function toBase64Url(str: string): string {
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+/** URL-safe Base64 decode */
+function fromBase64Url(str: string): string {
+  const padded = str.replace(/-/g, '+').replace(/_/g, '/')
+  const pad = (4 - (padded.length % 4)) % 4
+  return atob(padded + '='.repeat(pad))
+}
+
+export function encodeFallbackId(name: string, artist: string): string {
+  const raw = `${artist}${FALLBACK_SEPARATOR}${name}`
+  return `${FALLBACK_PREFIX}${toBase64Url(encodeURIComponent(raw))}`
+}
+
+function decodeFallbackId(
+  id: string,
+): { artist: string; album: string } | null {
+  if (!id.startsWith(FALLBACK_PREFIX)) return null
+  try {
+    const encoded = id.slice(FALLBACK_PREFIX.length)
+    const raw = decodeURIComponent(fromBase64Url(encoded))
+    const sepIndex = raw.indexOf(FALLBACK_SEPARATOR)
+    if (sepIndex === -1) return null
+    return {
+      artist: raw.slice(0, sepIndex),
+      album: raw.slice(sepIndex + FALLBACK_SEPARATOR.length),
+    }
+  } catch {
+    return null
   }
-  return `lastfm-${Math.abs(hash).toString(36)}`
 }

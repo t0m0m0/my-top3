@@ -236,4 +236,55 @@ describe('getMusicById', () => {
     const result = await getMusicById('api-key', 'invalid-mbid')
     expect(result.ok).toBe(false)
   })
+
+  it('generates URL-safe fallback id (no =, +, /)', async () => {
+    const { encodeFallbackId } = await import('./lastfm')
+    const id = encodeFallbackId('summer', 'Raph')
+    expect(id).toMatch(/^lastfm-[\w-]+$/)
+    expect(id).not.toContain('=')
+    expect(id).not.toContain('+')
+    expect(id).not.toContain('/')
+  })
+
+  it('resolves fallback id (lastfm- prefix) using artist+album params', async () => {
+    server.use(
+      http.get(LASTFM_BASE, ({ request }) => {
+        const url = new URL(request.url)
+        expect(url.searchParams.get('method')).toBe('album.getinfo')
+        expect(url.searchParams.get('artist')).toBe('Raph')
+        expect(url.searchParams.get('album')).toBe('summer')
+        expect(url.searchParams.has('mbid')).toBe(false)
+        return HttpResponse.json(
+          mockAlbumInfoResponse({ name: 'summer', artist: 'Raph' }),
+        )
+      }),
+    )
+    const { getMusicById, encodeFallbackId } = await import('./lastfm')
+    const fallbackId = encodeFallbackId('summer', 'Raph')
+    const result = await getMusicById('api-key', fallbackId)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.title).toBe('summer')
+      expect(result.data.subtitle).toBe('Raph')
+    }
+  })
+
+  it('search uses encodeFallbackId for albums without mbid', async () => {
+    server.use(
+      http.get(LASTFM_BASE, () =>
+        HttpResponse.json(
+          mockAlbumSearchResponse([
+            mockAlbum({ mbid: '', name: 'summer', artist: 'Raph' }),
+          ]),
+        ),
+      ),
+    )
+    const { searchMusic, encodeFallbackId } = await import('./lastfm')
+    const result = await searchMusic('api-key', 'test')
+    if (result.ok && result.data.items.length > 0) {
+      const expectedId = encodeFallbackId('summer', 'Raph')
+      expect(result.data.items[0].id).toBe(expectedId)
+      expect(result.data.items[0].id).toMatch(/^lastfm-/)
+    }
+  })
 })
