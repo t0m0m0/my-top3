@@ -9,6 +9,7 @@ import Top3Image from '../components/Top3Image'
 import WorkCard from '../components/WorkCard'
 import { useWorkFetch } from '../hooks/useWorkFetch'
 import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
+import DataCredits from '../components/DataCredits'
 
 function Top3Page() {
   const [searchParams] = useSearchParams()
@@ -210,6 +211,8 @@ function Top3Page() {
           </Button>
         </div>
       </div>
+
+      <DataCredits />
     </div>
   )
 }
