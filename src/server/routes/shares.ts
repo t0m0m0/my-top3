@@ -10,8 +10,8 @@ function isValidBody(body: unknown): body is {
   return typeof body === 'object' && body !== null
 }
 
-export function createSharesApp(filePath: string) {
-  const store = createShareStore(filePath)
+export function createSharesApp(dbPath: string) {
+  const store = createShareStore(dbPath)
   const app = new Hono()
 
   app.post('/', async (c) => {
@@ -33,7 +33,7 @@ export function createSharesApp(filePath: string) {
     }
 
     const params: ShareParams = {
-      theme: typeof body.theme === 'string' ? body.theme.slice(0, 50) : '',
+      theme: typeof body.theme === 'string' ? body.theme : '',
       bookId: typeof body.bookId === 'string' ? body.bookId : '',
       musicId: typeof body.musicId === 'string' ? body.musicId : '',
       movieId: typeof body.movieId === 'string' ? body.movieId : '',
@@ -52,8 +52,13 @@ export function createSharesApp(filePath: string) {
       )
     }
 
-    const id = store.save(params)
-    return c.json({ ok: true, id }, 201)
+    try {
+      const id = store.save(params)
+      return c.json({ ok: true, id }, 201)
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Validation failed'
+      return c.json({ ok: false, error: { kind: 'validation', message } }, 400)
+    }
   })
 
   app.get('/:id', (c) => {

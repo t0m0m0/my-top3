@@ -10,8 +10,8 @@ describe('shares route', () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'shares-route-'))
-    const filePath = path.join(tmpDir, 'shares.json')
-    app = createSharesApp(filePath)
+    const dbPath = path.join(tmpDir, 'shares.db')
+    app = createSharesApp(dbPath)
   })
 
   afterEach(() => {
@@ -53,6 +53,60 @@ describe('shares route', () => {
         body: 'not-json',
       })
       expect(res.status).toBe(400)
+    })
+
+    it('returns 400 for IDs exceeding max length', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'a'.repeat(101),
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      expect(res.status).toBe(400)
+      const json = (await res.json()) as {
+        ok: boolean
+        error: { message: string }
+      }
+      expect(json.ok).toBe(false)
+      expect(json.error.message).toMatch(/bookId/)
+    })
+
+    it('returns 400 for IDs containing control characters', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'abc\x00def',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('returns 400 for theme exceeding max length', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'あ'.repeat(51),
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      expect(res.status).toBe(400)
+      const json = (await res.json()) as {
+        ok: boolean
+        error: { message: string }
+      }
+      expect(json.ok).toBe(false)
+      expect(json.error.message).toMatch(/theme/)
     })
   })
 

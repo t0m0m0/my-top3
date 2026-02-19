@@ -10,7 +10,7 @@ import { createShareStore } from './share-store.ts'
 
 const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
-  path.resolve(process.cwd(), 'data', 'shares.json')
+  path.resolve(process.cwd(), 'data', 'shares.db')
 const shareStore = createShareStore(sharesDataPath)
 
 const app = new Hono()
@@ -81,6 +81,15 @@ app.use('*', serveStatic({ root: './dist', path: 'index.html' }))
 
 const port = Number(process.env['PORT']) || 8000
 
-serve({ fetch: app.fetch, port }, (info) => {
+const server = serve({ fetch: app.fetch, port }, (info) => {
   console.log(`Server running at http://localhost:${info.port}`)
 })
+
+// Graceful shutdown: close SQLite connection on process termination
+const shutdown = () => {
+  console.log('Shutting down...')
+  shareStore.close()
+  server.close()
+}
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
