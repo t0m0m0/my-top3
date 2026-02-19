@@ -2,7 +2,14 @@
 
 ## コミット前チェック
 
-- コミット前に必ず `npm run format:check` を実行し、失敗したら `npx prettier --write 'src/**/*.{ts,tsx,css}'` で修正すること
+コミット前に以下を **すべて** 実行し、エラーがない状態でコミットすること（CIパイプラインと同じ内容）:
+
+```bash
+npm run lint              # ESLint
+npm run format:check      # Prettier（失敗時: npx prettier --write 'src/**/*.{ts,tsx,css}'）
+npm run typecheck         # TypeScript 型チェック
+npm run test              # ユニット・統合テスト
+```
 
 ## 開発方針
 
