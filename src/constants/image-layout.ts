@@ -8,15 +8,15 @@ export const HALF = IMAGE_SIZE / 2
 export const SEP = 2
 
 export const CATEGORY_COLORS: Record<MediaCategory, string> = {
-  book: '#f97316',
-  music: '#10b981',
-  movie: '#a855f7',
+  book: '#818cf8',
+  music: '#a78bfa',
+  movie: '#fb7185',
 }
 
 export const CATEGORY_BORDER_COLORS: Record<MediaCategory, string> = {
-  book: 'rgba(249,115,22,0.4)',
-  music: 'rgba(16,185,129,0.4)',
-  movie: 'rgba(168,85,247,0.4)',
+  book: 'rgba(129,140,248,0.4)',
+  music: 'rgba(167,139,250,0.4)',
+  movie: 'rgba(251,113,133,0.4)',
 }
 
 export const NO_IMAGE_SRC =

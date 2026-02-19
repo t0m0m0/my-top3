@@ -60,7 +60,7 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Category label badge */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #1e3a5f, #1f2937)',
+          background: 'linear-gradient(135deg, #312e81, #1e1b4b)',
           color: COLORS.textPrimary,
           fontSize: 15,
           fontWeight: 700,
@@ -77,7 +77,7 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Rank badge - larger, gold, with glow */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #f59e0b, #eab308, #f59e0b)',
+          background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24)',
           color: '#78350f',
           fontSize: 18,
           fontWeight: 800,

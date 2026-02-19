@@ -111,7 +111,7 @@ export function useSearchPage() {
   const mainStyle = useMemo(
     () => ({
       background:
-        'linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #ecfdf5 100%)',
+        'linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-bg) 32%, #eef2ff 100%)',
       paddingBottom: selectionComplete
         ? 'calc(72px + env(safe-area-inset-bottom))'
         : undefined,
