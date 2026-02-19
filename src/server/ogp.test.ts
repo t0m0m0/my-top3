@@ -11,8 +11,7 @@ import {
 vi.mock('../services/google-books.ts', () => ({
   getBookById: vi.fn(),
 }))
-vi.mock('../services/spotify.ts', () => ({
-  getAccessToken: vi.fn(),
+vi.mock('../services/lastfm.ts', () => ({
   getMusicById: vi.fn(),
 }))
 vi.mock('../services/tmdb.ts', () => ({
@@ -141,8 +140,7 @@ describe('injectOgpTags', () => {
 
   afterEach(() => {
     delete process.env['GOOGLE_BOOKS_API_KEY']
-    delete process.env['SPOTIFY_CLIENT_ID']
-    delete process.env['SPOTIFY_CLIENT_SECRET']
+    delete process.env['LASTFM_API_KEY']
     delete process.env['TMDB_API_KEY']
   })
 
@@ -219,13 +217,11 @@ describe('injectOgpTags', () => {
 
   it('fetches all three works and includes them in description', async () => {
     process.env['GOOGLE_BOOKS_API_KEY'] = 'test-key'
-    process.env['SPOTIFY_CLIENT_ID'] = 'sp-id'
-    process.env['SPOTIFY_CLIENT_SECRET'] = 'sp-secret'
+    process.env['LASTFM_API_KEY'] = 'lastfm-key'
     process.env['TMDB_API_KEY'] = 'tmdb-key'
 
     const { getBookById } = await import('../services/google-books.ts')
-    const { getAccessToken, getMusicById } =
-      await import('../services/spotify.ts')
+    const { getMusicById } = await import('../services/lastfm.ts')
     const { getMovieById } = await import('../services/tmdb.ts')
 
     vi.mocked(getBookById).mockResolvedValue({
@@ -238,10 +234,6 @@ describe('injectOgpTags', () => {
         thumbnailUrl: '',
         externalUrl: '',
       },
-    })
-    vi.mocked(getAccessToken).mockResolvedValue({
-      ok: true,
-      data: 'mock-token',
     })
     vi.mocked(getMusicById).mockResolvedValue({
       ok: true,

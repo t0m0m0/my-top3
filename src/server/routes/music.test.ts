@@ -2,33 +2,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { musicApp } from './music'
 
-vi.mock('../../services/spotify.ts', () => ({
-  getAccessToken: vi.fn(),
+vi.mock('../../services/lastfm.ts', () => ({
   searchMusic: vi.fn(),
   getMusicById: vi.fn(),
 }))
 
-import {
-  getAccessToken,
-  searchMusic,
-  getMusicById,
-} from '../../services/spotify.ts'
+import { searchMusic, getMusicById } from '../../services/lastfm.ts'
 
-const mockGetAccessToken = vi.mocked(getAccessToken)
 const mockSearchMusic = vi.mocked(searchMusic)
 const mockGetMusicById = vi.mocked(getMusicById)
 
 describe('music routes', () => {
   beforeEach(() => {
-    vi.stubEnv('SPOTIFY_CLIENT_ID', 'test-id')
-    vi.stubEnv('SPOTIFY_CLIENT_SECRET', 'test-secret')
+    vi.stubEnv('LASTFM_API_KEY', 'test-api-key')
     vi.clearAllMocks()
-    mockGetAccessToken.mockResolvedValue({ ok: true, data: 'test-token' })
   })
 
   describe('GET /search', () => {
-    it('returns 500 when credentials missing', async () => {
-      vi.stubEnv('SPOTIFY_CLIENT_ID', '')
+    it('returns 500 when API key missing', async () => {
+      vi.stubEnv('LASTFM_API_KEY', '')
       const res = await musicApp.request('/search?q=test')
       expect(res.status).toBe(500)
     })
@@ -61,15 +53,6 @@ describe('music routes', () => {
       const longQuery = 'a'.repeat(201)
       const res = await musicApp.request(`/search?q=${longQuery}`)
       expect(res.status).toBe(400)
-    })
-
-    it('returns error when token fetch fails', async () => {
-      mockGetAccessToken.mockResolvedValue({
-        ok: false,
-        error: { kind: 'auth-error', message: 'Bad credentials', status: 401 },
-      })
-      const res = await musicApp.request('/search?q=test')
-      expect(res.status).toBe(401)
     })
   })
 
