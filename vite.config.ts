@@ -5,8 +5,7 @@ import devServer from '@hono/vite-dev-server'
 
 const API_ENV_KEYS = [
   'GOOGLE_BOOKS_API_KEY',
-  'SPOTIFY_CLIENT_ID',
-  'SPOTIFY_CLIENT_SECRET',
+  'LASTFM_API_KEY',
   'TMDB_API_KEY',
 ] as const
 

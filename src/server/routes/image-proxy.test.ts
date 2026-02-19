@@ -65,7 +65,7 @@ describe('image-proxy route', () => {
       expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*')
     })
 
-    it('proxies image from allowed Spotify CDN host', async () => {
+    it('proxies image from allowed Last.fm CDN host', async () => {
       globalThis.fetch = vi.fn().mockResolvedValue(
         new Response(new Uint8Array([0xff, 0xd8]), {
           status: 200,
