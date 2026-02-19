@@ -56,7 +56,22 @@ describe('CORS middleware', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
       'https://myno1s.exe.xyz:8000',
     )
-    expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET')
+    expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET,POST')
+  })
+
+  it('allows POST in preflight for /api/shares', async () => {
+    const app = await getApp()
+    const req = new Request('http://localhost/api/shares', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://myno1s.exe.xyz:8000',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'content-type',
+      },
+    })
+    const res = await app.request(req)
+    expect(res.status).toBe(204)
+    expect(res.headers.get('Access-Control-Allow-Methods')).toContain('POST')
   })
 
   it('does not return CORS headers for disallowed origin', async () => {

@@ -36,7 +36,7 @@ app.use(
   '/api/*',
   cors({
     origin: corsOrigins,
-    allowMethods: ['GET'],
+    allowMethods: ['GET', 'POST'],
   }),
 )
 
