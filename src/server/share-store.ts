@@ -15,6 +15,7 @@ export type ShareParams = {
 
 export type ShareStoreOptions = {
   maxRecords?: number
+  ttlSeconds?: number
 }
 
 const DEFAULT_MAX_RECORDS = 10_000
@@ -75,6 +76,8 @@ export type ShareStore = {
   save: (params: ShareParams) => string
   get: (id: string) => ShareParams | null
   list: (options: ShareListOptions) => ShareListResult
+  delete: (id: string) => boolean
+  purgeExpired: () => number
   close: () => void
 }
 
@@ -83,6 +86,7 @@ export function createShareStore(
   options?: ShareStoreOptions,
 ): ShareStore {
   const maxRecords = options?.maxRecords ?? DEFAULT_MAX_RECORDS
+  const ttlSeconds = options?.ttlSeconds ?? 0 // 0 = no TTL
 
   // Ensure directory exists
   const dir = path.dirname(dbPath)
@@ -146,6 +150,10 @@ export function createShareStore(
     SELECT theme, book_id, music_id, movie_id, book_thumb, music_thumb, movie_thumb FROM shares WHERE id = ?
   `)
 
+  const selectByIdFullStmt = db.prepare(`
+    SELECT theme, book_id, music_id, movie_id, book_thumb, music_thumb, movie_thumb, created_at FROM shares WHERE id = ?
+  `)
+
   const selectByHashStmt = db.prepare(`
     SELECT id FROM shares WHERE params_hash = ?
   `)
@@ -164,6 +172,17 @@ export function createShareStore(
       SELECT id FROM shares ORDER BY created_at ASC LIMIT ?
     )
   `)
+
+  const deleteByIdStmt = db.prepare(`DELETE FROM shares WHERE id = ?`)
+
+  const purgeExpiredStmt = db.prepare(
+    `DELETE FROM shares WHERE created_at < unixepoch() - ?`,
+  )
+
+  function isExpired(createdAt: number): boolean {
+    if (ttlSeconds <= 0) return false
+    return createdAt < Math.floor(Date.now() / 1000) - ttlSeconds
+  }
 
   const saveTransaction = db.transaction((params: ShareParams): string => {
     const hash = computeParamsHash(params)
@@ -212,7 +231,7 @@ export function createShareStore(
       if (id.length === 0 || id.length > 12 || CONTROL_CHAR_RE.test(id)) {
         return null
       }
-      const row = selectStmt.get(id) as
+      const row = selectByIdFullStmt.get(id) as
         | {
             theme: string
             book_id: string
@@ -221,9 +240,11 @@ export function createShareStore(
             book_thumb: string
             music_thumb: string
             movie_thumb: string
+            created_at: number
           }
         | undefined
       if (!row) return null
+      if (isExpired(row.created_at)) return null
       return {
         theme: row.theme,
         bookId: row.book_id,
@@ -236,6 +257,9 @@ export function createShareStore(
     },
 
     list(options: ShareListOptions): ShareListResult {
+      if (ttlSeconds > 0) {
+        purgeExpiredStmt.run(ttlSeconds)
+      }
       const { cnt } = countStmt.get() as { cnt: number }
       const rows = listStmt.all(options.limit, options.offset) as {
         id: string
@@ -262,6 +286,20 @@ export function createShareStore(
         })),
         total: cnt,
       }
+    },
+
+    delete(id: string): boolean {
+      if (id.length === 0 || id.length > 12 || CONTROL_CHAR_RE.test(id)) {
+        return false
+      }
+      const result = deleteByIdStmt.run(id)
+      return result.changes > 0
+    },
+
+    purgeExpired(): number {
+      if (ttlSeconds <= 0) return 0
+      const result = purgeExpiredStmt.run(ttlSeconds)
+      return result.changes
     },
 
     close(): void {

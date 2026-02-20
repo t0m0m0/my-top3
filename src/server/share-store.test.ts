@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+import Database from 'better-sqlite3'
 import { createShareStore, type ShareParams } from './share-store'
 
 describe('share-store', () => {
@@ -227,6 +228,98 @@ describe('share-store', () => {
       const result = store.list({ limit: 10, offset: 100 })
       expect(result.items).toHaveLength(0)
       expect(result.total).toBe(1)
+      store.close()
+    })
+  })
+
+  describe('TTL expiration', () => {
+    it('get returns null for expired records', () => {
+      const store = createShareStore(dbPath, { ttlSeconds: 60 })
+      const id = store.save(sampleParams)
+
+      // Manually backdate the record to simulate expiration
+      const db = new Database(dbPath)
+      db.prepare('UPDATE shares SET created_at = created_at - 120').run()
+      db.close()
+
+      expect(store.get(id)).toBeNull()
+      store.close()
+    })
+
+    it('list excludes expired records', () => {
+      const store = createShareStore(dbPath, { ttlSeconds: 60 })
+      store.save({ ...sampleParams, theme: 'old' })
+
+      // Backdate the first record
+      const db = new Database(dbPath)
+      db.prepare(
+        "UPDATE shares SET created_at = created_at - 120 WHERE theme = 'old'",
+      ).run()
+      db.close()
+
+      store.save({ ...sampleParams, theme: 'new' })
+
+      const result = store.list({ limit: 10, offset: 0 })
+      expect(result.items).toHaveLength(1)
+      expect(result.items[0]!.theme).toBe('new')
+      expect(result.total).toBe(1)
+      store.close()
+    })
+
+    it('purgeExpired removes expired records and returns count', () => {
+      const store = createShareStore(dbPath, { ttlSeconds: 60 })
+      store.save({ ...sampleParams, theme: 'old1' })
+      store.save({ ...sampleParams, theme: 'old2' })
+
+      const db = new Database(dbPath)
+      db.prepare('UPDATE shares SET created_at = created_at - 120').run()
+      db.close()
+
+      store.save({ ...sampleParams, theme: 'fresh' })
+
+      const purged = store.purgeExpired()
+      expect(purged).toBe(2)
+
+      const result = store.list({ limit: 10, offset: 0 })
+      expect(result.items).toHaveLength(1)
+      expect(result.items[0]!.theme).toBe('fresh')
+      store.close()
+    })
+
+    it('defaults to no TTL when ttlSeconds is not set', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+
+      // Backdate by a large amount
+      const db = new Database(dbPath)
+      db.prepare('UPDATE shares SET created_at = created_at - 999999').run()
+      db.close()
+
+      // Should still be retrievable (no TTL)
+      expect(store.get(id)).not.toBeNull()
+      store.close()
+    })
+  })
+
+  describe('delete', () => {
+    it('deletes a record by id and returns true', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(store.delete(id)).toBe(true)
+      expect(store.get(id)).toBeNull()
+      store.close()
+    })
+
+    it('returns false when id does not exist', () => {
+      const store = createShareStore(dbPath)
+      expect(store.delete('nonexistent')).toBe(false)
+      store.close()
+    })
+
+    it('rejects invalid ids', () => {
+      const store = createShareStore(dbPath)
+      expect(store.delete('')).toBe(false)
+      expect(store.delete('a'.repeat(20))).toBe(false)
       store.close()
     })
   })

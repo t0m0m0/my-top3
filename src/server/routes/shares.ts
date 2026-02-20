@@ -13,9 +13,17 @@ function isValidBody(body: unknown): body is {
   return typeof body === 'object' && body !== null && !Array.isArray(body)
 }
 
-export function createSharesApp(dbPath: string) {
-  const store = createShareStore(dbPath)
+export type SharesAppOptions = {
+  adminApiKey?: string
+  ttlSeconds?: number
+}
+
+export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
+  const store = createShareStore(dbPath, {
+    ttlSeconds: options?.ttlSeconds,
+  })
   const app = new Hono()
+  const adminApiKey = options?.adminApiKey
 
   const MAX_LIMIT = 50
   const DEFAULT_LIMIT = 20
@@ -94,6 +102,40 @@ export function createSharesApp(dbPath: string) {
     }
 
     return c.json({ ok: true, data: params })
+  })
+
+  app.delete('/:id', (c) => {
+    if (!adminApiKey) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'unauthorized', message: 'Admin API not configured' },
+        },
+        401,
+      )
+    }
+
+    const auth = c.req.header('Authorization')
+    if (auth !== `Bearer ${adminApiKey}`) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'unauthorized', message: 'Invalid credentials' },
+        },
+        401,
+      )
+    }
+
+    const id = c.req.param('id')
+    const deleted = store.delete(id)
+    if (!deleted) {
+      return c.json(
+        { ok: false, error: { kind: 'not_found', message: 'Share not found' } },
+        404,
+      )
+    }
+
+    return c.json({ ok: true })
   })
 
   return app

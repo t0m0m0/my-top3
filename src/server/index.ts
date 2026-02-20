@@ -36,7 +36,7 @@ app.use(
   '/api/*',
   cors({
     origin: corsOrigins,
-    allowMethods: ['GET', 'POST'],
+    allowMethods: ['GET', 'POST', 'DELETE'],
   }),
 )
 
@@ -50,6 +50,14 @@ app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)
 app.route('/api/movies', moviesApp)
 app.route('/api/image', imageProxyApp)
-app.route('/api/shares', createSharesApp(sharesDataPath))
+const SHARE_TTL_SECONDS = 90 * 24 * 60 * 60 // 90 days
+
+app.route(
+  '/api/shares',
+  createSharesApp(sharesDataPath, {
+    adminApiKey: process.env['ADMIN_API_KEY'],
+    ttlSeconds: SHARE_TTL_SECONDS,
+  }),
+)
 
 export default app
