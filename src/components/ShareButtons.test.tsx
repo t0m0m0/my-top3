@@ -371,6 +371,43 @@ describe('ShareButtons', () => {
   })
 
   describe('Short URL pre-resolution', () => {
+    it('skips createShortUrl when existingShareId is provided', async () => {
+      vi.mocked(createShortUrl).mockResolvedValue('/s/new123')
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      const shareParams = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+      }
+
+      render(
+        <ShareButtons
+          theme="テスト"
+          shareParams={shareParams}
+          existingShareId="abc123"
+        />,
+      )
+
+      // Should NOT call createShortUrl at all
+      await waitFor(() => {
+        expect(createShortUrl).not.toHaveBeenCalled()
+      })
+
+      // Click share — should use the existing share URL
+      fireEvent.click(screen.getByLabelText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: `${window.location.origin}/s/abc123`,
+          }),
+        )
+      })
+    })
+
     it('pre-resolves short URL on mount when shareParams are provided', async () => {
       vi.mocked(createShortUrl).mockResolvedValue('/s/abc123')
       const shareMock = vi.fn().mockResolvedValue(undefined)

@@ -24,6 +24,7 @@ type ShareButtonsProps = {
   captureRef?: RefObject<HTMLDivElement | null>
   preGeneratedBlob?: Blob | null
   shareParams?: ShareParams
+  existingShareId?: string
 }
 
 function buildShareText(theme?: string, url?: string): string {
@@ -36,6 +37,7 @@ export default function ShareButtons({
   captureRef,
   preGeneratedBlob,
   shareParams,
+  existingShareId,
 }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
   const [copyFailed, setCopyFailed] = useState(false)
@@ -49,6 +51,11 @@ export default function ShareButtons({
 
   // Pre-resolve short URL on mount so it's ready when user taps share
   useEffect(() => {
+    // If we already have a share ID (e.g. viewing from /s/:id), use it directly
+    if (existingShareId) {
+      resolvedUrlRef.current = `${window.location.origin}/s/${existingShareId}`
+      return
+    }
     if (!shareParams) return
     let cancelled = false
     createShortUrl(shareParams)
@@ -63,7 +70,7 @@ export default function ShareButtons({
     return () => {
       cancelled = true
     }
-  }, [shareParams])
+  }, [shareParams, existingShareId])
 
   const getShareUrl = useCallback((): string => {
     return resolvedUrlRef.current ?? window.location.href
