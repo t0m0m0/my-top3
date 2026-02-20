@@ -2,13 +2,16 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { searchMovies, getMovieById } from './tmdb'
+import { searchMovies, getMovieById, _clearCaches } from './tmdb'
 
 const BASE_URL = 'https://api.themoviedb.org/3'
 
 const server = setupServer()
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
+afterEach(() => {
+  server.resetHandlers()
+  _clearCaches()
+})
 afterAll(() => server.close())
 
 function mockMovie(overrides: Record<string, unknown> = {}) {

@@ -4,10 +4,23 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
+import { TtlCache } from '../utils/cache.ts'
 import { assertObject, assertField, assertArray } from './validation-helpers.ts'
 
 const BASE_URL = 'https://ws.audioscrobbler.com/2.0'
 const DEFAULT_MAX_RESULTS = 20
+
+const SEARCH_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const GET_BY_ID_TTL_MS = 60 * 60 * 1000 // 1 hour
+
+const searchCache = new TtlCache<Result<PaginatedResponse<SearchResultItem>>>({
+  ttlMs: SEARCH_TTL_MS,
+  maxEntries: 200,
+})
+const getByIdCache = new TtlCache<Result<SearchResultItem>>({
+  ttlMs: GET_BY_ID_TTL_MS,
+  maxEntries: 500,
+})
 
 // ── Last.fm API response types ──────────────────────────────────────
 
@@ -108,6 +121,10 @@ export async function searchMusic(
 
   // Last.fm uses 1-based page numbers
   const page = Math.floor(startIndex / maxResults) + 1
+  const cacheKey = `${trimmed}:${page}:${maxResults}`
+
+  const cached = searchCache.get(cacheKey)
+  if (cached) return cached
 
   const params = new URLSearchParams({
     method: 'album.search',
@@ -136,7 +153,7 @@ export async function searchMusic(
     .map(mapSearchAlbumToResult)
     .filter((item) => item.thumbnailUrl !== '')
 
-  return {
+  const response: Result<PaginatedResponse<SearchResultItem>> = {
     ok: true,
     data: {
       items: mapped,
@@ -144,6 +161,9 @@ export async function searchMusic(
       startIndex,
     },
   }
+
+  searchCache.set(cacheKey, response)
+  return response
 }
 
 export async function getMusicById(
@@ -157,6 +177,9 @@ export async function getMusicById(
       error: { kind: 'not-found', message: 'Invalid album ID' },
     }
   }
+
+  const cached = getByIdCache.get(mbid)
+  if (cached) return cached
 
   const fallback = decodeFallbackId(mbid)
   const params = new URLSearchParams({
@@ -182,7 +205,7 @@ export async function getMusicById(
   if (!result.ok) return result
 
   const { album } = result.data
-  return {
+  const response: Result<SearchResultItem> = {
     ok: true,
     data: {
       id: album.mbid || mbid,
@@ -193,9 +216,18 @@ export async function getMusicById(
       externalUrl: album.url ?? '',
     },
   }
+
+  getByIdCache.set(mbid, response)
+  return response
 }
 
 // ── Mapping ─────────────────────────────────────────────────────────
+
+/** @internal Clear caches (for testing only) */
+export function _clearCaches(): void {
+  searchCache.clear()
+  getByIdCache.clear()
+}
 
 function mapSearchAlbumToResult(album: LastfmAlbumSearch): SearchResultItem {
   const id = album.mbid || encodeFallbackId(album.name, album.artist)

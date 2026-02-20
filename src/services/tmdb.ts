@@ -4,12 +4,25 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
+import { TtlCache } from '../utils/cache.ts'
 import { assertObject, assertField, assertArray } from './validation-helpers.ts'
 
 const BASE_URL = 'https://api.themoviedb.org/3'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300'
 const DEFAULT_MAX_RESULTS = 20
 const TMDB_PAGE_SIZE = 20
+
+const SEARCH_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const GET_BY_ID_TTL_MS = 60 * 60 * 1000 // 1 hour
+
+const searchCache = new TtlCache<Result<PaginatedResponse<SearchResultItem>>>({
+  ttlMs: SEARCH_TTL_MS,
+  maxEntries: 200,
+})
+const getByIdCache = new TtlCache<Result<SearchResultItem>>({
+  ttlMs: GET_BY_ID_TTL_MS,
+  maxEntries: 500,
+})
 
 // ── TMDb API response types ────────────────────────────────────────
 
@@ -109,6 +122,10 @@ export async function searchMovies(
   }
 
   const page = startIndexToPage(startIndex)
+  const cacheKey = `${trimmed}:${page}`
+
+  const cached = searchCache.get(cacheKey)
+  if (cached) return cached
 
   const params = new URLSearchParams({
     api_key: apiKey,
@@ -129,7 +146,7 @@ export async function searchMovies(
 
   const mapped = sliced.map((movie) => mapMovieToSearchResult(movie))
 
-  return {
+  const response: Result<PaginatedResponse<SearchResultItem>> = {
     ok: true,
     data: {
       items: mapped,
@@ -137,6 +154,9 @@ export async function searchMovies(
       startIndex,
     },
   }
+
+  searchCache.set(cacheKey, response)
+  return response
 }
 
 export async function getMovieById(
@@ -151,6 +171,9 @@ export async function getMovieById(
     }
   }
 
+  const cached = getByIdCache.get(id)
+  if (cached) return cached
+
   const params = new URLSearchParams({
     api_key: apiKey,
     language: 'ja-JP',
@@ -164,7 +187,13 @@ export async function getMovieById(
 
   if (!result.ok) return result
 
-  return { ok: true, data: mapMovieDetailToSearchResult(result.data) }
+  const response: Result<SearchResultItem> = {
+    ok: true,
+    data: mapMovieDetailToSearchResult(result.data),
+  }
+
+  getByIdCache.set(id, response)
+  return response
 }
 
 // ── Mapping ─────────────────────────────────────────────────────────
@@ -173,6 +202,12 @@ function extractYear(releaseDate?: string): string {
   if (!releaseDate) return ''
   const year = releaseDate.slice(0, 4)
   return /^\d{4}$/.test(year) ? year : ''
+}
+
+/** @internal Clear caches (for testing only) */
+export function _clearCaches(): void {
+  searchCache.clear()
+  getByIdCache.clear()
 }
 
 function mapMovieToSearchResult(movie: TMDbMovie): SearchResultItem {

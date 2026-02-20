@@ -7,7 +7,11 @@ const LASTFM_BASE = 'https://ws.audioscrobbler.com/2.0'
 
 const server = setupServer()
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
+afterEach(async () => {
+  server.resetHandlers()
+  const { _clearCaches } = await import('./lastfm')
+  _clearCaches()
+})
 afterAll(() => server.close())
 
 function mockAlbumSearchResponse(
