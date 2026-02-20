@@ -68,6 +68,9 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
       - name: Run E2E tests
+        # API keys are dummy values for server startup only.
+        # All external API calls are intercepted by Playwright route
+        # handlers in each test file, so no real API requests are made.
         run: npm run test:e2e
         env:
           CI: true
