@@ -38,42 +38,42 @@ describe('rateLimiter', () => {
     expect(res.headers.get('X-RateLimit-Limit')).toBe('10')
     expect(res.headers.get('X-RateLimit-Remaining')).toBe('9')
   })
-})
 
-it('evicts oldest entries when store exceeds maxStoreSize', async () => {
-  const app = new Hono()
-  app.use('*', rateLimiter({ windowMs: 60000, max: 100, maxStoreSize: 3 }))
-  app.get('/test', (c) => c.json({ ok: true }))
+  it('evicts oldest entries when store exceeds maxStoreSize', async () => {
+    const app = new Hono()
+    app.use('*', rateLimiter({ windowMs: 60000, max: 100, maxStoreSize: 3 }))
+    app.get('/test', (c) => c.json({ ok: true }))
 
-  // Fill store with 4 different IPs (exceeds maxStoreSize of 3)
-  for (let i = 0; i < 4; i++) {
-    await app.request('/test', {
-      headers: { 'x-forwarded-for': `10.0.0.${i}` },
+    // Fill store with 4 different IPs (exceeds maxStoreSize of 3)
+    for (let i = 0; i < 4; i++) {
+      await app.request('/test', {
+        headers: { 'x-forwarded-for': `10.0.0.${i}` },
+      })
+    }
+
+    // First IP should have been evicted; its counter reset
+    const res = await app.request('/test', {
+      headers: { 'x-forwarded-for': '10.0.0.0' },
     })
-  }
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-RateLimit-Remaining')).toBe('99')
+  })
 
-  // First IP should have been evicted; its counter reset
-  const res = await app.request('/test', {
-    headers: { 'x-forwarded-for': '10.0.0.0' },
-  })
-  expect(res.status).toBe(200)
-  expect(res.headers.get('X-RateLimit-Remaining')).toBe('99')
-})
+  it('uses first IP from x-forwarded-for when multiple present', async () => {
+    const app = new Hono()
+    app.use('*', rateLimiter({ windowMs: 60000, max: 2 }))
+    app.get('/test', (c) => c.json({ ok: true }))
 
-it('uses first IP from x-forwarded-for when multiple present', async () => {
-  const app = new Hono()
-  app.use('*', rateLimiter({ windowMs: 60000, max: 2 }))
-  app.get('/test', (c) => c.json({ ok: true }))
-
-  // Same real IP with different proxy chains
-  await app.request('/test', {
-    headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.1' },
+    // Same real IP with different proxy chains
+    await app.request('/test', {
+      headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.1' },
+    })
+    await app.request('/test', {
+      headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.2' },
+    })
+    const res = await app.request('/test', {
+      headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.3' },
+    })
+    expect(res.status).toBe(429)
   })
-  await app.request('/test', {
-    headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.2' },
-  })
-  const res = await app.request('/test', {
-    headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.3' },
-  })
-  expect(res.status).toBe(429)
 })
