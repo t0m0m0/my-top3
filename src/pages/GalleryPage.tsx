@@ -5,9 +5,11 @@ import ErrorMessage from '../components/ErrorMessage'
 import GalleryCard from '../components/GalleryCard'
 import DataCredits from '../components/DataCredits'
 import { useGallery } from '../hooks/useGallery'
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 
 export default function GalleryPage() {
   const { items, loading, loadingMore, error, hasMore, loadMore } = useGallery()
+  const sentinelRef = useIntersectionObserver(loadMore)
 
   return (
     <div
@@ -104,28 +106,29 @@ export default function GalleryPage() {
               ))}
             </div>
 
-            {/* Load more */}
-            {hasMore && (
-              <div className="mt-8 text-center">
-                <Button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  variant="outlined"
-                  sx={{
-                    borderRadius: '9999px',
-                    px: 4,
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-primary)',
-                    fontWeight: 600,
-                    '&:hover': {
-                      borderColor: 'var(--color-primary-dark)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: '#fff',
-                    },
-                  }}
+            {loadingMore && (
+              <div className="flex justify-center py-6">
+                <CircularProgress size={32} />
+              </div>
+            )}
+
+            {!loadingMore && hasMore && (
+              <div
+                ref={sentinelRef}
+                data-testid="gallery-sentinel"
+                className="h-4"
+                aria-hidden="true"
+              />
+            )}
+
+            {!loadingMore && !hasMore && items.length > 0 && (
+              <div className="py-4 text-center">
+                <p
+                  className="text-sm"
+                  style={{ color: 'var(--color-text-secondary)' }}
                 >
-                  {loadingMore ? '読み込み中...' : 'もっと見る'}
-                </Button>
+                  全件表示しました
+                </p>
               </div>
             )}
           </>

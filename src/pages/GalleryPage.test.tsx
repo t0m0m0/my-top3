@@ -1,12 +1,30 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  afterAll,
+  afterEach,
+  beforeEach,
+} from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { http, HttpResponse } from 'msw'
 import { server } from '../test/msw/server'
 import GalleryPage from './GalleryPage'
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }))
+beforeEach(() => {
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+    },
+  )
+})
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
@@ -86,42 +104,41 @@ describe('GalleryPage', () => {
     })
   })
 
-  it('shows "more" button when hasMore and loads next page', async () => {
-    const user = userEvent.setup()
-    let callCount = 0
+  it('renders sentinel element for infinite scroll when hasMore', async () => {
     server.use(
-      http.get('/api/shares', () => {
-        callCount++
-        if (callCount === 1) {
-          return HttpResponse.json({
-            ok: true,
-            data: { items: makeFakeShares(20), total: 25 },
-          })
-        }
-        return HttpResponse.json({
+      http.get('/api/shares', () =>
+        HttpResponse.json({
           ok: true,
-          data: {
-            items: makeFakeShares(5).map((s) => ({
-              ...s,
-              id: `p2-${s.id}`,
-              theme: `Page2 ${s.theme}`,
-            })),
-            total: 25,
-          },
-        })
-      }),
+          data: { items: makeFakeShares(20), total: 25 },
+        }),
+      ),
     )
 
     renderPage()
     await waitFor(() => expect(screen.getByText('Theme 0')).toBeInTheDocument())
 
-    const moreBtn = screen.getByRole('button', { name: /もっと見る/ })
-    expect(moreBtn).toBeInTheDocument()
+    // Sentinel for infinite scroll should be present (not a button)
+    expect(
+      screen.queryByRole('button', { name: /もっと見る/ }),
+    ).not.toBeInTheDocument()
+    expect(
+      document.querySelector('[data-testid="gallery-sentinel"]'),
+    ).toBeInTheDocument()
+  })
 
-    await user.click(moreBtn)
-    await waitFor(() =>
-      expect(screen.getByText('Page2 Theme 0')).toBeInTheDocument(),
+  it('shows "全件表示しました" when all items loaded', async () => {
+    server.use(
+      http.get('/api/shares', () =>
+        HttpResponse.json({
+          ok: true,
+          data: { items: makeFakeShares(3), total: 3 },
+        }),
+      ),
     )
+
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Theme 0')).toBeInTheDocument())
+    expect(screen.getByText('全件表示しました')).toBeInTheDocument()
   })
 
   it('has a link back to top page', async () => {
