@@ -24,10 +24,7 @@ export function createSharesApp(dbPath: string) {
       Math.max(Number.isFinite(limitParam) ? limitParam : DEFAULT_LIMIT, 1),
       MAX_LIMIT,
     )
-    const offset = Math.max(
-      Number.isFinite(offsetParam) ? offsetParam : 0,
-      0,
-    )
+    const offset = Math.max(Number.isFinite(offsetParam) ? offsetParam : 0, 0)
     const result = store.list({ limit, offset })
     return c.json({ ok: true, data: result })
   })
