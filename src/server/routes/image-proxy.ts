@@ -9,6 +9,7 @@ export const ALLOWED_HOSTS = [
 
 const PROXY_TIMEOUT_MS = 10_000
 const CACHE_MAX_AGE = 86400 // 1 day
+const MAX_RESPONSE_SIZE = 10 * 1024 * 1024 // 10MB
 
 function isAllowedHost(hostname: string): boolean {
   return (ALLOWED_HOSTS as readonly string[]).includes(hostname)
@@ -17,6 +18,48 @@ function isAllowedHost(hostname: string): boolean {
 function isImageContentType(contentType: string | null): boolean {
   if (!contentType) return false
   return contentType.startsWith('image/')
+}
+
+/**
+ * ストリーミングでレスポンスを読み込み、上限を超えたら null を返す。
+ */
+async function readWithSizeLimit(
+  response: Response,
+  maxSize: number,
+): Promise<Uint8Array | null> {
+  const reader = response.body?.getReader()
+  if (!reader) {
+    // body がない場合は空を返す
+    return new Uint8Array(0)
+  }
+
+  const chunks: Uint8Array[] = []
+  let totalSize = 0
+
+  try {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      totalSize += value.byteLength
+      if (totalSize > maxSize) {
+        await reader.cancel()
+        return null
+      }
+      chunks.push(value)
+    }
+  } catch {
+    await reader.cancel()
+    throw new Error('ストリーム読み込み中にエラーが発生しました')
+  }
+
+  const result = new Uint8Array(totalSize)
+  let offset = 0
+  for (const chunk of chunks) {
+    result.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return result
 }
 
 export const imageProxyApp = new Hono()
@@ -101,7 +144,35 @@ imageProxyApp.get('/proxy', async (c) => {
       )
     }
 
-    const body = await upstream.arrayBuffer()
+    // Content-Length が明示されていて上限超過なら即拒否
+    const contentLength = upstream.headers.get('Content-Length')
+    if (contentLength && Number(contentLength) > MAX_RESPONSE_SIZE) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'unknown',
+            message: `レスポンスサイズが上限（${MAX_RESPONSE_SIZE} bytes）を超えています`,
+          },
+        },
+        413,
+      )
+    }
+
+    // ストリーミング読み込みでサイズ制限を強制
+    const body = await readWithSizeLimit(upstream, MAX_RESPONSE_SIZE)
+    if (body === null) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'unknown',
+            message: `レスポンスサイズが上限（${MAX_RESPONSE_SIZE} bytes）を超えています`,
+          },
+        },
+        413,
+      )
+    }
 
     return new Response(body, {
       status: 200,
