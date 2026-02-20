@@ -165,11 +165,16 @@ export default function Top3Content({ params }: Props) {
             theme={params.theme}
             captureRef={showImage ? captureRef : undefined}
             preGeneratedBlob={preGeneratedBlob}
-            shareParams={params}
+            shareParams={{
+              ...params,
+              bookThumb: book.data?.thumbnailUrl ?? '',
+              musicThumb: music.data?.thumbnailUrl ?? '',
+              movieThumb: movie.data?.thumbnailUrl ?? '',
+            }}
           />
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button
             component={Link}
             to={buildEditUrl(params)}
@@ -190,6 +195,27 @@ export default function Top3Content({ params }: Props) {
             }}
           >
             ← トップページに戻る
+          </Button>
+          <Button
+            component={Link}
+            to="/gallery"
+            variant="outlined"
+            sx={{
+              borderRadius: '9999px',
+              px: 4,
+              py: 1,
+              borderColor: 'var(--color-secondary)',
+              color: 'var(--color-secondary)',
+              fontWeight: 600,
+              transition: 'all 0.2s',
+              '&:hover': {
+                borderColor: 'var(--color-secondary-dark)',
+                backgroundColor: 'var(--color-secondary)',
+                color: '#fff',
+              },
+            }}
+          >
+            🎨 みんなのNo.1s
           </Button>
         </div>
       </div>

@@ -14,6 +14,9 @@ type ShareParams = {
   bookId: string
   musicId: string
   movieId: string
+  bookThumb?: string
+  musicThumb?: string
+  movieThumb?: string
 }
 
 type ShareButtonsProps = {

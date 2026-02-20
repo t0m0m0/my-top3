@@ -6,6 +6,9 @@ function isValidBody(body: unknown): body is {
   bookId?: string
   musicId?: string
   movieId?: string
+  bookThumb?: string
+  musicThumb?: string
+  movieThumb?: string
 } {
   return typeof body === 'object' && body !== null && !Array.isArray(body)
 }
@@ -13,6 +16,21 @@ function isValidBody(body: unknown): body is {
 export function createSharesApp(dbPath: string) {
   const store = createShareStore(dbPath)
   const app = new Hono()
+
+  const MAX_LIMIT = 50
+  const DEFAULT_LIMIT = 20
+
+  app.get('/', (c) => {
+    const limitParam = parseInt(c.req.query('limit') ?? '', 10)
+    const offsetParam = parseInt(c.req.query('offset') ?? '', 10)
+    const limit = Math.min(
+      Math.max(Number.isFinite(limitParam) ? limitParam : DEFAULT_LIMIT, 1),
+      MAX_LIMIT,
+    )
+    const offset = Math.max(Number.isFinite(offsetParam) ? offsetParam : 0, 0)
+    const result = store.list({ limit, offset })
+    return c.json({ ok: true, data: result })
+  })
 
   app.post('/', async (c) => {
     let body: unknown
@@ -37,6 +55,9 @@ export function createSharesApp(dbPath: string) {
       bookId: typeof body.bookId === 'string' ? body.bookId : '',
       musicId: typeof body.musicId === 'string' ? body.musicId : '',
       movieId: typeof body.movieId === 'string' ? body.movieId : '',
+      bookThumb: typeof body.bookThumb === 'string' ? body.bookThumb : '',
+      musicThumb: typeof body.musicThumb === 'string' ? body.musicThumb : '',
+      movieThumb: typeof body.movieThumb === 'string' ? body.movieThumb : '',
     }
 
     if (!params.bookId && !params.musicId && !params.movieId) {
