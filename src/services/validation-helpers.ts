@@ -2,7 +2,7 @@ export function assertObject(
   data: unknown,
   label: string,
 ): Record<string, unknown> {
-  if (typeof data !== 'object' || data === null) {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     throw new Error(`Expected object response from ${label}`)
   }
   return data as Record<string, unknown>

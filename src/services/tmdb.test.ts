@@ -128,6 +128,42 @@ describe('searchMovies', () => {
       expect(result.data.items[1].subtitle).toBe('2024')
     }
   })
+
+  it('returns validation error when results contain invalid items', async () => {
+    server.use(
+      http.get(`${BASE_URL}/search/movie`, () =>
+        HttpResponse.json({
+          page: 1,
+          results: [{ title: 'No ID Movie' }],
+          total_pages: 1,
+          total_results: 1,
+        }),
+      ),
+    )
+    const result = await searchMovies('key', 'test')
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).toMatch(/id/)
+    }
+  })
+
+  it('returns validation error when results items lack title', async () => {
+    server.use(
+      http.get(`${BASE_URL}/search/movie`, () =>
+        HttpResponse.json({
+          page: 1,
+          results: [{ id: 1 }],
+          total_pages: 1,
+          total_results: 1,
+        }),
+      ),
+    )
+    const result = await searchMovies('key', 'test')
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).toMatch(/title/)
+    }
+  })
 })
 
 describe('getMovieById', () => {

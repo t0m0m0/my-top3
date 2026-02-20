@@ -4,7 +4,7 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
-import { assertObject, assertField } from './validation-helpers.ts'
+import { assertObject, assertField, assertArray } from './validation-helpers.ts'
 
 const BASE_URL = 'https://ws.audioscrobbler.com/2.0'
 const DEFAULT_MAX_RESULTS = 20
@@ -53,13 +53,22 @@ type LastfmErrorResponse = {
 function validateSearchResponse(data: unknown): LastfmSearchResponse {
   const obj = assertObject(data, 'Last.fm search API')
   assertField<object>(obj, 'results', 'object', 'Last.fm search response')
-  const results = obj['results'] as Record<string, unknown>
+  const results = assertObject(obj['results'], 'Last.fm search results')
   assertField<object>(
     results,
     'albummatches',
     'object',
     'Last.fm search results',
   )
+  const albummatches = assertObject(
+    results['albummatches'],
+    'Last.fm albummatches',
+  )
+  const albums = assertArray(albummatches, 'album', 'Last.fm albummatches')
+  for (const item of albums) {
+    const album = assertObject(item, 'Last.fm album item')
+    assertField<string>(album, 'name', 'string', 'Last.fm album item')
+  }
   return data as LastfmSearchResponse
 }
 

@@ -152,6 +152,32 @@ describe('searchBooks', () => {
     }
   })
 
+  it('returns validation error when items contain invalid entries', async () => {
+    server.use(
+      http.get(BOOKS_API, () =>
+        HttpResponse.json(mockSearchResponse([{ selfLink: 'link' }], 1)),
+      ),
+    )
+    const result = await searchBooks('key', 'test')
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).toMatch(/id/)
+    }
+  })
+
+  it('returns validation error when items lack volumeInfo', async () => {
+    server.use(
+      http.get(BOOKS_API, () =>
+        HttpResponse.json(mockSearchResponse([{ id: 'vol-1' }], 1)),
+      ),
+    )
+    const result = await searchBooks('key', 'test')
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).toMatch(/volumeInfo/)
+    }
+  })
+
   it('handles missing thumbnails', async () => {
     server.use(
       http.get(BOOKS_API, () =>

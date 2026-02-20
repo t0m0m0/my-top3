@@ -45,7 +45,19 @@ type GoogleBooksSearchResponse = {
 function validateSearchResponse(data: unknown): GoogleBooksSearchResponse {
   const obj = assertObject(data, 'Google Books API')
   assertField<number>(obj, 'totalItems', 'number', 'Google Books response')
-  assertOptionalArray(obj, 'items', 'Google Books response')
+  const items = assertOptionalArray(obj, 'items', 'Google Books response')
+  if (items) {
+    for (const item of items) {
+      const vol = assertObject(item, 'Google Books volume item')
+      assertField<string>(vol, 'id', 'string', 'Google Books volume item')
+      assertField<object>(
+        vol,
+        'volumeInfo',
+        'object',
+        'Google Books volume item',
+      )
+    }
+  }
   return data as GoogleBooksSearchResponse
 }
 

@@ -7,7 +7,7 @@ function isValidBody(body: unknown): body is {
   musicId?: string
   movieId?: string
 } {
-  return typeof body === 'object' && body !== null
+  return typeof body === 'object' && body !== null && !Array.isArray(body)
 }
 
 export function createSharesApp(dbPath: string) {

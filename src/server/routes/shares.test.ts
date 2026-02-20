@@ -46,6 +46,21 @@ describe('shares route', () => {
       expect(res.status).toBe(400)
     })
 
+    it('returns 400 when body is an array', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify([{ bookId: 'abc' }]),
+      })
+      expect(res.status).toBe(400)
+      const json = (await res.json()) as {
+        ok: boolean
+        error: { message: string }
+      }
+      expect(json.ok).toBe(false)
+      expect(json.error.message).toBe('Invalid body')
+    })
+
     it('returns 400 for invalid JSON', async () => {
       const res = await app.request('/', {
         method: 'POST',
