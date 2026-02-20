@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import StepGuide from '../components/StepGuide'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
@@ -145,6 +146,20 @@ function SearchPage() {
             error={error}
           />
         </div>
+      </div>
+
+      {/* Gallery Link */}
+      <div className="mx-auto max-w-5xl px-3 pb-2 pt-6 text-center sm:px-4">
+        <Link
+          to="/gallery"
+          className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+          style={{
+            color: 'var(--color-primary)',
+            border: '1px solid var(--color-primary)',
+          }}
+        >
+          🎨 みんなのNo.1sを見る →
+        </Link>
       </div>
 
       <DataCredits />

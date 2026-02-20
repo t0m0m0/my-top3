@@ -4,6 +4,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import SearchPage from './pages/SearchPage'
 import Top3Page from './pages/Top3Page'
 import ShortUrlPage from './pages/ShortUrlPage'
+import GalleryPage from './pages/GalleryPage'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<SearchPage />} />
           <Route path="/my-no1s" element={<Top3Page />} />
           <Route path="/s/:id" element={<ShortUrlPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
         </Routes>
       </SelectionProvider>
     </ErrorBoundary>
