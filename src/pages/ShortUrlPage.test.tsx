@@ -14,12 +14,17 @@ vi.mock('react-router-dom', async () => {
 vi.mock('../components/Top3Content', () => ({
   default: ({
     params,
+    existingShareId,
   }: {
     params: { theme: string; bookId: string; musicId: string; movieId: string }
+    existingShareId?: string
   }) => (
     <div data-testid="top3-content">
       <span>{params.theme}</span>
       <span>{params.bookId}</span>
+      {existingShareId && (
+        <span data-testid="existing-share-id">{existingShareId}</span>
+      )}
     </div>
   ),
 }))
@@ -73,6 +78,28 @@ describe('ShortUrlPage', () => {
     })
     expect(screen.getByText('テスト')).toBeInTheDocument()
     expect(screen.getByText('b1')).toBeInTheDocument()
+  })
+
+  it('passes existingShareId to Top3Content', async () => {
+    mockUseParams.mockReturnValue({ id: 'xyz789' })
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          theme: 'テスト',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'mv1',
+        },
+      }),
+    })
+    render(<ShortUrlPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId('existing-share-id')).toHaveTextContent(
+        'xyz789',
+      )
+    })
   })
 
   it('calls the correct API endpoint', async () => {

@@ -90,7 +90,7 @@ function ShortUrlPage() {
     )
   }
 
-  return <Top3Content params={data} />
+  return <Top3Content params={data} existingShareId={id} />
 }
 
 export default ShortUrlPage

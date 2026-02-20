@@ -19,9 +19,10 @@ type Top3Params = {
 
 type Props = {
   params: Top3Params
+  existingShareId?: string
 }
 
-export default function Top3Content({ params }: Props) {
+export default function Top3Content({ params, existingShareId }: Props) {
   const captureRef = useRef<HTMLDivElement>(null)
   const [captureElement, setCaptureElement] = useState<HTMLDivElement | null>(
     null,
@@ -171,6 +172,7 @@ export default function Top3Content({ params }: Props) {
               musicThumb: music.data?.thumbnailUrl ?? '',
               movieThumb: movie.data?.thumbnailUrl ?? '',
             }}
+            existingShareId={existingShareId}
           />
         </div>
 
