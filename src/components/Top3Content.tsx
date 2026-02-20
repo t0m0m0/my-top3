@@ -165,7 +165,12 @@ export default function Top3Content({ params }: Props) {
             theme={params.theme}
             captureRef={showImage ? captureRef : undefined}
             preGeneratedBlob={preGeneratedBlob}
-            shareParams={params}
+            shareParams={{
+              ...params,
+              bookThumb: book.data?.thumbnailUrl ?? '',
+              musicThumb: music.data?.thumbnailUrl ?? '',
+              movieThumb: movie.data?.thumbnailUrl ?? '',
+            }}
           />
         </div>
 

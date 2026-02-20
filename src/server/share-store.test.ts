@@ -24,6 +24,13 @@ describe('share-store', () => {
     movieId: 'ghi789',
   }
 
+  const sampleParamsWithDefaults = {
+    ...sampleParams,
+    bookThumb: '',
+    musicThumb: '',
+    movieThumb: '',
+  }
+
   it('save returns a short id string', () => {
     const store = createShareStore(dbPath)
     const id = store.save(sampleParams)
@@ -37,7 +44,7 @@ describe('share-store', () => {
     const store = createShareStore(dbPath)
     const id = store.save(sampleParams)
     const result = store.get(id)
-    expect(result).toEqual(sampleParams)
+    expect(result).toEqual(sampleParamsWithDefaults)
     store.close()
   })
 
@@ -54,7 +61,7 @@ describe('share-store', () => {
 
     // Create a new store instance from the same file
     const store2 = createShareStore(dbPath)
-    expect(store2.get(id)).toEqual(sampleParams)
+    expect(store2.get(id)).toEqual(sampleParamsWithDefaults)
     store2.close()
   })
 
@@ -70,7 +77,7 @@ describe('share-store', () => {
     const newPath = path.join(tmpDir, 'subdir', 'shares.db')
     const store = createShareStore(newPath)
     const id = store.save(sampleParams)
-    expect(store.get(id)).toEqual(sampleParams)
+    expect(store.get(id)).toEqual(sampleParamsWithDefaults)
     store.close()
   })
 
@@ -124,6 +131,32 @@ describe('share-store', () => {
     })
   })
 
+  describe('save with thumbnails', () => {
+    it('stores and retrieves thumbnail URLs', () => {
+      const store = createShareStore(dbPath)
+      const params = {
+        ...sampleParams,
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
+      }
+      const id = store.save(params)
+      const result = store.get(id)
+      expect(result).toEqual(params)
+      store.close()
+    })
+
+    it('defaults thumbnails to empty string when not provided', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const result = store.get(id)!
+      expect(result.bookThumb).toBe('')
+      expect(result.musicThumb).toBe('')
+      expect(result.movieThumb).toBe('')
+      store.close()
+    })
+  })
+
   describe('list', () => {
     it('returns shares in newest-first order', () => {
       const store = createShareStore(dbPath)
@@ -168,15 +201,23 @@ describe('share-store', () => {
       store.close()
     })
 
-    it('each item includes id and created_at', () => {
+    it('each item includes id, created_at, and thumbnails', () => {
       const store = createShareStore(dbPath)
-      store.save(sampleParams)
+      store.save({
+        ...sampleParams,
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
+      })
       const result = store.list({ limit: 10, offset: 0 })
       const item = result.items[0]!
       expect(item.id).toBeDefined()
       expect(typeof item.id).toBe('string')
       expect(item.createdAt).toBeDefined()
       expect(typeof item.createdAt).toBe('number')
+      expect(item.bookThumb).toBe('https://example.com/book.jpg')
+      expect(item.musicThumb).toBe('https://example.com/music.jpg')
+      expect(item.movieThumb).toBe('https://example.com/movie.jpg')
       store.close()
     })
 

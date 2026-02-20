@@ -35,6 +35,9 @@ const makeFakeShares = (count: number) =>
     bookId: `b${i}`,
     musicId: `m${i}`,
     movieId: `v${i}`,
+    bookThumb: `https://example.com/book-${i}.jpg`,
+    musicThumb: `https://example.com/music-${i}.jpg`,
+    movieThumb: `https://example.com/movie-${i}.jpg`,
     createdAt: 1700000000 - i,
   }))
 

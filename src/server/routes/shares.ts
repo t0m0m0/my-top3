@@ -6,6 +6,9 @@ function isValidBody(body: unknown): body is {
   bookId?: string
   musicId?: string
   movieId?: string
+  bookThumb?: string
+  musicThumb?: string
+  movieThumb?: string
 } {
   return typeof body === 'object' && body !== null && !Array.isArray(body)
 }
@@ -52,6 +55,9 @@ export function createSharesApp(dbPath: string) {
       bookId: typeof body.bookId === 'string' ? body.bookId : '',
       musicId: typeof body.musicId === 'string' ? body.musicId : '',
       movieId: typeof body.movieId === 'string' ? body.movieId : '',
+      bookThumb: typeof body.bookThumb === 'string' ? body.bookThumb : '',
+      musicThumb: typeof body.musicThumb === 'string' ? body.musicThumb : '',
+      movieThumb: typeof body.movieThumb === 'string' ? body.movieThumb : '',
     }
 
     if (!params.bookId && !params.musicId && !params.movieId) {

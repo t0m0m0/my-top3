@@ -6,6 +6,9 @@ export type GalleryItem = {
   bookId: string
   musicId: string
   movieId: string
+  bookThumb: string
+  musicThumb: string
+  movieThumb: string
   createdAt: number
 }
 

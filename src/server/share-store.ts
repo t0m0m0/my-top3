@@ -8,6 +8,9 @@ export type ShareParams = {
   bookId: string
   musicId: string
   movieId: string
+  bookThumb?: string
+  musicThumb?: string
+  movieThumb?: string
 }
 
 export type ShareStoreOptions = {
@@ -53,7 +56,7 @@ function validateParams(params: ShareParams): void {
   validateField('movieId', params.movieId, MAX_ID_LENGTH)
 }
 
-export type ShareListItem = ShareParams & {
+export type ShareListItem = Required<ShareParams> & {
   id: string
   createdAt: number
 }
@@ -113,18 +116,34 @@ export function createShareStore(
     )
   }
 
+  // Migration: add thumbnail columns if missing
+  const colNames = new Set(columns.map((c) => c.name))
+  if (!colNames.has('book_thumb')) {
+    db.exec("ALTER TABLE shares ADD COLUMN book_thumb TEXT NOT NULL DEFAULT ''")
+  }
+  if (!colNames.has('music_thumb')) {
+    db.exec(
+      "ALTER TABLE shares ADD COLUMN music_thumb TEXT NOT NULL DEFAULT ''",
+    )
+  }
+  if (!colNames.has('movie_thumb')) {
+    db.exec(
+      "ALTER TABLE shares ADD COLUMN movie_thumb TEXT NOT NULL DEFAULT ''",
+    )
+  }
+
   db.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS idx_shares_params_hash
       ON shares(params_hash) WHERE params_hash != '';
   `)
 
   const insertStmt = db.prepare(`
-    INSERT INTO shares (id, theme, book_id, music_id, movie_id, params_hash, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, unixepoch())
+    INSERT INTO shares (id, theme, book_id, music_id, movie_id, params_hash, book_thumb, music_thumb, movie_thumb, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
   `)
 
   const selectStmt = db.prepare(`
-    SELECT theme, book_id, music_id, movie_id FROM shares WHERE id = ?
+    SELECT theme, book_id, music_id, movie_id, book_thumb, music_thumb, movie_thumb FROM shares WHERE id = ?
   `)
 
   const selectByHashStmt = db.prepare(`
@@ -134,7 +153,7 @@ export function createShareStore(
   const countStmt = db.prepare(`SELECT COUNT(*) as cnt FROM shares`)
 
   const listStmt = db.prepare(`
-    SELECT id, theme, book_id, music_id, movie_id, created_at
+    SELECT id, theme, book_id, music_id, movie_id, book_thumb, music_thumb, movie_thumb, created_at
     FROM shares
     ORDER BY created_at DESC
     LIMIT ? OFFSET ?
@@ -175,6 +194,9 @@ export function createShareStore(
       params.musicId,
       params.movieId,
       hash,
+      params.bookThumb ?? '',
+      params.musicThumb ?? '',
+      params.movieThumb ?? '',
     )
     return id
   })
@@ -191,7 +213,15 @@ export function createShareStore(
         return null
       }
       const row = selectStmt.get(id) as
-        | { theme: string; book_id: string; music_id: string; movie_id: string }
+        | {
+            theme: string
+            book_id: string
+            music_id: string
+            movie_id: string
+            book_thumb: string
+            music_thumb: string
+            movie_thumb: string
+          }
         | undefined
       if (!row) return null
       return {
@@ -199,6 +229,9 @@ export function createShareStore(
         bookId: row.book_id,
         musicId: row.music_id,
         movieId: row.movie_id,
+        bookThumb: row.book_thumb,
+        musicThumb: row.music_thumb,
+        movieThumb: row.movie_thumb,
       }
     },
 
@@ -210,6 +243,9 @@ export function createShareStore(
         book_id: string
         music_id: string
         movie_id: string
+        book_thumb: string
+        music_thumb: string
+        movie_thumb: string
         created_at: number
       }[]
       return {
@@ -219,6 +255,9 @@ export function createShareStore(
           bookId: row.book_id,
           musicId: row.music_id,
           movieId: row.movie_id,
+          bookThumb: row.book_thumb,
+          musicThumb: row.music_thumb,
+          movieThumb: row.movie_thumb,
           createdAt: row.created_at,
         })),
         total: cnt,

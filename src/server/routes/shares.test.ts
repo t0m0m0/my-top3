@@ -179,6 +179,41 @@ describe('shares route', () => {
       expect(json.data.total).toBe(4)
     })
 
+    it('returns thumbnail URLs in list items', async () => {
+      await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'with-thumbs',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+          bookThumb: 'https://example.com/book.jpg',
+          musicThumb: 'https://example.com/music.jpg',
+          movieThumb: 'https://example.com/movie.jpg',
+        }),
+      })
+
+      const res = await app.request('/')
+      const json = (await res.json()) as {
+        ok: boolean
+        data: {
+          items: {
+            bookThumb: string
+            musicThumb: string
+            movieThumb: string
+          }[]
+        }
+      }
+      expect(json.data.items[0]!.bookThumb).toBe('https://example.com/book.jpg')
+      expect(json.data.items[0]!.musicThumb).toBe(
+        'https://example.com/music.jpg',
+      )
+      expect(json.data.items[0]!.movieThumb).toBe(
+        'https://example.com/movie.jpg',
+      )
+    })
+
     it('returns empty list when no shares exist', async () => {
       const res = await app.request('/')
       expect(res.status).toBe(200)
@@ -228,7 +263,7 @@ describe('shares route', () => {
         }
       }
       expect(json.ok).toBe(true)
-      expect(json.data).toEqual({
+      expect(json.data).toMatchObject({
         theme: '\u30c6\u30b9\u30c8',
         bookId: 'b1',
         musicId: '',

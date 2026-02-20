@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom'
-import { useWorkFetch } from '../hooks/useWorkFetch'
-import Skeleton from '@mui/material/Skeleton'
 
 const PLACEHOLDER =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="%23e5e7eb"><rect width="80" height="80"/></svg>'
@@ -8,31 +6,18 @@ const PLACEHOLDER =
 type Props = {
   id: string
   theme: string
-  bookId: string
-  musicId: string
-  movieId: string
+  bookThumb: string
+  musicThumb: string
+  movieThumb: string
   createdAt: number
 }
 
-function Thumbnail({
-  category,
-  workId,
-}: {
-  category: 'book' | 'music' | 'movie'
-  workId: string
-}) {
-  const { data, loading } = useWorkFetch(category, workId)
-
-  if (!workId) return null
-
-  if (loading) {
-    return <Skeleton variant="rounded" width={72} height={72} />
-  }
-
+function Thumbnail({ src, alt }: { src: string; alt: string }) {
+  if (!src) return null
   return (
     <img
-      src={data?.thumbnailUrl ?? PLACEHOLDER}
-      alt={data?.title ?? ''}
+      src={src}
+      alt={alt}
       className="h-18 w-18 rounded-md object-cover shadow-sm"
       loading="lazy"
       onError={(e) => {
@@ -54,11 +39,13 @@ function formatDate(unixSeconds: number): string {
 export default function GalleryCard({
   id,
   theme,
-  bookId,
-  musicId,
-  movieId,
+  bookThumb,
+  musicThumb,
+  movieThumb,
   createdAt,
 }: Props) {
+  const hasThumbs = bookThumb || musicThumb || movieThumb
+
   return (
     <Link
       to={`/s/${id}`}
@@ -84,11 +71,25 @@ export default function GalleryCard({
         </h3>
 
         {/* Thumbnails */}
-        <div className="flex gap-2">
-          <Thumbnail category="book" workId={bookId} />
-          <Thumbnail category="music" workId={musicId} />
-          <Thumbnail category="movie" workId={movieId} />
-        </div>
+        {hasThumbs ? (
+          <div className="flex gap-2">
+            <Thumbnail src={bookThumb} alt="Book" />
+            <Thumbnail src={musicThumb} alt="Music" />
+            <Thumbnail src={movieThumb} alt="Movie" />
+          </div>
+        ) : (
+          <div
+            className="flex h-18 items-center justify-center rounded-md"
+            style={{ backgroundColor: 'var(--color-bg)' }}
+          >
+            <span
+              className="text-xs"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              タップして見る
+            </span>
+          </div>
+        )}
 
         {/* Date */}
         <p
