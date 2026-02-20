@@ -221,13 +221,13 @@ export async function getMusicById(
   return response
 }
 
-// ── Mapping ─────────────────────────────────────────────────────────
-
 /** @internal Clear caches (for testing only) */
 export function _clearCaches(): void {
   searchCache.clear()
   getByIdCache.clear()
 }
+
+// ── Mapping ─────────────────────────────────────────────────────────
 
 function mapSearchAlbumToResult(album: LastfmAlbumSearch): SearchResultItem {
   const id = album.mbid || encodeFallbackId(album.name, album.artist)

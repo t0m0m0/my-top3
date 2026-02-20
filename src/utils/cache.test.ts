@@ -43,6 +43,18 @@ describe('TtlCache', () => {
     expect(cache.get('c')).toBe('3')
   })
 
+  it('get() promotes entry to most recently used (LRU)', () => {
+    const cache = new TtlCache<string>({ ttlMs: 60_000, maxEntries: 2 })
+    cache.set('a', '1')
+    cache.set('b', '2')
+    cache.get('a') // promote 'a' to most recently used
+    cache.set('c', '3') // should evict 'b' (now oldest), not 'a'
+
+    expect(cache.get('a')).toBe('1')
+    expect(cache.get('b')).toBeUndefined()
+    expect(cache.get('c')).toBe('3')
+  })
+
   it('reports size correctly', () => {
     const cache = new TtlCache<string>({ ttlMs: 60_000, maxEntries: 100 })
     expect(cache.size).toBe(0)

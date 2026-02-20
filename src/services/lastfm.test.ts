@@ -2,14 +2,14 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
+import { _clearCaches } from './lastfm'
 
 const LASTFM_BASE = 'https://ws.audioscrobbler.com/2.0'
 
 const server = setupServer()
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(async () => {
+afterEach(() => {
   server.resetHandlers()
-  const { _clearCaches } = await import('./lastfm')
   _clearCaches()
 })
 afterAll(() => server.close())

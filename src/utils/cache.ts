@@ -22,6 +22,10 @@ export class TtlCache<T> {
       return undefined
     }
 
+    // Move to end so it becomes the most recently used
+    this.map.delete(key)
+    this.map.set(key, entry)
+
     return entry.value
   }
 

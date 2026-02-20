@@ -122,7 +122,7 @@ export async function searchMovies(
   }
 
   const page = startIndexToPage(startIndex)
-  const cacheKey = `${trimmed}:${page}`
+  const cacheKey = `${trimmed}:${page}:${maxResults}`
 
   const cached = searchCache.get(cacheKey)
   if (cached) return cached
