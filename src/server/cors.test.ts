@@ -56,7 +56,9 @@ describe('CORS middleware', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
       'https://myno1s.exe.xyz:8000',
     )
-    expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET,POST')
+    expect(res.headers.get('Access-Control-Allow-Methods')).toBe(
+      'GET,POST,DELETE',
+    )
   })
 
   it('allows POST in preflight for /api/shares', async () => {
