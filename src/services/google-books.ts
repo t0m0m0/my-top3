@@ -4,6 +4,7 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
+import { TtlCache } from '../utils/cache.ts'
 import {
   assertObject,
   assertField,
@@ -12,6 +13,18 @@ import {
 
 const BASE_URL = 'https://www.googleapis.com/books/v1/volumes'
 const DEFAULT_MAX_RESULTS = 20
+
+const SEARCH_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const GET_BY_ID_TTL_MS = 60 * 60 * 1000 // 1 hour
+
+const searchCache = new TtlCache<Result<PaginatedResponse<SearchResultItem>>>({
+  ttlMs: SEARCH_TTL_MS,
+  maxEntries: 200,
+})
+const getByIdCache = new TtlCache<Result<SearchResultItem>>({
+  ttlMs: GET_BY_ID_TTL_MS,
+  maxEntries: 500,
+})
 
 type GoogleBooksImageLinks = {
   smallThumbnail?: string
@@ -117,6 +130,11 @@ export async function searchBooks(
     }
   }
 
+  const cacheKey = `${trimmed}:${startIndex}:${maxResults}`
+
+  const cached = searchCache.get(cacheKey)
+  if (cached) return cached
+
   // Search by title and author in parallel, then merge results
   const [titleResult, authorResult] = await Promise.all([
     fetchJson<GoogleBooksSearchResponse>(
@@ -152,7 +170,7 @@ export async function searchBooks(
   const authorTotal = authorResult.ok ? authorResult.data.totalItems : 0
   const totalItems = Math.max(titleTotal, authorTotal)
 
-  return {
+  const response: Result<PaginatedResponse<SearchResultItem>> = {
     ok: true,
     data: {
       items: mapped,
@@ -160,6 +178,9 @@ export async function searchBooks(
       startIndex,
     },
   }
+
+  searchCache.set(cacheKey, response)
+  return response
 }
 
 export async function getBookById(
@@ -174,6 +195,9 @@ export async function getBookById(
     }
   }
 
+  const cached = getByIdCache.get(volumeId)
+  if (cached) return cached
+
   const params = new URLSearchParams({ key: apiKey })
 
   const result = await fetchJson<GoogleBooksVolume>(
@@ -183,7 +207,19 @@ export async function getBookById(
 
   if (!result.ok) return result
 
-  return { ok: true, data: mapVolumeToSearchResult(result.data) }
+  const response: Result<SearchResultItem> = {
+    ok: true,
+    data: mapVolumeToSearchResult(result.data),
+  }
+
+  getByIdCache.set(volumeId, response)
+  return response
+}
+
+/** @internal Clear caches (for testing only) */
+export function _clearCaches(): void {
+  searchCache.clear()
+  getByIdCache.clear()
 }
 
 function mapVolumeToSearchResult(volume: GoogleBooksVolume): SearchResultItem {

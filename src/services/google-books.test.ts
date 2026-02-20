@@ -2,13 +2,16 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { searchBooks, getBookById } from './google-books'
+import { searchBooks, getBookById, _clearCaches } from './google-books'
 
 const BOOKS_API = 'https://www.googleapis.com/books/v1/volumes'
 
 const server = setupServer()
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
+afterEach(() => {
+  server.resetHandlers()
+  _clearCaches()
+})
 afterAll(() => server.close())
 
 function mockSearchResponse(items: unknown[] = [], totalItems = 0) {
