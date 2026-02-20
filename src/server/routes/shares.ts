@@ -14,6 +14,24 @@ export function createSharesApp(dbPath: string) {
   const store = createShareStore(dbPath)
   const app = new Hono()
 
+  const MAX_LIMIT = 50
+  const DEFAULT_LIMIT = 20
+
+  app.get('/', (c) => {
+    const limitParam = parseInt(c.req.query('limit') ?? '', 10)
+    const offsetParam = parseInt(c.req.query('offset') ?? '', 10)
+    const limit = Math.min(
+      Math.max(Number.isFinite(limitParam) ? limitParam : DEFAULT_LIMIT, 1),
+      MAX_LIMIT,
+    )
+    const offset = Math.max(
+      Number.isFinite(offsetParam) ? offsetParam : 0,
+      0,
+    )
+    const result = store.list({ limit, offset })
+    return c.json({ ok: true, data: result })
+  })
+
   app.post('/', async (c) => {
     let body: unknown
     try {

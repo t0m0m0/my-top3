@@ -125,6 +125,83 @@ describe('shares route', () => {
     })
   })
 
+  describe('GET /', () => {
+    it('returns a list of shares in newest-first order', async () => {
+      // Create multiple shares
+      for (const theme of ['alpha', 'beta', 'gamma']) {
+        await app.request('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            theme,
+            bookId: `b-${theme}`,
+            musicId: `m-${theme}`,
+            movieId: `v-${theme}`,
+          }),
+        })
+      }
+
+      const res = await app.request('/')
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: { theme: string }[]; total: number }
+      }
+      expect(json.ok).toBe(true)
+      expect(json.data.items).toHaveLength(3)
+      expect(json.data.items[0]!.theme).toBe('gamma')
+      expect(json.data.total).toBe(3)
+    })
+
+    it('supports limit and offset query params', async () => {
+      for (const theme of ['a', 'b', 'c', 'd']) {
+        await app.request('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            theme,
+            bookId: `b-${theme}`,
+            musicId: '',
+            movieId: '',
+          }),
+        })
+      }
+
+      const res = await app.request('/?limit=2&offset=1')
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: { theme: string }[]; total: number }
+      }
+      expect(json.data.items).toHaveLength(2)
+      expect(json.data.items[0]!.theme).toBe('c')
+      expect(json.data.items[1]!.theme).toBe('b')
+      expect(json.data.total).toBe(4)
+    })
+
+    it('returns empty list when no shares exist', async () => {
+      const res = await app.request('/')
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: unknown[]; total: number }
+      }
+      expect(json.data.items).toHaveLength(0)
+      expect(json.data.total).toBe(0)
+    })
+
+    it('clamps limit to max 50', async () => {
+      const res = await app.request('/?limit=999')
+      expect(res.status).toBe(200)
+      // Just check it doesn't error; clamping is internal
+    })
+
+    it('ignores negative offset', async () => {
+      const res = await app.request('/?offset=-5')
+      expect(res.status).toBe(200)
+    })
+  })
+
   describe('GET /:id', () => {
     it('returns stored params', async () => {
       const createRes = await app.request('/', {

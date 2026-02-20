@@ -124,6 +124,72 @@ describe('share-store', () => {
     })
   })
 
+  describe('list', () => {
+    it('returns shares in newest-first order', () => {
+      const store = createShareStore(dbPath)
+      store.save({ ...sampleParams, theme: 'first' })
+      store.save({ ...sampleParams, theme: 'second' })
+      store.save({ ...sampleParams, theme: 'third' })
+      const result = store.list({ limit: 10, offset: 0 })
+      expect(result.items).toHaveLength(3)
+      expect(result.items[0]!.theme).toBe('third')
+      expect(result.items[1]!.theme).toBe('second')
+      expect(result.items[2]!.theme).toBe('first')
+      expect(result.total).toBe(3)
+      store.close()
+    })
+
+    it('respects limit and offset for pagination', () => {
+      const store = createShareStore(dbPath)
+      store.save({ ...sampleParams, theme: 'a' })
+      store.save({ ...sampleParams, theme: 'b' })
+      store.save({ ...sampleParams, theme: 'c' })
+      store.save({ ...sampleParams, theme: 'd' })
+
+      const page1 = store.list({ limit: 2, offset: 0 })
+      expect(page1.items).toHaveLength(2)
+      expect(page1.items[0]!.theme).toBe('d')
+      expect(page1.items[1]!.theme).toBe('c')
+      expect(page1.total).toBe(4)
+
+      const page2 = store.list({ limit: 2, offset: 2 })
+      expect(page2.items).toHaveLength(2)
+      expect(page2.items[0]!.theme).toBe('b')
+      expect(page2.items[1]!.theme).toBe('a')
+      expect(page2.total).toBe(4)
+      store.close()
+    })
+
+    it('returns empty array when no shares exist', () => {
+      const store = createShareStore(dbPath)
+      const result = store.list({ limit: 10, offset: 0 })
+      expect(result.items).toHaveLength(0)
+      expect(result.total).toBe(0)
+      store.close()
+    })
+
+    it('each item includes id and created_at', () => {
+      const store = createShareStore(dbPath)
+      store.save(sampleParams)
+      const result = store.list({ limit: 10, offset: 0 })
+      const item = result.items[0]!
+      expect(item.id).toBeDefined()
+      expect(typeof item.id).toBe('string')
+      expect(item.createdAt).toBeDefined()
+      expect(typeof item.createdAt).toBe('number')
+      store.close()
+    })
+
+    it('returns fewer items when offset exceeds total', () => {
+      const store = createShareStore(dbPath)
+      store.save(sampleParams)
+      const result = store.list({ limit: 10, offset: 100 })
+      expect(result.items).toHaveLength(0)
+      expect(result.total).toBe(1)
+      store.close()
+    })
+  })
+
   describe('input validation', () => {
     it('rejects bookId exceeding max length', () => {
       const store = createShareStore(dbPath)

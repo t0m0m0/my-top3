@@ -53,9 +53,25 @@ function validateParams(params: ShareParams): void {
   validateField('movieId', params.movieId, MAX_ID_LENGTH)
 }
 
+export type ShareListItem = ShareParams & {
+  id: string
+  createdAt: number
+}
+
+export type ShareListResult = {
+  items: ShareListItem[]
+  total: number
+}
+
+export type ShareListOptions = {
+  limit: number
+  offset: number
+}
+
 export type ShareStore = {
   save: (params: ShareParams) => string
   get: (id: string) => ShareParams | null
+  list: (options: ShareListOptions) => ShareListResult
   close: () => void
 }
 
@@ -117,6 +133,13 @@ export function createShareStore(
 
   const countStmt = db.prepare(`SELECT COUNT(*) as cnt FROM shares`)
 
+  const listStmt = db.prepare(`
+    SELECT id, theme, book_id, music_id, movie_id, created_at
+    FROM shares
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?
+  `)
+
   const deleteOldestStmt = db.prepare(`
     DELETE FROM shares WHERE id IN (
       SELECT id FROM shares ORDER BY created_at ASC LIMIT ?
@@ -176,6 +199,29 @@ export function createShareStore(
         bookId: row.book_id,
         musicId: row.music_id,
         movieId: row.movie_id,
+      }
+    },
+
+    list(options: ShareListOptions): ShareListResult {
+      const { cnt } = countStmt.get() as { cnt: number }
+      const rows = listStmt.all(options.limit, options.offset) as {
+        id: string
+        theme: string
+        book_id: string
+        music_id: string
+        movie_id: string
+        created_at: number
+      }[]
+      return {
+        items: rows.map((row) => ({
+          id: row.id,
+          theme: row.theme,
+          bookId: row.book_id,
+          musicId: row.music_id,
+          movieId: row.movie_id,
+          createdAt: row.created_at,
+        })),
+        total: cnt,
       }
     },
 
