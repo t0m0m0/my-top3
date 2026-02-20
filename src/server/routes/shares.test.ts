@@ -278,4 +278,106 @@ describe('shares route', () => {
       expect(json.ok).toBe(false)
     })
   })
+
+  describe('DELETE /:id', () => {
+    it('returns 401 when no admin key is configured', async () => {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const res = await app.request(`/${id}`, { method: 'DELETE' })
+      expect(res.status).toBe(401)
+    })
+
+    it('returns 401 when Authorization header is missing', async () => {
+      const appWithKey = createSharesApp(path.join(tmpDir, 'shares2.db'), {
+        adminApiKey: 'secret-key',
+      })
+      const createRes = await appWithKey.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const res = await appWithKey.request(`/${id}`, { method: 'DELETE' })
+      expect(res.status).toBe(401)
+    })
+
+    it('returns 401 when Authorization header has wrong key', async () => {
+      const appWithKey = createSharesApp(path.join(tmpDir, 'shares3.db'), {
+        adminApiKey: 'secret-key',
+      })
+      const createRes = await appWithKey.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const res = await appWithKey.request(`/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer wrong-key' },
+      })
+      expect(res.status).toBe(401)
+    })
+
+    it('deletes a share with valid admin key', async () => {
+      const appWithKey = createSharesApp(path.join(tmpDir, 'shares4.db'), {
+        adminApiKey: 'secret-key',
+      })
+      const createRes = await appWithKey.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const res = await appWithKey.request(`/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer secret-key' },
+      })
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as { ok: boolean }
+      expect(json.ok).toBe(true)
+
+      // Verify it's gone
+      const getRes = await appWithKey.request(`/${id}`)
+      expect(getRes.status).toBe(404)
+    })
+
+    it('returns 404 when deleting non-existent share', async () => {
+      const appWithKey = createSharesApp(path.join(tmpDir, 'shares5.db'), {
+        adminApiKey: 'secret-key',
+      })
+      const res = await appWithKey.request('/nonexistent', {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer secret-key' },
+      })
+      expect(res.status).toBe(404)
+    })
+  })
 })

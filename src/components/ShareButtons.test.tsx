@@ -140,6 +140,22 @@ describe('ShareButtons', () => {
       })
     })
 
+    it('shares text without quotes when theme is empty string', async () => {
+      const shareMock = vi.fn().mockResolvedValue(undefined)
+      Object.assign(navigator, { share: shareMock })
+
+      render(<ShareButtons theme="" />)
+      fireEvent.click(screen.getByLabelText('シェア'))
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: `#MyNo1s\n${window.location.href}`,
+          }),
+        )
+      })
+    })
+
     it('shares text and URL without theme (URL embedded in text)', async () => {
       const shareMock = vi.fn().mockResolvedValue(undefined)
       Object.assign(navigator, { share: shareMock })
