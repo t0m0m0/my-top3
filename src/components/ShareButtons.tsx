@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect, useRef, type RefObject } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import ShareIcon from '@mui/icons-material/Share'
+import { StatusSnackbar } from './StatusSnackbar'
 import { generateImageBlob } from '../utils/image-helpers'
 import { createShortUrl } from '../utils/share-url'
 
@@ -209,42 +208,29 @@ export default function ShareButtons({
         </Tooltip>
       )}
 
-      <Snackbar
+      <StatusSnackbar
         open={copied}
         autoHideDuration={2000}
+        severity="success"
+        message="URLをコピーしました"
         onClose={handleCloseSuccess}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" variant="filled" onClose={handleCloseSuccess}>
-          URLをコピーしました
-        </Alert>
-      </Snackbar>
+      />
 
-      <Snackbar
+      <StatusSnackbar
         open={copyFailed}
         autoHideDuration={4000}
+        severity="error"
+        message="URLのコピーに失敗しました。アドレスバーから手動でコピーしてください。"
         onClose={handleCloseError}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="error" variant="filled" onClose={handleCloseError}>
-          URLのコピーに失敗しました。アドレスバーから手動でコピーしてください。
-        </Alert>
-      </Snackbar>
+      />
 
-      <Snackbar
+      <StatusSnackbar
         open={shareFailed}
         autoHideDuration={4000}
+        severity="error"
+        message="シェアに失敗しました。URLをコピーして手動でシェアしてください。"
         onClose={handleCloseShareError}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity="error"
-          variant="filled"
-          onClose={handleCloseShareError}
-        >
-          シェアに失敗しました。URLをコピーして手動でシェアしてください。
-        </Alert>
-      </Snackbar>
+      />
     </div>
   )
 }

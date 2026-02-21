@@ -1,14 +1,13 @@
 import React from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import Snackbar from '@mui/material/Snackbar'
-import Alert from '@mui/material/Alert'
 import DownloadIcon from '@mui/icons-material/Download'
 import type { SearchResultItem, MediaCategory } from '../types/common'
 import { IMAGE_SIZE, HALF, SEP } from '../constants/image-layout'
 import { useImageCapture } from '../hooks/useImageCapture'
 import { useLayoutSwap } from '../hooks/useLayoutSwap'
 import { ImageSlot } from './ImageSlot'
+import { StatusSnackbar } from './StatusSnackbar'
 import { LayoutSelector } from './LayoutSelector'
 
 type CaptureRefProp =
@@ -200,31 +199,20 @@ function Top3Image({
         </Button>
       </div>
 
-      <Snackbar
+      <StatusSnackbar
         open={successOpen}
-        autoHideDuration={3000}
+        severity="success"
+        message="画像を保存しました"
         onClose={() => setSuccessOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setSuccessOpen(false)}
-          severity="success"
-          variant="filled"
-        >
-          画像を保存しました
-        </Alert>
-      </Snackbar>
+      />
 
-      <Snackbar
+      <StatusSnackbar
         open={!!error}
         autoHideDuration={5000}
+        severity="error"
+        message={error ?? ''}
         onClose={() => setError(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setError(null)} severity="error" variant="filled">
-          {error}
-        </Alert>
-      </Snackbar>
+      />
     </div>
   )
 }
