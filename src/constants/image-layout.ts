@@ -19,8 +19,8 @@ export const CATEGORY_BORDER_COLORS: Record<MediaCategory, string> = {
   movie: 'rgba(251,113,133,0.4)',
 }
 
-export const NO_IMAGE_SRC =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgZmlsbD0iIzM3NDE1MSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOWNhM2FmIiBmb250LXNpemU9IjE0Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
+/** @deprecated Use CANVAS_PLACEHOLDER from constants/placeholders instead */
+export { CANVAS_PLACEHOLDER as NO_IMAGE_SRC } from './placeholders'
 
 export const DEFAULT_LAYOUT: LayoutConfig = {
   top: 'music',

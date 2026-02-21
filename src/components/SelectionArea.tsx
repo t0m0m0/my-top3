@@ -6,6 +6,8 @@ import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useNavigate } from 'react-router-dom'
 import { useSelection } from '../hooks/useSelection'
+import { SafeImage } from './SafeImage'
+import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
 import { buildTop3Url } from '../utils/url-params'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { CATEGORY_LABELS_EN } from '../constants/category'
@@ -85,14 +87,11 @@ function SlotCard({
       >
         <CloseIcon sx={{ fontSize: 16 }} />
       </IconButton>
-      <img
+      <SafeImage
         src={item.thumbnailUrl}
         alt={item.title}
+        fallbackSrc={DEFAULT_PLACEHOLDER}
         className="h-16 w-12 rounded object-cover"
-        onError={(e) => {
-          ;(e.target as HTMLImageElement).src = ''
-          ;(e.target as HTMLImageElement).alt = 'No Image'
-        }}
       />
       <div className="min-w-0 flex-1 pr-4">
         <span

@@ -1,5 +1,7 @@
 import type { SearchResultItem } from '../types/common'
 import { proxyImageUrl } from '../utils/proxy-image-url'
+import { SafeImage } from './SafeImage'
+import { CANVAS_PLACEHOLDER } from '../constants/placeholders'
 
 export type ImageWorkCardProps = {
   item: SearchResultItem | null
@@ -24,8 +26,8 @@ const TRUNCATED_TEXT: React.CSSProperties = {
   textAlign: 'center',
 }
 
-export const NO_IMAGE_SRC =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgZmlsbD0iIzM3NDE1MSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOWNhM2FmIiBmb250LXNpemU9IjE0Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='
+/** @deprecated Use CANVAS_PLACEHOLDER from constants/placeholders instead */
+export const NO_IMAGE_SRC = CANVAS_PLACEHOLDER
 
 export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
   if (!item) {
@@ -94,16 +96,11 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       </div>
 
       {/* Thumbnail with enhanced shadow */}
-      <img
+      <SafeImage
         src={proxyImageUrl(item.thumbnailUrl)}
         alt={item.title}
+        fallbackSrc={CANVAS_PLACEHOLDER}
         crossOrigin="anonymous"
-        onError={(e) => {
-          const img = e.target as HTMLImageElement
-          if (img.src !== NO_IMAGE_SRC) {
-            img.src = NO_IMAGE_SRC
-          }
-        }}
         style={{
           width: 210,
           height: 290,

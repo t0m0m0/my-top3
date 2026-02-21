@@ -1,9 +1,8 @@
 import Skeleton from '@mui/material/Skeleton'
 import Button from '@mui/material/Button'
 import type { SearchResultItem } from '../types/common'
-
-const DEFAULT_THUMBNAIL =
-  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="176" fill="%23e5e7eb"><rect width="128" height="176"/><text x="64" y="92" text-anchor="middle" fill="%239ca3af" font-size="12">No Image</text></svg>'
+import { SafeImage } from './SafeImage'
+import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   BOOK: { bg: '#6366f1', text: '#ffffff' },
@@ -131,16 +130,11 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
           </div>
         </div>
 
-        <img
+        <SafeImage
           src={work.thumbnailUrl}
           alt={work.title}
+          fallbackSrc={DEFAULT_PLACEHOLDER}
           className="mb-3 h-44 w-32 rounded-lg object-cover shadow-md transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement
-            if (img.src !== DEFAULT_THUMBNAIL) {
-              img.src = DEFAULT_THUMBNAIL
-            }
-          }}
         />
         <p className="text-center text-[0.85rem] font-semibold leading-tight">
           {work.title}
