@@ -155,7 +155,15 @@ export function createShareStore(
   `)
 
   const selectByHashStmt = db.prepare(`
-    SELECT id FROM shares WHERE params_hash = ?
+    SELECT id, book_thumb, music_thumb, movie_thumb FROM shares WHERE params_hash = ?
+  `)
+
+  const updateThumbsStmt = db.prepare(`
+    UPDATE shares
+    SET book_thumb = CASE WHEN book_thumb = '' AND @bookThumb != '' THEN @bookThumb ELSE book_thumb END,
+        music_thumb = CASE WHEN music_thumb = '' AND @musicThumb != '' THEN @musicThumb ELSE music_thumb END,
+        movie_thumb = CASE WHEN movie_thumb = '' AND @movieThumb != '' THEN @movieThumb ELSE movie_thumb END
+    WHERE id = @id
   `)
 
   const countStmt = db.prepare(`SELECT COUNT(*) as cnt FROM shares`)
@@ -188,8 +196,31 @@ export function createShareStore(
     const hash = computeParamsHash(params)
 
     // Return existing ID if the same params were already saved
-    const existing = selectByHashStmt.get(hash) as { id: string } | undefined
+    const existing = selectByHashStmt.get(hash) as
+      | {
+          id: string
+          book_thumb: string
+          music_thumb: string
+          movie_thumb: string
+        }
+      | undefined
     if (existing) {
+      // Update thumbnails if they were previously empty
+      const bookThumb = params.bookThumb ?? ''
+      const musicThumb = params.musicThumb ?? ''
+      const movieThumb = params.movieThumb ?? ''
+      if (
+        (existing.book_thumb === '' && bookThumb !== '') ||
+        (existing.music_thumb === '' && musicThumb !== '') ||
+        (existing.movie_thumb === '' && movieThumb !== '')
+      ) {
+        updateThumbsStmt.run({
+          bookThumb,
+          musicThumb,
+          movieThumb,
+          id: existing.id,
+        })
+      }
       return existing.id
     }
 

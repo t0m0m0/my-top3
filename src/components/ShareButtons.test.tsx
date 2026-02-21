@@ -32,6 +32,7 @@ describe('ShareButtons', () => {
         writeText: vi.fn().mockResolvedValue(undefined),
       },
     })
+    vi.mocked(createShortUrl).mockReset()
   })
 
   afterEach(() => {
@@ -434,6 +435,9 @@ describe('ShareButtons', () => {
         bookId: 'b1',
         musicId: 'm1',
         movieId: 'mv1',
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
       }
 
       render(<ShareButtons theme="テスト" shareParams={shareParams} />)
@@ -459,6 +463,83 @@ describe('ShareButtons', () => {
       expect(createShortUrl).toHaveBeenCalledTimes(1)
     })
 
+    it('does not call createShortUrl when thumbnails are all empty', async () => {
+      vi.mocked(createShortUrl).mockResolvedValue('/s/abc123')
+
+      const shareParams = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+        bookThumb: '',
+        musicThumb: '',
+        movieThumb: '',
+      }
+
+      render(<ShareButtons theme="テスト" shareParams={shareParams} />)
+
+      // Wait a tick to confirm no call is made
+      await new Promise((r) => setTimeout(r, 50))
+      expect(createShortUrl).not.toHaveBeenCalled()
+    })
+
+    it('calls createShortUrl once thumbnails are provided', async () => {
+      vi.mocked(createShortUrl).mockResolvedValue('/s/abc123')
+
+      const paramsWithoutThumbs = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+        bookThumb: '',
+        musicThumb: '',
+        movieThumb: '',
+      }
+
+      const paramsWithThumbs = {
+        ...paramsWithoutThumbs,
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
+      }
+
+      const { rerender } = render(
+        <ShareButtons theme="テスト" shareParams={paramsWithoutThumbs} />,
+      )
+
+      // Should not call yet
+      await new Promise((r) => setTimeout(r, 50))
+      expect(createShortUrl).not.toHaveBeenCalled()
+
+      // Re-render with thumbnails provided
+      rerender(<ShareButtons theme="テスト" shareParams={paramsWithThumbs} />)
+
+      await waitFor(() => {
+        expect(createShortUrl).toHaveBeenCalledWith(paramsWithThumbs)
+      })
+    })
+
+    it('calls createShortUrl when some categories have no ID (partial selection)', async () => {
+      vi.mocked(createShortUrl).mockResolvedValue('/s/abc123')
+
+      // Only book is selected, music and movie are empty
+      const shareParams = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: '',
+        movieId: '',
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: '',
+        movieThumb: '',
+      }
+
+      render(<ShareButtons theme="テスト" shareParams={shareParams} />)
+
+      await waitFor(() => {
+        expect(createShortUrl).toHaveBeenCalledWith(shareParams)
+      })
+    })
+
     it('falls back to current URL when pre-resolution fails', async () => {
       vi.mocked(createShortUrl).mockRejectedValue(new Error('network error'))
       const shareMock = vi.fn().mockResolvedValue(undefined)
@@ -469,6 +550,9 @@ describe('ShareButtons', () => {
         bookId: 'b1',
         musicId: 'm1',
         movieId: 'mv1',
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
       }
 
       render(<ShareButtons theme="テスト" shareParams={shareParams} />)

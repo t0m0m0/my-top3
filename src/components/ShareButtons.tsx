@@ -48,7 +48,9 @@ export default function ShareButtons({
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
 
-  // Pre-resolve short URL on mount so it's ready when user taps share
+  // Pre-resolve short URL on mount so it's ready when user taps share.
+  // Wait until thumbnails are loaded for categories that have an ID,
+  // otherwise the share record would be saved with empty thumbnails.
   useEffect(() => {
     // If we already have a share ID (e.g. viewing from /s/:id), use it directly
     if (existingShareId) {
@@ -56,6 +58,14 @@ export default function ShareButtons({
       return
     }
     if (!shareParams) return
+
+    // Check that thumbnails are ready for all selected categories
+    const thumbsReady =
+      (!shareParams.bookId || !!shareParams.bookThumb) &&
+      (!shareParams.musicId || !!shareParams.musicThumb) &&
+      (!shareParams.movieId || !!shareParams.movieThumb)
+    if (!thumbsReady) return
+
     let cancelled = false
     createShortUrl(shareParams)
       .then((shortPath) => {
