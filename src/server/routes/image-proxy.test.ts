@@ -151,6 +151,118 @@ describe('image-proxy route', () => {
     })
   })
 
+  it('returns 413 when Content-Length exceeds the size limit', async () => {
+    const overSizeBytes = 11 * 1024 * 1024 // 11MB
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response('too large', {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/jpeg',
+          'Content-Length': String(overSizeBytes),
+        },
+      }),
+    )
+
+    const url = 'https://books.google.com/books/content?id=abc&img=1'
+    const res = await imageProxyApp.request(
+      `/proxy?url=${encodeURIComponent(url)}`,
+    )
+
+    expect(res.status).toBe(413)
+    const json = (await res.json()) as ErrorResponse
+    expect(json.ok).toBe(false)
+    expect(json.error.message).toMatch(/サイズ/)
+  })
+
+  it('allows responses within the size limit', async () => {
+    const imageData = new Uint8Array(1024) // 1KB
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(imageData, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+          'Content-Length': '1024',
+        },
+      }),
+    )
+
+    const url = 'https://books.google.com/books/content?id=abc&img=1'
+    const res = await imageProxyApp.request(
+      `/proxy?url=${encodeURIComponent(url)}`,
+    )
+
+    expect(res.status).toBe(200)
+  })
+
+  it('returns 413 when streamed body exceeds the size limit without Content-Length', async () => {
+    // Create a ReadableStream that produces chunks exceeding 10MB
+    const chunkSize = 1024 * 1024 // 1MB per chunk
+    let chunksSent = 0
+    const stream = new ReadableStream({
+      pull(controller) {
+        if (chunksSent < 11) {
+          controller.enqueue(new Uint8Array(chunkSize))
+          chunksSent++
+        } else {
+          controller.close()
+        }
+      },
+    })
+
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/jpeg',
+          // No Content-Length header
+        },
+      }),
+    )
+
+    const url = 'https://books.google.com/books/content?id=abc&img=1'
+    const res = await imageProxyApp.request(
+      `/proxy?url=${encodeURIComponent(url)}`,
+    )
+
+    expect(res.status).toBe(413)
+    const json = (await res.json()) as ErrorResponse
+    expect(json.ok).toBe(false)
+    expect(json.error.message).toMatch(/サイズ/)
+  })
+
+  it('streams responses without Content-Length within the size limit', async () => {
+    const chunkSize = 1024
+    let chunksSent = 0
+    const stream = new ReadableStream({
+      pull(controller) {
+        if (chunksSent < 3) {
+          controller.enqueue(new Uint8Array(chunkSize))
+          chunksSent++
+        } else {
+          controller.close()
+        }
+      },
+    })
+
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+        },
+      }),
+    )
+
+    const url = 'https://books.google.com/books/content?id=abc&img=1'
+    const res = await imageProxyApp.request(
+      `/proxy?url=${encodeURIComponent(url)}`,
+    )
+
+    expect(res.status).toBe(200)
+    const body = await res.arrayBuffer()
+    expect(body.byteLength).toBe(3 * 1024)
+  })
+
   describe('ALLOWED_HOSTS', () => {
     it('includes Google Books domains', () => {
       expect(ALLOWED_HOSTS).toContain('books.google.com')
