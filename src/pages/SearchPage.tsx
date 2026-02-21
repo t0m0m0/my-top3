@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import StepGuide from '../components/StepGuide'
 import TabSwitcher from '../components/TabSwitcher'
@@ -23,14 +24,23 @@ function SearchPage() {
     error,
     loadMore,
     hasMore,
+    selectionComplete,
     handleQueryChange,
-    handleHistorySearch,
-    handleSelect,
-    handleThemeHistorySelect,
+    selectItem,
     handleBeforeCreate,
     handleCompleteChange,
-    mainStyle,
   } = useSearchPage()
+
+  const mainStyle = useMemo(
+    () => ({
+      background:
+        'linear-gradient(180deg, #3730a3 0%, var(--color-primary-dark) 12%, var(--color-bg) 32%, #eef2ff 100%)',
+      paddingBottom: selectionComplete
+        ? 'calc(72px + env(safe-area-inset-bottom))'
+        : undefined,
+    }),
+    [selectionComplete],
+  )
 
   return (
     <div className="min-h-screen" style={mainStyle}>
@@ -101,7 +111,7 @@ function SearchPage() {
             }}
           >
             <ThemeInput value={theme} onChange={setTheme} />
-            <ThemeHistory onSelect={handleThemeHistorySelect} />
+            <ThemeHistory onSelect={setTheme} />
           </div>
         </div>
 
@@ -143,10 +153,7 @@ function SearchPage() {
           </div>
 
           {!currentQuery.trim() && (
-            <SearchHistory
-              category={activeTab}
-              onSearch={handleHistorySearch}
-            />
+            <SearchHistory category={activeTab} onSearch={handleQueryChange} />
           )}
 
           <SearchResults
@@ -154,7 +161,7 @@ function SearchPage() {
             isLoading={isLoading}
             hasMore={hasMore}
             onLoadMore={loadMore}
-            onSelect={handleSelect}
+            onSelect={selectItem}
             query={debouncedQuery}
             error={error}
           />
