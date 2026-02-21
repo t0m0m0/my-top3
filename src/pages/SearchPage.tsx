@@ -72,7 +72,20 @@ function SearchPage() {
         >
           テーマを決めて、お気に入りの3作品を選ぼう
         </p>
-        <div className="animate-fade-in-up animate-delay-400 relative mt-6">
+        <div className="animate-fade-in-up animate-delay-200 relative mt-3">
+          <Link
+            to="/gallery"
+            className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+            style={{
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.5)',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+            }}
+          >
+            🎨 みんなのNo.1sを見る →
+          </Link>
+        </div>
+        <div className="animate-fade-in-up animate-delay-400 relative mt-5">
           <StepGuide />
         </div>
       </div>
@@ -146,20 +159,6 @@ function SearchPage() {
             error={error}
           />
         </div>
-      </div>
-
-      {/* Gallery Link */}
-      <div className="mx-auto max-w-5xl px-3 pb-2 pt-6 text-center sm:px-4">
-        <Link
-          to="/gallery"
-          className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
-          style={{
-            color: 'var(--color-primary)',
-            border: '1px solid var(--color-primary)',
-          }}
-        >
-          🎨 みんなのNo.1sを見る →
-        </Link>
       </div>
 
       <DataCredits />
