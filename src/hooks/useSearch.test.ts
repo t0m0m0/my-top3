@@ -158,4 +158,50 @@ describe('useSearch', () => {
     expect(result.current.hasMore).toBe(false)
     expect(result.current.results).toEqual([])
   })
+
+  it('uses API_ENDPOINTS for music category', async () => {
+    let requestedUrl = ''
+    server.use(
+      http.get('/api/music/search', ({ request }) => {
+        requestedUrl = new URL(request.url).pathname
+        return HttpResponse.json({
+          ok: true,
+          data: {
+            items: [{ id: 'm1', title: 'Test Music', category: 'music' }],
+            totalItems: 1,
+            startIndex: 0,
+          },
+        })
+      }),
+    )
+    const { result } = renderHook(() => useSearch('music', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(requestedUrl).toBe('/api/music/search')
+    expect(result.current.results[0].category).toBe('music')
+  })
+
+  it('uses API_ENDPOINTS for movie category', async () => {
+    let requestedUrl = ''
+    server.use(
+      http.get('/api/movies/search', ({ request }) => {
+        requestedUrl = new URL(request.url).pathname
+        return HttpResponse.json({
+          ok: true,
+          data: {
+            items: [{ id: 'mv1', title: 'Test Movie', category: 'movie' }],
+            totalItems: 1,
+            startIndex: 0,
+          },
+        })
+      }),
+    )
+    const { result } = renderHook(() => useSearch('movie', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(requestedUrl).toBe('/api/movies/search')
+    expect(result.current.results[0].category).toBe('movie')
+  })
 })

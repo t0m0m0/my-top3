@@ -1,19 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { MediaCategory, SearchResultItem } from '../types/common'
 import { MESSAGES } from '../constants/messages'
+import { API_ENDPOINTS } from '../constants/category'
 
 const MAX_RESULTS = 20
-
-function categoryToPath(category: MediaCategory): string {
-  switch (category) {
-    case 'book':
-      return 'books'
-    case 'music':
-      return 'music'
-    case 'movie':
-      return 'movies'
-  }
-}
 
 type UseSearchReturn = {
   results: SearchResultItem[]
@@ -57,16 +47,18 @@ export function useSearch(
       setError(null)
 
       try {
-        const path = categoryToPath(category)
         const params = new URLSearchParams({
           q: query.trim(),
           startIndex: String(index),
           maxResults: String(MAX_RESULTS),
         })
 
-        const response = await fetch(`/api/${path}/search?${params}`, {
-          signal: controller.signal,
-        })
+        const response = await fetch(
+          `${API_ENDPOINTS[category]}/search?${params}`,
+          {
+            signal: controller.signal,
+          },
+        )
 
         if (!response.ok) {
           if (response.status === 429) {
