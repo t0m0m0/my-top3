@@ -147,6 +147,56 @@ describe('share-store', () => {
       store.close()
     })
 
+    it('updates thumbnails on existing record when previously empty', () => {
+      const store = createShareStore(dbPath)
+      // First save without thumbnails
+      const id1 = store.save(sampleParams)
+      const result1 = store.get(id1)!
+      expect(result1.bookThumb).toBe('')
+      expect(result1.musicThumb).toBe('')
+      expect(result1.movieThumb).toBe('')
+
+      // Second save with same params but with thumbnails
+      const id2 = store.save({
+        ...sampleParams,
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
+      })
+
+      // Should return the same id (idempotent)
+      expect(id2).toBe(id1)
+
+      // Thumbnails should now be updated
+      const result2 = store.get(id2)!
+      expect(result2.bookThumb).toBe('https://example.com/book.jpg')
+      expect(result2.musicThumb).toBe('https://example.com/music.jpg')
+      expect(result2.movieThumb).toBe('https://example.com/movie.jpg')
+      store.close()
+    })
+
+    it('does not overwrite existing thumbnails with empty strings', () => {
+      const store = createShareStore(dbPath)
+      // Save with thumbnails
+      const id1 = store.save({
+        ...sampleParams,
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
+      })
+
+      // Save again without thumbnails
+      const id2 = store.save(sampleParams)
+      expect(id2).toBe(id1)
+
+      // Original thumbnails should be preserved
+      const result = store.get(id2)!
+      expect(result.bookThumb).toBe('https://example.com/book.jpg')
+      expect(result.musicThumb).toBe('https://example.com/music.jpg')
+      expect(result.movieThumb).toBe('https://example.com/movie.jpg')
+      store.close()
+    })
+
     it('defaults thumbnails to empty string when not provided', () => {
       const store = createShareStore(dbPath)
       const id = store.save(sampleParams)
