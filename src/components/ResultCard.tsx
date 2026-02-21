@@ -1,19 +1,12 @@
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
 import Button from '@mui/material/Button'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import type { SearchResultItem, MediaCategory } from '../types/common'
 import { useSelection } from '../hooks/useSelection'
-
-const NO_IMAGE_PLACEHOLDERS: Record<MediaCategory, string> = {
-  book: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23fef3c7' width='120' height='160'/%3E%3Ctext x='50%25' y='45%25' dominant-baseline='middle' text-anchor='middle' fill='%23d97706' font-family='sans-serif' font-size='32'%3E📖%3C/text%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' fill='%23b45309' font-family='sans-serif' font-size='11'%3ENo Image%3C/text%3E%3C/svg%3E",
-  music:
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23dbeafe' width='120' height='160'/%3E%3Ctext x='50%25' y='45%25' dominant-baseline='middle' text-anchor='middle' fill='%232563eb' font-family='sans-serif' font-size='32'%3E🎵%3C/text%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' fill='%231d4ed8' font-family='sans-serif' font-size='11'%3ENo Image%3C/text%3E%3C/svg%3E",
-  movie:
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='160' viewBox='0 0 120 160'%3E%3Crect fill='%23ede9fe' width='120' height='160'/%3E%3Ctext x='50%25' y='45%25' dominant-baseline='middle' text-anchor='middle' fill='%237c3aed' font-family='sans-serif' font-size='32'%3E🎬%3C/text%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' fill='%236d28d9' font-family='sans-serif' font-size='11'%3ENo Image%3C/text%3E%3C/svg%3E",
-}
+import { CATEGORY_PLACEHOLDERS } from '../constants/placeholders'
+import { SafeImage } from './SafeImage'
 
 const THUMBNAIL_DIMENSIONS: Record<
   MediaCategory,
@@ -32,7 +25,7 @@ type ResultCardProps = {
 export default function ResultCard({ item, onSelect }: ResultCardProps) {
   const { selection } = useSelection()
   const isSelected = selection[item.category]?.id === item.id
-  const placeholder = NO_IMAGE_PLACEHOLDERS[item.category]
+  const placeholder = CATEGORY_PLACEHOLDERS[item.category]
   const dimensions = THUMBNAIL_DIMENSIONS[item.category]
 
   const handleCardClick = () => {
@@ -77,18 +70,15 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
       }}
     >
       <div className="relative shrink-0">
-        <CardMedia
-          component="img"
-          sx={{
+        <SafeImage
+          src={item.thumbnailUrl || placeholder}
+          alt={item.title}
+          fallbackSrc={placeholder}
+          style={{
             width: dimensions.width,
             aspectRatio: dimensions.aspectRatio,
             objectFit: 'cover',
-          }}
-          image={item.thumbnailUrl || placeholder}
-          alt={item.title}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement
-            target.src = placeholder
+            display: 'block',
           }}
         />
         {isSelected && (
