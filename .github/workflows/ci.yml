@@ -100,6 +100,5 @@ jobs:
         run: npm run build
         env:
           GOOGLE_BOOKS_API_KEY: dummy
-          SPOTIFY_CLIENT_ID: dummy
-          SPOTIFY_CLIENT_SECRET: dummy
+          LASTFM_API_KEY: dummy
           TMDB_API_KEY: dummy
