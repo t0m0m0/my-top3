@@ -4,23 +4,16 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
-import { TtlCache } from '../utils/cache.ts'
 import { assertObject, assertField, assertArray } from './validation-helpers.ts'
+import { createServiceCaches, EMPTY_SEARCH_RESULT } from './service-cache.ts'
 
 const BASE_URL = 'https://ws.audioscrobbler.com/2.0'
 const DEFAULT_MAX_RESULTS = 20
 
-const SEARCH_TTL_MS = 5 * 60 * 1000 // 5 minutes
-const GET_BY_ID_TTL_MS = 60 * 60 * 1000 // 1 hour
-
-const searchCache = new TtlCache<Result<PaginatedResponse<SearchResultItem>>>({
-  ttlMs: SEARCH_TTL_MS,
-  maxEntries: 200,
-})
-const getByIdCache = new TtlCache<Result<SearchResultItem>>({
-  ttlMs: GET_BY_ID_TTL_MS,
-  maxEntries: 500,
-})
+const { searchCache, getByIdCache, clearCaches } = createServiceCaches<
+  Result<PaginatedResponse<SearchResultItem>>,
+  Result<SearchResultItem>
+>()
 
 // ── Last.fm API response types ──────────────────────────────────────
 
@@ -112,12 +105,7 @@ export async function searchMusic(
   const { startIndex = 0, maxResults = DEFAULT_MAX_RESULTS, signal } = options
 
   const trimmed = query.trim()
-  if (trimmed === '') {
-    return {
-      ok: true,
-      data: { items: [], totalItems: 0, startIndex: 0 },
-    }
-  }
+  if (trimmed === '') return EMPTY_SEARCH_RESULT
 
   // Last.fm uses 1-based page numbers
   const page = Math.floor(startIndex / maxResults) + 1
@@ -222,10 +210,7 @@ export async function getMusicById(
 }
 
 /** @internal Clear caches (for testing only) */
-export function _clearCaches(): void {
-  searchCache.clear()
-  getByIdCache.clear()
-}
+export const _clearCaches = clearCaches
 
 // ── Mapping ─────────────────────────────────────────────────────────
 
