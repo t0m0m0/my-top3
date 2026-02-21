@@ -2,7 +2,11 @@ import TextField from '@mui/material/TextField'
 import Chip from '@mui/material/Chip'
 import { MAX_THEME_LENGTH } from '../hooks/useTheme'
 
-const THEME_SUGGESTIONS = ['夏に読みたい', '青春', '2024年ベスト'] as const
+const THEME_SUGGESTIONS = [
+  '夏に読みたい',
+  '青春',
+  `${new Date().getFullYear()}年ベスト`,
+]
 
 type ThemeInputProps = {
   value: string

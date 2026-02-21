@@ -36,7 +36,9 @@ it('renders suggestion chips', () => {
   render(<ThemeInput value="" onChange={vi.fn()} />)
   expect(screen.getByText('夏に読みたい')).toBeInTheDocument()
   expect(screen.getByText('青春')).toBeInTheDocument()
-  expect(screen.getByText('2024年ベスト')).toBeInTheDocument()
+  expect(
+    screen.getByText(`${new Date().getFullYear()}年ベスト`),
+  ).toBeInTheDocument()
 })
 
 it('calls onChange when a suggestion chip is clicked', async () => {
