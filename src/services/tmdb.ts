@@ -4,25 +4,18 @@ import type {
   SearchResultItem,
 } from '../types/common.ts'
 import { fetchJson } from '../utils/fetch-client.ts'
-import { TtlCache } from '../utils/cache.ts'
 import { assertObject, assertField, assertArray } from './validation-helpers.ts'
+import { createServiceCaches, EMPTY_SEARCH_RESULT } from './service-cache.ts'
 
 const BASE_URL = 'https://api.themoviedb.org/3'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300'
 const DEFAULT_MAX_RESULTS = 20
 const TMDB_PAGE_SIZE = 20
 
-const SEARCH_TTL_MS = 5 * 60 * 1000 // 5 minutes
-const GET_BY_ID_TTL_MS = 60 * 60 * 1000 // 1 hour
-
-const searchCache = new TtlCache<Result<PaginatedResponse<SearchResultItem>>>({
-  ttlMs: SEARCH_TTL_MS,
-  maxEntries: 200,
-})
-const getByIdCache = new TtlCache<Result<SearchResultItem>>({
-  ttlMs: GET_BY_ID_TTL_MS,
-  maxEntries: 500,
-})
+const { searchCache, getByIdCache, clearCaches } = createServiceCaches<
+  Result<PaginatedResponse<SearchResultItem>>,
+  Result<SearchResultItem>
+>()
 
 // ── TMDb API response types ────────────────────────────────────────
 
@@ -114,12 +107,7 @@ export async function searchMovies(
   const { startIndex = 0, maxResults = DEFAULT_MAX_RESULTS, signal } = options
 
   const trimmed = query.trim()
-  if (trimmed === '') {
-    return {
-      ok: true,
-      data: { items: [], totalItems: 0, startIndex: 0 },
-    }
-  }
+  if (trimmed === '') return EMPTY_SEARCH_RESULT
 
   const page = startIndexToPage(startIndex)
   const cacheKey = `${trimmed}:${page}:${maxResults}`
@@ -205,10 +193,7 @@ function extractYear(releaseDate?: string): string {
 }
 
 /** @internal Clear caches (for testing only) */
-export function _clearCaches(): void {
-  searchCache.clear()
-  getByIdCache.clear()
-}
+export const _clearCaches = clearCaches
 
 function mapMovieToSearchResult(movie: TMDbMovie): SearchResultItem {
   return {
