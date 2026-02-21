@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import type { MediaCategory, SearchResultItem } from '../types/common'
+import type { MediaCategory } from '../types/common'
 import { useDebounce } from './useDebounce'
 import { useSearch } from './useSearch'
 import { useSearchHistory } from './useSearchHistory'
@@ -77,27 +77,6 @@ export function useSearchPage() {
     [activeTab],
   )
 
-  const handleHistorySearch = useCallback(
-    (keyword: string) => {
-      setQueries((prev) => ({ ...prev, [activeTab]: keyword }))
-    },
-    [activeTab],
-  )
-
-  const handleSelect = useCallback(
-    (item: SearchResultItem) => {
-      selectItem(item)
-    },
-    [selectItem],
-  )
-
-  const handleThemeHistorySelect = useCallback(
-    (selectedTheme: string) => {
-      setTheme(selectedTheme)
-    },
-    [setTheme],
-  )
-
   const [selectionComplete, setSelectionComplete] = useState(false)
 
   const handleBeforeCreate = useCallback(() => {
@@ -107,17 +86,6 @@ export function useSearchPage() {
   const handleCompleteChange = useCallback((complete: boolean) => {
     setSelectionComplete(complete)
   }, [])
-
-  const mainStyle = useMemo(
-    () => ({
-      background:
-        'linear-gradient(180deg, #3730a3 0%, var(--color-primary-dark) 12%, var(--color-bg) 32%, #eef2ff 100%)',
-      paddingBottom: selectionComplete
-        ? 'calc(72px + env(safe-area-inset-bottom))'
-        : undefined,
-    }),
-    [selectionComplete],
-  )
 
   return {
     activeTab,
@@ -131,12 +99,10 @@ export function useSearchPage() {
     error,
     loadMore,
     hasMore,
+    selectionComplete,
     handleQueryChange,
-    handleHistorySearch,
-    handleSelect,
-    handleThemeHistorySelect,
+    selectItem,
     handleBeforeCreate,
     handleCompleteChange,
-    mainStyle,
   }
 }
