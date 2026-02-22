@@ -9,6 +9,7 @@ import WorkCard from './WorkCard'
 import { useWorkFetch } from '../hooks/useWorkFetch'
 import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
 import DataCredits from './DataCredits'
+import PageHeader from './PageHeader'
 
 type Top3Params = {
   theme: string
@@ -76,36 +77,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
       }}
     >
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        {/* Header with decorative line */}
-        <div className="text-center">
-          <div
-            className="mx-auto mb-2 h-0.5 w-16 rounded-full"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
-            }}
-          />
-          <h1
-            className="text-xl font-extrabold sm:text-2xl"
-            style={{
-              fontFamily: 'var(--font-display)',
-              background:
-                'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            My No.1s
-          </h1>
-          <div
-            className="mx-auto mt-2 h-0.5 w-16 rounded-full"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
-            }}
-          />
-        </div>
+        <PageHeader title="My No.1s" />
 
         {/* Theme display with decorative quotes via CSS pseudo-elements */}
         {params.theme && (
