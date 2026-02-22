@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 import ErrorMessage from '../components/ErrorMessage'
 import GalleryCard from '../components/GalleryCard'
 import DataCredits from '../components/DataCredits'
+import PageHeader from '../components/PageHeader'
 import { useGallery } from '../hooks/useGallery'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 
@@ -20,42 +21,10 @@ export default function GalleryPage() {
       }}
     >
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        {/* Header */}
-        <div className="text-center">
-          <div
-            className="mx-auto mb-2 h-0.5 w-16 rounded-full"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
-            }}
-          />
-          <h1
-            className="text-xl font-extrabold sm:text-2xl"
-            style={{
-              fontFamily: 'var(--font-display)',
-              background:
-                'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            みんなのNo.1s
-          </h1>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
-            みんなが選んだお気に入りの作品たち
-          </p>
-          <div
-            className="mx-auto mt-2 h-0.5 w-16 rounded-full"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
-            }}
-          />
-        </div>
+        <PageHeader
+          title="みんなのNo.1s"
+          subtitle="みんなが選んだお気に入りの作品たち"
+        />
 
         {/* Loading */}
         {loading && (
