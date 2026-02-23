@@ -5,6 +5,7 @@ import ErrorMessage from '../components/ErrorMessage'
 import GalleryCard from '../components/GalleryCard'
 import DataCredits from '../components/DataCredits'
 import PageHeader from '../components/PageHeader'
+import PillLinkButton from '../components/PillLinkButton'
 import { useGallery } from '../hooks/useGallery'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 
@@ -105,27 +106,7 @@ export default function GalleryPage() {
 
         {/* Navigation */}
         <div className="mt-8 text-center">
-          <Button
-            component={Link}
-            to="/"
-            variant="outlined"
-            sx={{
-              borderRadius: '9999px',
-              px: 4,
-              py: 1,
-              borderColor: 'var(--color-primary)',
-              color: 'var(--color-primary)',
-              fontWeight: 600,
-              transition: 'all 0.2s',
-              '&:hover': {
-                borderColor: 'var(--color-primary-dark)',
-                backgroundColor: 'var(--color-primary)',
-                color: '#fff',
-              },
-            }}
-          >
-            ← Top3を作成する
-          </Button>
+          <PillLinkButton to="/">← Top3を作成する</PillLinkButton>
         </div>
       </div>
 
