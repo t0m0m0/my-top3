@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@mui/material/Button'
 import { buildEditUrl } from '../utils/url-params'
+import PillLinkButton from './PillLinkButton'
 import ErrorMessage from './ErrorMessage'
 import ShareButtons from './ShareButtons'
 import Top3Image from './Top3Image'
@@ -149,48 +150,12 @@ export default function Top3Content({ params, existingShareId }: Props) {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Button
-            component={Link}
-            to={buildEditUrl(params)}
-            variant="outlined"
-            sx={{
-              borderRadius: '9999px',
-              px: 4,
-              py: 1,
-              borderColor: 'var(--color-primary)',
-              color: 'var(--color-primary)',
-              fontWeight: 600,
-              transition: 'all 0.2s',
-              '&:hover': {
-                borderColor: 'var(--color-primary-dark)',
-                backgroundColor: 'var(--color-primary)',
-                color: '#fff',
-              },
-            }}
-          >
+          <PillLinkButton to={buildEditUrl(params)}>
             ← トップページに戻る
-          </Button>
-          <Button
-            component={Link}
-            to="/gallery"
-            variant="outlined"
-            sx={{
-              borderRadius: '9999px',
-              px: 4,
-              py: 1,
-              borderColor: 'var(--color-secondary)',
-              color: 'var(--color-secondary)',
-              fontWeight: 600,
-              transition: 'all 0.2s',
-              '&:hover': {
-                borderColor: 'var(--color-secondary-dark)',
-                backgroundColor: 'var(--color-secondary)',
-                color: '#fff',
-              },
-            }}
-          >
+          </PillLinkButton>
+          <PillLinkButton to="/gallery" color="secondary">
             🎨 みんなのNo.1s
-          </Button>
+          </PillLinkButton>
         </div>
       </div>
 
