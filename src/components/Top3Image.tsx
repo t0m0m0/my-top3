@@ -6,20 +6,17 @@ import type { SearchResultItem, MediaCategory } from '../types/common'
 import { IMAGE_SIZE, HALF, SEP } from '../constants/image-layout'
 import { useImageCapture } from '../hooks/useImageCapture'
 import { useLayoutSwap } from '../hooks/useLayoutSwap'
+import { useMergedRef } from '../hooks/useMergedRef'
 import { ImageSlot } from './ImageSlot'
 import { StatusSnackbar } from './StatusSnackbar'
 import { LayoutSelector } from './LayoutSelector'
-
-type CaptureRefProp =
-  | React.RefObject<HTMLDivElement | null>
-  | ((node: HTMLDivElement | null) => void)
 
 type Top3ImageProps = {
   theme: string
   book: SearchResultItem | null
   music: SearchResultItem | null
   movie: SearchResultItem | null
-  captureRef?: CaptureRefProp
+  captureRef?: React.Ref<HTMLDivElement>
 }
 
 function Top3Image({
@@ -41,20 +38,9 @@ function Top3Image({
     handleDownload,
   } = useImageCapture(theme)
 
-  // Use a callback ref to sync both internal and external refs
-  const captureRefCallback = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      const mutableInternalRef =
-        internalCaptureRef as React.MutableRefObject<HTMLDivElement | null>
-      mutableInternalRef.current = node
-      if (typeof externalCaptureRef === 'function') {
-        externalCaptureRef(node)
-      } else if (externalCaptureRef && 'current' in externalCaptureRef) {
-        // Assign via Object.assign to avoid lint immutability error on props
-        Object.assign(externalCaptureRef, { current: node })
-      }
-    },
-    [internalCaptureRef, externalCaptureRef],
+  const captureRefCallback = useMergedRef(
+    internalCaptureRef,
+    externalCaptureRef,
   )
 
   const { layout, handleLayoutChange } = useLayoutSwap()
