@@ -419,4 +419,132 @@ describe('share-store', () => {
       store.close()
     })
   })
+
+  describe('reactions', () => {
+    it('addReaction returns count=1 and reacted=true for first reaction', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const result = store.addReaction(id, 'client-1')
+      expect(result).toEqual({ count: 1, reacted: true })
+      store.close()
+    })
+
+    it('addReaction is idempotent — same client cannot react twice', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addReaction(id, 'client-1')
+      const result = store.addReaction(id, 'client-1')
+      expect(result).toEqual({ count: 1, reacted: true })
+      store.close()
+    })
+
+    it('multiple clients can react independently', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addReaction(id, 'client-1')
+      const result = store.addReaction(id, 'client-2')
+      expect(result).toEqual({ count: 2, reacted: true })
+      store.close()
+    })
+
+    it('removeReaction decrements count and returns reacted=false', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addReaction(id, 'client-1')
+      store.addReaction(id, 'client-2')
+      const result = store.removeReaction(id, 'client-1')
+      expect(result).toEqual({ count: 1, reacted: false })
+      store.close()
+    })
+
+    it('removeReaction is idempotent — no error if not reacted', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const result = store.removeReaction(id, 'client-1')
+      expect(result).toEqual({ count: 0, reacted: false })
+      store.close()
+    })
+
+    it('getReactionCount returns 0 for share with no reactions', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(store.getReactionCount(id)).toBe(0)
+      store.close()
+    })
+
+    it('getReactionCount returns correct count', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addReaction(id, 'client-1')
+      store.addReaction(id, 'client-2')
+      store.addReaction(id, 'client-3')
+      expect(store.getReactionCount(id)).toBe(3)
+      store.close()
+    })
+
+    it('hasReacted returns false when client has not reacted', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(store.hasReacted(id, 'client-1')).toBe(false)
+      store.close()
+    })
+
+    it('hasReacted returns true when client has reacted', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addReaction(id, 'client-1')
+      expect(store.hasReacted(id, 'client-1')).toBe(true)
+      store.close()
+    })
+
+    it('reactions are scoped to specific shares', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save({ ...sampleParams, theme: 'share1' })
+      const id2 = store.save({ ...sampleParams, theme: 'share2' })
+      store.addReaction(id1, 'client-1')
+      expect(store.getReactionCount(id1)).toBe(1)
+      expect(store.getReactionCount(id2)).toBe(0)
+      store.close()
+    })
+
+    it('list includes reactionCount for each item', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save({ ...sampleParams, theme: 'popular' })
+      store.save({ ...sampleParams, theme: 'unpopular' })
+      store.addReaction(id1, 'client-1')
+      store.addReaction(id1, 'client-2')
+      const result = store.list({ limit: 10, offset: 0 })
+      const popular = result.items.find((i) => i.theme === 'popular')!
+      const unpopular = result.items.find((i) => i.theme === 'unpopular')!
+      expect(popular.reactionCount).toBe(2)
+      expect(unpopular.reactionCount).toBe(0)
+      store.close()
+    })
+
+    it('deleting a share also deletes its reactions', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addReaction(id, 'client-1')
+      store.delete(id)
+      // After deletion, getReactionCount should return 0
+      expect(store.getReactionCount(id)).toBe(0)
+      store.close()
+    })
+
+    it('validates client_id is not empty', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(() => store.addReaction(id, '')).toThrowError(/client_id/)
+      store.close()
+    })
+
+    it('validates client_id max length', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(() => store.addReaction(id, 'a'.repeat(101))).toThrowError(
+        /client_id/,
+      )
+      store.close()
+    })
+  })
 })

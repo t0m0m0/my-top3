@@ -90,6 +90,61 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
     }
   })
 
+  app.post('/:id/reactions', async (c) => {
+    const id = c.req.param('id')
+    const share = store.get(id)
+    if (!share) {
+      return c.json(
+        { ok: false, error: { kind: 'not_found', message: 'Share not found' } },
+        404,
+      )
+    }
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid JSON' } },
+        400,
+      )
+    }
+
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid body' } },
+        400,
+      )
+    }
+
+    const { clientId, toggle } = body as {
+      clientId?: unknown
+      toggle?: unknown
+    }
+    if (typeof clientId !== 'string' || !clientId) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'validation', message: 'clientId is required' },
+        },
+        400,
+      )
+    }
+
+    try {
+      let result
+      if (toggle && store.hasReacted(id, clientId)) {
+        result = store.removeReaction(id, clientId)
+      } else {
+        result = store.addReaction(id, clientId)
+      }
+      return c.json({ ok: true, data: result })
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Validation failed'
+      return c.json({ ok: false, error: { kind: 'validation', message } }, 400)
+    }
+  })
+
   app.get('/:id', (c) => {
     const id = c.req.param('id')
     const params = store.get(id)

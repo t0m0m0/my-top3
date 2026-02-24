@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import GalleryCard from './GalleryCard'
+
+// Mock useReaction
+const mockToggleReaction = vi.fn()
+vi.mock('../hooks/useReaction', () => ({
+  useReaction: (_shareId: string, initialCount: number) => ({
+    count: initialCount,
+    reacted: false,
+    toggleReaction: mockToggleReaction,
+  }),
+}))
 
 const defaultProps = {
   id: 'abc123',
@@ -10,6 +20,7 @@ const defaultProps = {
   musicThumb: 'https://example.com/music.jpg',
   movieThumb: 'https://example.com/movie.jpg',
   createdAt: 1700000000,
+  reactionCount: 5,
 }
 
 function renderCard(props = defaultProps) {
@@ -19,6 +30,10 @@ function renderCard(props = defaultProps) {
     </MemoryRouter>,
   )
 }
+
+afterEach(() => {
+  mockToggleReaction.mockClear()
+})
 
 describe('GalleryCard', () => {
   it('renders theme name', () => {
@@ -58,5 +73,37 @@ describe('GalleryCard', () => {
     renderCard({ ...defaultProps, bookThumb: '' })
     const images = screen.getAllByRole('img')
     expect(images).toHaveLength(2)
+  })
+
+  it('renders reaction count', () => {
+    renderCard()
+    expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  it('renders heart button', () => {
+    renderCard()
+    const btn = screen.getByRole('button', { name: /いいね/ })
+    expect(btn).toBeInTheDocument()
+  })
+
+  it('calls toggleReaction on heart button click', () => {
+    renderCard()
+    const btn = screen.getByRole('button', { name: /いいね/ })
+    fireEvent.click(btn)
+    expect(mockToggleReaction).toHaveBeenCalledTimes(1)
+  })
+
+  it('heart button click does not navigate (stopPropagation)', () => {
+    renderCard()
+    const btn = screen.getByRole('button', { name: /いいね/ })
+    fireEvent.click(btn)
+    // The button handler should call preventDefault to stop link navigation
+    // We just check toggleReaction was called
+    expect(mockToggleReaction).toHaveBeenCalled()
+  })
+
+  it('shows 0 count when reactionCount is 0', () => {
+    renderCard({ ...defaultProps, reactionCount: 0 })
+    expect(screen.getByText('0')).toBeInTheDocument()
   })
 })

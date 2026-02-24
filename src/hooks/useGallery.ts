@@ -10,6 +10,7 @@ export type GalleryItem = {
   musicThumb: string
   movieThumb: string
   createdAt: number
+  reactionCount: number
 }
 
 type GalleryState = {

@@ -19,6 +19,7 @@ const makeFakeShares = (count: number) =>
     musicThumb: `https://example.com/music-${i}.jpg`,
     movieThumb: `https://example.com/movie-${i}.jpg`,
     createdAt: 1700000000 - i,
+    reactionCount: 0,
   }))
 
 describe('useGallery', () => {
