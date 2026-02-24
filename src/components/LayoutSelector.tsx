@@ -56,7 +56,7 @@ export function LayoutSelector({
                 color: 'var(--color-text-secondary)',
                 transition: 'all 0.2s ease',
                 '&:hover': {
-                  background: 'rgba(99, 102, 241, 0.06)',
+                  background: 'rgba(160, 132, 94, 0.06)',
                 },
                 '&.Mui-selected': {
                   color: 'var(--color-surface)',

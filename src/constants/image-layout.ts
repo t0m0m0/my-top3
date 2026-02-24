@@ -9,14 +9,14 @@ export const SEP = 2
 
 export const CATEGORY_COLORS: Record<MediaCategory, string> = {
   book: '#c4a882',
-  music: '#f0b4c8',
-  movie: '#a8d5ba',
+  music: '#d4829c',
+  movie: '#7dad8e',
 }
 
 export const CATEGORY_BORDER_COLORS: Record<MediaCategory, string> = {
-  book: 'rgba(196,168,130,0.4)',
-  music: 'rgba(240,180,200,0.4)',
-  movie: 'rgba(168,213,186,0.4)',
+  book: 'rgba(196, 168, 130, 0.4)',
+  music: 'rgba(212, 130, 156, 0.4)',
+  movie: 'rgba(125, 173, 142, 0.4)',
 }
 
 /** @deprecated Use CANVAS_PLACEHOLDER from constants/placeholders instead */
