@@ -34,7 +34,7 @@ function SearchPage() {
   const mainStyle = useMemo(
     () => ({
       background:
-        'linear-gradient(180deg, #7e22ce 0%, #a855f7 12%, var(--color-bg) 32%, #fdf4ff 100%)',
+        'linear-gradient(180deg, #7c6544 0%, #a0845e 12%, var(--color-bg) 32%, #f5f0ea 100%)',
       paddingBottom: selectionComplete
         ? 'calc(72px + env(safe-area-inset-bottom))'
         : undefined,

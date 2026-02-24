@@ -79,7 +79,7 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Rank badge - larger, gold, with glow */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24)',
+          background: 'linear-gradient(135deg, #c4a882, #a0845e, #c4a882)',
           color: '#78350f',
           fontSize: 18,
           fontWeight: 800,

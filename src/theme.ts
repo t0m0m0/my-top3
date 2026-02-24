@@ -5,6 +5,7 @@ const fontFamily = ['"M PLUS Rounded 1c"', '"Noto Sans JP"', 'sans-serif'].join(
 )
 
 const displayFontFamily = [
+  '"Zen Maru Gothic"',
   '"M PLUS Rounded 1c"',
   '"Noto Sans JP"',
   'sans-serif',
@@ -13,27 +14,27 @@ const displayFontFamily = [
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#a855f7', // purple-500
-      light: '#c084fc', // purple-400
-      dark: '#9333ea', // purple-600
+      main: '#a0845e', // warm brown
+      light: '#c4a882', // light brown
+      dark: '#7c6544', // dark brown
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#ec4899', // pink-500
-      light: '#f472b6', // pink-400
-      dark: '#db2777', // pink-600
+      main: '#d4829c', // rose pink
+      light: '#f0b4c8', // light rose
+      dark: '#b5607a', // dark rose
       contrastText: '#ffffff',
     },
     error: {
       main: '#ef4444',
     },
     background: {
-      default: '#fdf4ff', // fuchsia-50
+      default: '#faf8f5', // warm cream
       paper: '#ffffff',
     },
     text: {
-      primary: '#1e1b2e',
-      secondary: '#78716c',
+      primary: '#3d3028', // dark brown
+      secondary: '#8c7e72', // warm grey
     },
   },
   typography: {
@@ -71,11 +72,11 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-          boxShadow: '0 4px 14px rgba(168, 85, 247, 0.3)',
+          background: 'linear-gradient(135deg, #a0845e 0%, #d4829c 100%)',
+          boxShadow: '0 4px 14px rgba(160, 132, 94, 0.3)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #9333ea 0%, #db2777 100%)',
-            boxShadow: '0 6px 20px rgba(168, 85, 247, 0.4)',
+            background: 'linear-gradient(135deg, #7c6544 0%, #b5607a 100%)',
+            boxShadow: '0 6px 20px rgba(160, 132, 94, 0.4)',
           },
         },
       },
@@ -120,7 +121,7 @@ const theme = createTheme({
         root: {
           borderRadius: 10,
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#a855f7',
+            borderColor: '#a0845e',
           },
         },
       },
