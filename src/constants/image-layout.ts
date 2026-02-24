@@ -34,11 +34,8 @@ export const SLOT_LABELS: Record<SlotPosition, string> = {
   'bottom-right': '右下',
 }
 
-export const CATEGORY_LABELS: Record<MediaCategory, string> = {
-  book: '📚 本',
-  music: '🎵 音楽',
-  movie: '🎬 映画',
-}
+// Re-export from category.ts (single source of truth)
+export { CATEGORY_LABELS_DISPLAY as CATEGORY_LABELS } from './category'
 
 export type SlotStyle = {
   top: number

@@ -1,5 +1,5 @@
 import { getBookById } from '../services/google-books.ts'
-import { CATEGORY_LABELS_EN, CATEGORIES } from '../constants/category.ts'
+import { CATEGORY_LABELS_DISPLAY, CATEGORIES } from '../constants/category.ts'
 import type { MediaCategory, SearchResultItem } from '../types/common.ts'
 
 const MAX_THEME_LENGTH = 50
@@ -78,7 +78,7 @@ const CATEGORY_CONFIG: Record<MediaCategory, () => Promise<CategoryConfig>> = {
 }
 
 function buildCategoryLabel(category: MediaCategory): string {
-  return CATEGORY_LABELS_EN[category]
+  return CATEGORY_LABELS_DISPLAY[category]
 }
 
 async function fetchWorkTitle(
