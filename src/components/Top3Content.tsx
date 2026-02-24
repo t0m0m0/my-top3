@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@mui/material/Button'
 import { buildEditUrl } from '../utils/url-params'
@@ -9,6 +9,7 @@ import Top3Image from './Top3Image'
 import WorkCard from './WorkCard'
 import { useWorkFetch } from '../hooks/useWorkFetch'
 import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
+import { useMergedRef } from '../hooks/useMergedRef'
 import DataCredits from './DataCredits'
 import PageHeader from './PageHeader'
 
@@ -29,11 +30,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
   const [captureElement, setCaptureElement] = useState<HTMLDivElement | null>(
     null,
   )
-  const captureRefCallback = useCallback((node: HTMLDivElement | null) => {
-    ;(captureRef as React.MutableRefObject<HTMLDivElement | null>).current =
-      node
-    setCaptureElement(node)
-  }, [])
+  const captureRefCallback = useMergedRef(captureRef, setCaptureElement)
 
   const book = useWorkFetch('book', params.bookId)
   const music = useWorkFetch('music', params.musicId)
