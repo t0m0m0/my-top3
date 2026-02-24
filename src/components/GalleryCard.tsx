@@ -64,7 +64,7 @@ export default function GalleryCard({
       to={`/s/${id}`}
       className="group block transition-all duration-200 hover:-translate-y-1"
       style={{
-        borderRadius: 20,
+        borderRadius: 'var(--radius-card)',
         border: '1.5px solid var(--color-border)',
         boxShadow: '0 2px 12px rgba(62, 42, 20, 0.06)',
       }}
@@ -72,7 +72,7 @@ export default function GalleryCard({
       <div
         className="flex flex-col p-4"
         style={{
-          borderRadius: 18,
+          borderRadius: 'var(--radius-card-inner)',
           background: 'var(--color-surface)',
         }}
       >

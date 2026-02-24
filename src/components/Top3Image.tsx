@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import DownloadIcon from '@mui/icons-material/Download'
 import type { SearchResultItem, MediaCategory } from '../types/common'
 import { IMAGE_SIZE, HALF, SEP } from '../constants/image-layout'
+import { CANVAS_DARK } from '../constants/image-colors'
 import { useImageCapture } from '../hooks/useImageCapture'
 import { useLayoutSwap } from '../hooks/useLayoutSwap'
 import { useMergedRef } from '../hooks/useMergedRef'
@@ -71,7 +72,7 @@ function Top3Image({
             style={{
               width: IMAGE_SIZE,
               height: IMAGE_SIZE,
-              background: '#2a2420',
+              background: CANVAS_DARK,
               position: 'relative',
               overflow: 'hidden',
               fontFamily:

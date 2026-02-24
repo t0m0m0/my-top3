@@ -6,6 +6,11 @@ import {
   CATEGORY_LABELS,
   SLOT_STYLES,
 } from '../constants/image-layout'
+import {
+  CANVAS_DARK,
+  CANVAS_TEXT_MUTED,
+  TEXT_SECONDARY,
+} from '../constants/image-colors'
 import { proxyImageUrl } from '../utils/proxy-image-url'
 
 export type ImageSlotProps = {
@@ -31,7 +36,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
           width: style.width,
           height: style.height,
           overflow: 'hidden',
-          background: '#2a2420',
+          background: CANVAS_DARK,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -40,7 +45,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
       >
         <span
           style={{
-            color: '#a89888',
+            color: CANVAS_TEXT_MUTED,
             fontSize: 16,
             fontWeight: 600,
             letterSpacing: 2,
@@ -48,7 +53,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
         >
           {CATEGORY_LABELS[category]}
         </span>
-        <span style={{ color: '#8c7e72', fontSize: 14, marginTop: 4 }}>
+        <span style={{ color: TEXT_SECONDARY, fontSize: 14, marginTop: 4 }}>
           No Data
         </span>
       </div>

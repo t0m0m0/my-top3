@@ -2,21 +2,21 @@ import type { SearchResultItem } from '../types/common'
 import { proxyImageUrl } from '../utils/proxy-image-url'
 import { SafeImage } from './SafeImage'
 import { CANVAS_PLACEHOLDER } from '../constants/placeholders'
+import {
+  IMAGE_COLORS,
+  CANVAS_DARK,
+  TEXT_PRIMARY,
+  RANK_BADGE_BG,
+  RANK_TEXT,
+  PRIMARY_LIGHT,
+} from '../constants/image-colors'
 
 export type ImageWorkCardProps = {
   item: SearchResultItem | null
   label: string
 }
 
-export const COLORS = {
-  textPrimary: '#fff',
-  textSecondary: '#e8ddd0',
-  textMuted: '#c4b5a5',
-  textSubheading: '#f0e8de',
-  badgeBg: '#3d3028',
-  rankBadgeBg: '#e8d5b8',
-  canvasBg: '#2a2420',
-} as const
+export const COLORS = IMAGE_COLORS
 
 const TRUNCATED_TEXT: React.CSSProperties = {
   overflow: 'hidden',
@@ -62,7 +62,7 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Category label badge */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #3d3028, #2a2420)',
+          background: `linear-gradient(135deg, ${TEXT_PRIMARY}, ${CANVAS_DARK})`,
           color: COLORS.textPrimary,
           fontSize: 15,
           fontWeight: 700,
@@ -79,8 +79,8 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Rank badge - larger, gold, with glow */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #e8d5b8, #c4a882, #e8d5b8)',
-          color: '#5c4a2e',
+          background: `linear-gradient(135deg, ${RANK_BADGE_BG}, ${PRIMARY_LIGHT}, ${RANK_BADGE_BG})`,
+          color: RANK_TEXT,
           fontSize: 18,
           fontWeight: 800,
           width: 48,

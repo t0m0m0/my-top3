@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { PRIMARY_LIGHT } from '../constants/image-colors'
 import StepGuide from '../components/StepGuide'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
@@ -34,7 +35,7 @@ function SearchPage() {
   const mainStyle = useMemo(
     () => ({
       background:
-        'linear-gradient(180deg, #d4c4aa 0%, #e8ddd0 12%, var(--color-bg) 32%, #faf8f5 100%)',
+        'linear-gradient(180deg, color-mix(in srgb, var(--color-primary-light) 50%, var(--color-bg)) 0%, color-mix(in srgb, var(--color-primary-light) 20%, var(--color-bg)) 12%, var(--color-bg) 32%, var(--color-bg) 100%)',
       paddingBottom: selectionComplete
         ? 'calc(72px + env(safe-area-inset-bottom))'
         : undefined,
@@ -62,7 +63,7 @@ function SearchPage() {
                 cx={40 * col + 20}
                 cy={40 * row + 20}
                 r="4"
-                fill="#c4a882"
+                fill={PRIMARY_LIGHT}
               />
             )),
           )}
@@ -71,14 +72,17 @@ function SearchPage() {
           className="animate-fade-in-up relative text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
             fontFamily: 'var(--font-display)',
-            color: '#3d3028',
+            color: 'var(--color-text-primary)',
           }}
         >
           すきコレ
         </h1>
         <p
           className="animate-fade-in-up animate-delay-200 relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
-          style={{ color: 'rgba(61, 48, 40, 0.8)' }}
+          style={{
+            color:
+              'color-mix(in srgb, var(--color-text-primary) 80%, transparent)',
+          }}
         >
           好きな作品を3つ選んで、みんなにシェアしよう ✨
         </p>
@@ -88,8 +92,10 @@ function SearchPage() {
             className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
             style={{
               color: 'var(--color-primary-dark)',
-              border: '1px solid rgba(160, 132, 94, 0.3)',
-              backgroundColor: 'rgba(255, 252, 248, 0.6)',
+              border:
+                '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+              backgroundColor:
+                'color-mix(in srgb, var(--color-bg) 60%, transparent)',
             }}
           >
             みんなの推しを見る 👀

@@ -3,11 +3,12 @@ import Button from '@mui/material/Button'
 import type { SearchResultItem } from '../types/common'
 import { SafeImage } from './SafeImage'
 import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
+import { PRIMARY, SECONDARY, ACCENT } from '../constants/image-colors'
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  '📚 本': { bg: '#a0845e', text: '#ffffff' },
-  '🎵 音楽': { bg: '#d4829c', text: '#ffffff' },
-  '🎬 映画': { bg: '#7dad8e', text: '#ffffff' },
+  '📚 本': { bg: PRIMARY, text: '#ffffff' },
+  '🎵 音楽': { bg: SECONDARY, text: '#ffffff' },
+  '🎬 映画': { bg: ACCENT, text: '#ffffff' },
 }
 
 type WorkCardProps = {
@@ -83,7 +84,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
     <div
       className="relative"
       style={{
-        borderRadius: 20,
+        borderRadius: 'var(--radius-card)',
         border: '1.5px solid var(--color-border)',
         boxShadow: '0 2px 12px rgba(62, 42, 20, 0.06)',
       }}
@@ -91,7 +92,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
       <div
         className="group relative flex min-h-[280px] flex-1 flex-col items-center p-4 pt-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         style={{
-          borderRadius: 18,
+          borderRadius: 'var(--radius-card-inner)',
           background: 'var(--color-surface)',
         }}
       >
@@ -118,13 +119,15 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             style={{
               width: 36,
               height: 36,
-              background: 'linear-gradient(135deg, #e8d5b8, #c4a882, #e8d5b8)',
-              boxShadow: '0 2px 8px rgba(160, 132, 94, 0.3)',
+              background:
+                'linear-gradient(135deg, var(--color-rank-badge), var(--color-primary-light), var(--color-rank-badge))',
+              boxShadow:
+                '0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent)',
             }}
           >
             <span
               className="text-[0.8rem] font-extrabold leading-none"
-              style={{ color: '#5c4a2e' }}
+              style={{ color: 'var(--color-rank-text)' }}
             >
               #1
             </span>
