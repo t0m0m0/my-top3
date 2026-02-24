@@ -62,7 +62,7 @@ function ShortUrlPage() {
         className="flex min-h-screen items-center justify-center"
         style={{
           background:
-            'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 100%)',
+            'linear-gradient(180deg, var(--color-bg) 0%, #f5f0ea 100%)',
         }}
       >
         <CircularProgress />
@@ -76,7 +76,7 @@ function ShortUrlPage() {
         className="min-h-screen"
         style={{
           background:
-            'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 100%)',
+            'linear-gradient(180deg, var(--color-bg) 0%, #f5f0ea 100%)',
         }}
       >
         <div className="mx-auto max-w-4xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">

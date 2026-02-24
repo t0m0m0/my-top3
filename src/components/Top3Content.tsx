@@ -52,7 +52,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
         className="min-h-screen"
         style={{
           background:
-            'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 100%)',
+            'linear-gradient(180deg, var(--color-bg) 0%, #f5f0ea 100%)',
         }}
       >
         <div className="mx-auto max-w-4xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
@@ -71,7 +71,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
       className="min-h-screen"
       style={{
         background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 50%, #fce7f3 100%)',
+          'linear-gradient(180deg, var(--color-bg) 0%, #f5f0ea 50%, #f0e8e0 100%)',
       }}
     >
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">

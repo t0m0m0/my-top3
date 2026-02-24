@@ -2,35 +2,36 @@
 
 /* Design System: CSS Custom Properties */
 :root {
-  /* Primary - Purple-Pink */
-  --color-primary: #a855f7;
-  --color-primary-light: #c084fc;
-  --color-primary-dark: #9333ea;
+  /* Primary - Warm Brown / Terracotta */
+  --color-primary: #a0845e;
+  --color-primary-light: #c4a882;
+  --color-primary-dark: #7c6544;
 
-  /* Secondary - Pink */
-  --color-secondary: #ec4899;
-  --color-secondary-light: #f472b6;
-  --color-secondary-dark: #db2777;
+  /* Secondary - Soft Pink */
+  --color-secondary: #d4829c;
+  --color-secondary-light: #f0b4c8;
+  --color-secondary-dark: #b5607a;
 
-  /* Accent - Amber Gold */
-  --color-accent: #f59e0b;
-  --color-accent-light: #fbbf24;
-  --color-accent-dark: #d97706;
+  /* Accent - Sage Green */
+  --color-accent: #7dad8e;
+  --color-accent-light: #a8d5ba;
+  --color-accent-dark: #5c8a6e;
 
-  /* Neutrals */
-  --color-bg: #fdf4ff;
+  /* Neutrals - Warm Cream */
+  --color-bg: #faf8f5;
   --color-surface: #ffffff;
-  --color-text-primary: #1e1b2e;
-  --color-text-secondary: #78716c;
-  --color-border: #f0e4f6;
+  --color-text-primary: #3d3028;
+  --color-text-secondary: #8c7e72;
+  --color-border: #e8e0d8;
 
   /* Fonts */
-  --font-display: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
+  --font-display:
+    'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
   --font-body: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
 
-  /* Colored Shadows */
-  --shadow-primary: 0 4px 14px rgba(168, 85, 247, 0.2);
-  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.02);
+  /* Shadows - Warm tones */
+  --shadow-primary: 0 4px 14px rgba(160, 132, 94, 0.15);
+  --shadow-card: 0 1px 4px rgb(0 0 0 / 0.04), 0 4px 16px rgb(62 42 20 / 0.04);
 }
 
 /* Base styles */
@@ -38,7 +39,7 @@ body {
   font-family: var(--font-body);
   color: var(--color-text-primary);
   background-color: var(--color-bg);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='washi'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23washi)' opacity='0.04'/%3E%3C/svg%3E");
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -53,7 +54,7 @@ body {
 
 /* Gradient text utility */
 .gradient-text {
-  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f472b6 100%);
+  background: linear-gradient(135deg, #a0845e 0%, #d4829c 50%, #c4a882 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

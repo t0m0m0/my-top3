@@ -5,9 +5,9 @@ import { SafeImage } from './SafeImage'
 import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  '📚 本': { bg: '#a855f7', text: '#ffffff' },
-  '🎵 音楽': { bg: '#ec4899', text: '#ffffff' },
-  '🎬 映画': { bg: '#f472b6', text: '#ffffff' },
+  '📚 本': { bg: '#a0845e', text: '#ffffff' },
+  '🎵 音楽': { bg: '#d4829c', text: '#ffffff' },
+  '🎬 映画': { bg: '#7dad8e', text: '#ffffff' },
 }
 
 type WorkCardProps = {
@@ -117,7 +117,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             style={{
               width: 36,
               height: 36,
-              background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24)',
+              background: 'linear-gradient(135deg, #c4a882, #a0845e, #c4a882)',
               boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
             }}
           >
