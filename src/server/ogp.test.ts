@@ -68,11 +68,11 @@ describe('buildOgDescription', () => {
 
   it('joins work titles with slash separator', () => {
     const works = [
-      { title: '1Q84', category: '📚Book' },
+      { title: '1Q84', category: '📖Book' },
       { title: 'Bohemian Rhapsody', category: '🎵Music' },
     ]
     expect(buildOgDescription(works)).toBe(
-      '📚Book: 1Q84 / 🎵Music: Bohemian Rhapsody',
+      '📖Book: 1Q84 / 🎵Music: Bohemian Rhapsody',
     )
   })
 
@@ -83,12 +83,12 @@ describe('buildOgDescription', () => {
 
   it('handles all three works', () => {
     const works = [
-      { title: '1Q84', category: '📚Book' },
+      { title: '1Q84', category: '📖Book' },
       { title: 'Shape of You', category: '🎵Music' },
       { title: 'Inception', category: '🎬Movie' },
     ]
     expect(buildOgDescription(works)).toBe(
-      '📚Book: 1Q84 / 🎵Music: Shape of You / 🎬Movie: Inception',
+      '📖Book: 1Q84 / 🎵Music: Shape of You / 🎬Movie: Inception',
     )
   })
 })
@@ -97,7 +97,7 @@ describe('buildMetaTags', () => {
   it('generates all required OGP and Twitter meta tags', () => {
     const result = buildMetaTags({
       title: 'テスト | My No.1s',
-      description: '📚Book: 1Q84',
+      description: '📖Book: 1Q84',
       url: 'https://example.com/my-no1s?theme=test',
     })
 
@@ -211,7 +211,7 @@ describe('injectOgpTags', () => {
       params,
     )
 
-    expect(result).toContain('📚Book: 1Q84')
+    expect(result).toContain('📖Book: 1Q84')
     expect(getBookById).toHaveBeenCalledWith('test-key', 'book1')
   })
 
@@ -270,7 +270,7 @@ describe('injectOgpTags', () => {
       params,
     )
 
-    expect(result).toContain('📚Book: 1Q84')
+    expect(result).toContain('📖Book: 1Q84')
     expect(result).toContain('🎵Music: Shape of You')
     expect(result).toContain('🎬Movie: Inception')
   })
