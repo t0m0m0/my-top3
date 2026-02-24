@@ -41,6 +41,61 @@ function computeParamsHash(params: ShareParams): string {
   return crypto.createHash('sha256').update(payload).digest('base64url')
 }
 
+type ShareRow = {
+  theme: string
+  book_id: string
+  music_id: string
+  movie_id: string
+  book_thumb: string
+  music_thumb: string
+  movie_thumb: string
+}
+
+function mapRow(row: ShareRow): Required<ShareParams> {
+  return {
+    theme: row.theme,
+    bookId: row.book_id,
+    musicId: row.music_id,
+    movieId: row.movie_id,
+    bookThumb: row.book_thumb,
+    musicThumb: row.music_thumb,
+    movieThumb: row.movie_thumb,
+  }
+}
+
+function isValidShareId(id: string): boolean {
+  return id.length > 0 && id.length <= 12 && !CONTROL_CHAR_RE.test(id)
+}
+
+function runMigrations(db: Database.Database): void {
+  const columns = db.prepare("PRAGMA table_info('shares')").all() as {
+    name: string
+  }[]
+
+  // Migration: add params_hash column if missing (existing DBs before this change)
+  if (!columns.some((c) => c.name === 'params_hash')) {
+    db.exec(
+      "ALTER TABLE shares ADD COLUMN params_hash TEXT NOT NULL DEFAULT ''",
+    )
+  }
+
+  // Migration: add thumbnail columns if missing
+  const colNames = new Set(columns.map((c) => c.name))
+  if (!colNames.has('book_thumb')) {
+    db.exec("ALTER TABLE shares ADD COLUMN book_thumb TEXT NOT NULL DEFAULT ''")
+  }
+  if (!colNames.has('music_thumb')) {
+    db.exec(
+      "ALTER TABLE shares ADD COLUMN music_thumb TEXT NOT NULL DEFAULT ''",
+    )
+  }
+  if (!colNames.has('movie_thumb')) {
+    db.exec(
+      "ALTER TABLE shares ADD COLUMN movie_thumb TEXT NOT NULL DEFAULT ''",
+    )
+  }
+}
+
 function validateField(name: string, value: string, maxLen: number): void {
   if (value.length > maxLen) {
     throw new Error(`${name} exceeds maximum length of ${maxLen}`)
@@ -110,31 +165,7 @@ export function createShareStore(
     CREATE INDEX IF NOT EXISTS idx_shares_created_at ON shares(created_at);
   `)
 
-  // Migration: add params_hash column if missing (existing DBs before this change)
-  const columns = db.prepare("PRAGMA table_info('shares')").all() as {
-    name: string
-  }[]
-  if (!columns.some((c) => c.name === 'params_hash')) {
-    db.exec(
-      "ALTER TABLE shares ADD COLUMN params_hash TEXT NOT NULL DEFAULT ''",
-    )
-  }
-
-  // Migration: add thumbnail columns if missing
-  const colNames = new Set(columns.map((c) => c.name))
-  if (!colNames.has('book_thumb')) {
-    db.exec("ALTER TABLE shares ADD COLUMN book_thumb TEXT NOT NULL DEFAULT ''")
-  }
-  if (!colNames.has('music_thumb')) {
-    db.exec(
-      "ALTER TABLE shares ADD COLUMN music_thumb TEXT NOT NULL DEFAULT ''",
-    )
-  }
-  if (!colNames.has('movie_thumb')) {
-    db.exec(
-      "ALTER TABLE shares ADD COLUMN movie_thumb TEXT NOT NULL DEFAULT ''",
-    )
-  }
+  runMigrations(db)
 
   db.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS idx_shares_params_hash
@@ -258,33 +289,13 @@ export function createShareStore(
     },
 
     get(id: string): ShareParams | null {
-      // Generated IDs are 8 chars of base64url; reject obviously invalid input early
-      if (id.length === 0 || id.length > 12 || CONTROL_CHAR_RE.test(id)) {
-        return null
-      }
+      if (!isValidShareId(id)) return null
       const row = selectByIdFullStmt.get(id) as
-        | {
-            theme: string
-            book_id: string
-            music_id: string
-            movie_id: string
-            book_thumb: string
-            music_thumb: string
-            movie_thumb: string
-            created_at: number
-          }
+        | (ShareRow & { created_at: number })
         | undefined
       if (!row) return null
       if (isExpired(row.created_at)) return null
-      return {
-        theme: row.theme,
-        bookId: row.book_id,
-        musicId: row.music_id,
-        movieId: row.movie_id,
-        bookThumb: row.book_thumb,
-        musicThumb: row.music_thumb,
-        movieThumb: row.movie_thumb,
-      }
+      return mapRow(row)
     },
 
     list(options: ShareListOptions): ShareListResult {
@@ -292,27 +303,14 @@ export function createShareStore(
         purgeExpiredStmt.run(ttlSeconds)
       }
       const { cnt } = countStmt.get() as { cnt: number }
-      const rows = listStmt.all(options.limit, options.offset) as {
+      const rows = listStmt.all(options.limit, options.offset) as (ShareRow & {
         id: string
-        theme: string
-        book_id: string
-        music_id: string
-        movie_id: string
-        book_thumb: string
-        music_thumb: string
-        movie_thumb: string
         created_at: number
-      }[]
+      })[]
       return {
         items: rows.map((row) => ({
+          ...mapRow(row),
           id: row.id,
-          theme: row.theme,
-          bookId: row.book_id,
-          musicId: row.music_id,
-          movieId: row.movie_id,
-          bookThumb: row.book_thumb,
-          musicThumb: row.music_thumb,
-          movieThumb: row.movie_thumb,
           createdAt: row.created_at,
         })),
         total: cnt,
@@ -320,9 +318,7 @@ export function createShareStore(
     },
 
     delete(id: string): boolean {
-      if (id.length === 0 || id.length > 12 || CONTROL_CHAR_RE.test(id)) {
-        return false
-      }
+      if (!isValidShareId(id)) return false
       const result = deleteByIdStmt.run(id)
       return result.changes > 0
     },
