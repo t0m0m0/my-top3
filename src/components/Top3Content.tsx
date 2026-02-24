@@ -11,7 +11,6 @@ import { useWorkFetch } from '../hooks/useWorkFetch'
 import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
 import { useMergedRef } from '../hooks/useMergedRef'
 import DataCredits from './DataCredits'
-import PageHeader from './PageHeader'
 
 type Top3Params = {
   theme: string
@@ -23,6 +22,30 @@ type Top3Params = {
 type Props = {
   params: Top3Params
   existingShareId?: string
+}
+
+/** Decorative washi tape above a work card */
+function WashiTape({
+  color,
+  rotate,
+  left,
+}: {
+  color: string
+  rotate: string
+  left: string
+}) {
+  return (
+    <div
+      className="washi-tape"
+      style={{
+        width: 60,
+        background: color,
+        transform: `rotate(${rotate})`,
+        top: -10,
+        left,
+      }}
+    />
+  )
 }
 
 export default function Top3Content({ params, existingShareId }: Props) {
@@ -67,55 +90,115 @@ export default function Top3Content({ params, existingShareId }: Props) {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #f5f0eb 50%, #efe8e0 100%)',
-      }}
-    >
+    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        <PageHeader title="すきコレ" />
+        {/* Header */}
+        <div className="mb-2 text-center">
+          <Link
+            to="/gallery"
+            className="mb-3 inline-flex items-center gap-1 text-sm font-medium transition-colors"
+            style={{ color: 'var(--color-primary)' }}
+          >
+            ← みんなのボード
+          </Link>
+          <h1
+            className="brand-gradient-text text-3xl font-extrabold tracking-tight sm:text-4xl"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            すきコレ
+          </h1>
+        </div>
 
-        {/* Theme display with decorative quotes via CSS pseudo-elements */}
+        {/* Theme title */}
         {params.theme && (
-          <div className="mt-3 text-center">
+          <div className="mt-2 text-center">
             <h2
-              className="theme-quote text-xl font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
+              className="text-xl font-bold sm:text-2xl"
+              style={{
+                fontFamily: 'var(--font-display)',
+                color: 'var(--color-text-primary)',
+              }}
             >
               {params.theme}
             </h2>
           </div>
         )}
 
-        <div className="mt-4 flex flex-col items-stretch gap-4 sm:mt-6 sm:flex-row">
-          <div className="animate-fade-in-up flex-1">
-            <WorkCard
-              work={book.data}
-              loading={book.loading}
-              error={book.error}
-              label="📚 本"
-              onRetry={book.error ? book.retry : undefined}
-            />
-          </div>
-          <div className="animate-fade-in-up animate-delay-100 flex-1">
-            <WorkCard
-              work={music.data}
-              loading={music.loading}
-              error={music.error}
-              label="🎵 音楽"
-              onRetry={music.error ? music.retry : undefined}
-            />
-          </div>
-          <div className="animate-fade-in-up animate-delay-200 flex-1">
-            <WorkCard
-              work={movie.data}
-              loading={movie.loading}
-              error={movie.error}
-              label="🎬 映画"
-              onRetry={movie.error ? movie.retry : undefined}
-            />
+        {/* Cork board area */}
+        <div className="cork-bg relative mt-6 rounded-3xl p-5 sm:p-8">
+          {/* Decorative pushpins */}
+          <div
+            className="pushpin pushpin-red"
+            style={{ top: 12, left: '48%' }}
+            aria-hidden="true"
+          />
+          <div
+            className="pushpin pushpin-blue"
+            style={{ top: 20, right: 40 }}
+            aria-hidden="true"
+          />
+          <div
+            className="pushpin pushpin-yellow"
+            style={{ bottom: 20, left: 60 }}
+            aria-hidden="true"
+          />
+
+          {/* Work cards with slight rotation */}
+          <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:justify-center sm:gap-6">
+            <div
+              className="animate-fade-in-up relative flex-1"
+              style={{ transform: 'rotate(-1.5deg)' }}
+            >
+              <WashiTape
+                color="linear-gradient(90deg, #fbcfe8, #fce7f3)"
+                rotate="2deg"
+                left="30%"
+              />
+              <WorkCard
+                work={book.data}
+                loading={book.loading}
+                error={book.error}
+                label="📚 本"
+                onRetry={book.error ? book.retry : undefined}
+              />
+            </div>
+            <div
+              className="animate-fade-in-up animate-delay-100 relative flex-1"
+              style={{
+                transform: 'rotate(1deg)',
+                marginTop: 'var(--card-offset, 0px)',
+              }}
+            >
+              <WashiTape
+                color="linear-gradient(90deg, #ddd6fe, #ede9fe)"
+                rotate="-3deg"
+                left="25%"
+              />
+              <WorkCard
+                work={music.data}
+                loading={music.loading}
+                error={music.error}
+                label="🎵 音楽"
+                onRetry={music.error ? music.retry : undefined}
+              />
+            </div>
+            <div
+              className="animate-fade-in-up animate-delay-200 relative flex-1"
+              style={{ transform: 'rotate(-0.5deg)' }}
+            >
+              <WashiTape
+                color="linear-gradient(90deg, #bfdbfe, #dbeafe)"
+                rotate="1deg"
+                left="35%"
+              />
+              <WorkCard
+                work={movie.data}
+                loading={movie.loading}
+                error={movie.error}
+                label="🎬 映画"
+                onRetry={movie.error ? movie.retry : undefined}
+              />
+            </div>
           </div>
         </div>
 
@@ -149,7 +232,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <PillLinkButton to={buildEditUrl(params)}>← 戻る</PillLinkButton>
           <PillLinkButton to="/gallery" color="secondary">
-            🎨 みんなの推し
+            🔍 みんなのボード
           </PillLinkButton>
         </div>
       </div>

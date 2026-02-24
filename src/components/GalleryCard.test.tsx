@@ -47,10 +47,11 @@ describe('GalleryCard', () => {
     expect(link).toHaveAttribute('href', '/s/abc123')
   })
 
-  it('renders 3 thumbnail images', () => {
+  it('renders thumbnail images (hero + small)', () => {
     renderCard()
     const images = screen.getAllByRole('img')
-    expect(images).toHaveLength(3)
+    // 3 hero images + 3 small thumbnails = 6
+    expect(images).toHaveLength(6)
   })
 
   it('renders fallback when theme is empty', () => {
@@ -66,13 +67,15 @@ describe('GalleryCard', () => {
       movieThumb: '',
     })
     expect(screen.queryAllByRole('img')).toHaveLength(0)
-    expect(screen.getByText('タップして見る')).toBeInTheDocument()
+    // Pin emoji is shown as fallback
+    expect(screen.getByText('📌')).toBeInTheDocument()
   })
 
   it('skips thumbnail for empty URL', () => {
     renderCard({ ...defaultProps, bookThumb: '' })
     const images = screen.getAllByRole('img')
-    expect(images).toHaveLength(2)
+    // 2 hero + 2 small = 4
+    expect(images).toHaveLength(4)
   })
 
   it('renders reaction count', () => {

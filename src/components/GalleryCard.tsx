@@ -4,6 +4,35 @@ import { useReaction } from '../hooks/useReaction'
 const PLACEHOLDER =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="%23e8e0d8"><rect width="80" height="80"/></svg>'
 
+/** Deterministic gradient class based on string hash */
+const GRADIENTS = [
+  'grad-warm',
+  'grad-cool',
+  'grad-sky',
+  'grad-sunset',
+  'grad-forest',
+  'grad-night',
+  'grad-sakura',
+  'grad-ocean',
+  'grad-autumn',
+  'grad-pastel',
+  'grad-starry',
+] as const
+
+function hashToGradient(s: string): string {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0
+  return GRADIENTS[Math.abs(h) % GRADIENTS.length]
+}
+
+/** Varying image heights for masonry look */
+const HEIGHT_CLASSES = ['h-28', 'h-32', 'h-36', 'h-40'] as const
+function hashToHeight(s: string): string {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 37 + s.charCodeAt(i)) | 0
+  return HEIGHT_CLASSES[Math.abs(h) % HEIGHT_CLASSES.length]
+}
+
 type Props = {
   id: string
   theme: string
@@ -20,7 +49,7 @@ function Thumbnail({ src, alt }: { src: string; alt: string }) {
     <img
       src={src}
       alt={alt}
-      className="h-18 w-18 rounded-md object-cover shadow-sm"
+      className="h-12 w-12 rounded-lg object-cover shadow-sm"
       loading="lazy"
       onError={(e) => {
         const img = e.target as HTMLImageElement
@@ -30,21 +59,12 @@ function Thumbnail({ src, alt }: { src: string; alt: string }) {
   )
 }
 
-function formatDate(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
 export default function GalleryCard({
   id,
   theme,
   bookThumb,
   musicThumb,
   movieThumb,
-  createdAt,
   reactionCount: initialReactionCount,
 }: Props) {
   const hasThumbs = bookThumb || musicThumb || movieThumb
@@ -52,6 +72,8 @@ export default function GalleryCard({
     id,
     initialReactionCount,
   )
+  const gradClass = hashToGradient(id)
+  const heightClass = hashToHeight(id)
 
   const handleReaction = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -62,81 +84,99 @@ export default function GalleryCard({
   return (
     <Link
       to={`/s/${id}`}
-      className="group block transition-all duration-200 hover:-translate-y-1"
-      style={{
-        borderRadius: 'var(--radius-card)',
-        border: '1.5px solid var(--color-border)',
-        boxShadow: '0 2px 12px rgba(62, 42, 20, 0.06)',
-      }}
+      className="masonry-item block overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
+      {/* Hero image area */}
       <div
-        className="flex flex-col p-4"
-        style={{
-          borderRadius: 'var(--radius-card-inner)',
-          background: 'var(--color-surface)',
-        }}
+        className={`${gradClass} ${heightClass} relative flex items-center justify-content-center`}
       >
-        {/* Theme */}
+        {hasThumbs ? (
+          <div className="flex w-full items-end justify-center gap-1.5 p-3">
+            {bookThumb && (
+              <img
+                src={bookThumb}
+                alt="Book"
+                className="h-16 w-12 rounded-md object-cover shadow-md"
+                loading="lazy"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement
+                  if (img.src !== PLACEHOLDER) img.src = PLACEHOLDER
+                }}
+              />
+            )}
+            {musicThumb && (
+              <img
+                src={musicThumb}
+                alt="Music"
+                className="h-16 w-12 rounded-md object-cover shadow-md"
+                loading="lazy"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement
+                  if (img.src !== PLACEHOLDER) img.src = PLACEHOLDER
+                }}
+              />
+            )}
+            {movieThumb && (
+              <img
+                src={movieThumb}
+                alt="Movie"
+                className="h-16 w-12 rounded-md object-cover shadow-md"
+                loading="lazy"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement
+                  if (img.src !== PLACEHOLDER) img.src = PLACEHOLDER
+                }}
+              />
+            )}
+          </div>
+        ) : (
+          <div className="flex w-full items-center justify-center">
+            <span className="text-3xl opacity-60">📌</span>
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="px-3 pb-3 pt-2.5">
         <h3
-          className="mb-3 truncate text-sm font-bold"
+          className="mb-2 line-clamp-2 text-sm font-bold leading-snug"
           style={{
-            color: 'var(--color-text-primary)',
             fontFamily: 'var(--font-display)',
+            color: 'var(--color-text-primary)',
           }}
         >
           {theme || 'No Theme'}
         </h3>
 
-        {/* Thumbnails */}
-        {hasThumbs ? (
-          <div className="flex gap-2">
+        {/* Thumbnails row (small) */}
+        {hasThumbs && (
+          <div className="mb-2 flex gap-1.5">
             <Thumbnail src={bookThumb} alt="Book" />
             <Thumbnail src={musicThumb} alt="Music" />
             <Thumbnail src={movieThumb} alt="Movie" />
           </div>
-        ) : (
-          <div
-            className="flex h-18 items-center justify-center rounded-md"
-            style={{ backgroundColor: 'var(--color-bg)' }}
-          >
-            <span
-              className="text-xs"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              タップして見る
-            </span>
-          </div>
         )}
 
-        {/* Footer: Date + Reaction */}
-        <div className="mt-3 flex items-center justify-between">
-          <p
-            className="text-xs"
-            style={{ color: 'var(--color-text-secondary)' }}
+        {/* Reaction */}
+        <button
+          type="button"
+          onClick={handleReaction}
+          aria-label="いいね"
+          className="flex items-center gap-1 text-xs transition-colors duration-150"
+          style={{
+            color: reacted
+              ? 'var(--color-primary)'
+              : 'var(--color-text-secondary)',
+          }}
+        >
+          <span
+            className="transition-transform duration-150"
+            style={{ transform: reacted ? 'scale(1.2)' : 'scale(1)' }}
           >
-            {formatDate(createdAt)}
-          </p>
-
-          <button
-            type="button"
-            onClick={handleReaction}
-            aria-label="いいね"
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors duration-150"
-            style={{
-              color: reacted
-                ? 'var(--color-primary)'
-                : 'var(--color-text-secondary)',
-            }}
-          >
-            <span
-              className="transition-transform duration-150"
-              style={{ transform: reacted ? 'scale(1.2)' : 'scale(1)' }}
-            >
-              {reacted ? '❤️' : '🩵'}
-            </span>
-            <span>{count}</span>
-          </button>
-        </div>
+            {reacted ? '❤️' : '💜'}
+          </span>
+          <span>{count}</span>
+        </button>
       </div>
     </Link>
   )

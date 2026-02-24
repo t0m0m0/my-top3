@@ -69,10 +69,9 @@ function SearchPage() {
           )}
         </svg>
         <h1
-          className="animate-fade-in-up relative text-3xl font-extrabold tracking-tight sm:text-4xl"
+          className="animate-fade-in-up brand-gradient-text relative text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
             fontFamily: 'var(--font-display)',
-            color: 'var(--color-text-primary)',
           }}
         >
           すきコレ
@@ -98,7 +97,7 @@ function SearchPage() {
                 'color-mix(in srgb, var(--color-bg) 60%, transparent)',
             }}
           >
-            みんなの推しを見る 👀
+            🔍 みんなのボードを見る
           </Link>
         </div>
         <div className="animate-fade-in-up animate-delay-400 relative mt-5">
