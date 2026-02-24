@@ -18,7 +18,7 @@ export default function PageHeader({ title, subtitle }: Props) {
         style={{
           fontFamily: 'var(--font-display)',
           background:
-            'linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))',
+            'linear-gradient(135deg, var(--color-primary-dark), var(--color-secondary))',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
