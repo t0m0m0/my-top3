@@ -180,7 +180,10 @@ export default function ShareButtons({
             height: 44,
             backgroundColor: 'var(--color-primary-dark)',
             color: '#ffffff',
-            '&:hover': { backgroundColor: 'var(--color-primary)', filter: 'brightness(0.85)' },
+            '&:hover': {
+              backgroundColor: 'var(--color-primary)',
+              filter: 'brightness(0.85)',
+            },
           }}
         >
           <ContentCopyIcon fontSize="small" />

@@ -166,7 +166,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
     )
 
     // Click the select button
-    await user.click(screen.getByRole('button', { name: '推す！💜' }))
+    await user.click(screen.getByRole('button', { name: '推す！✨' }))
 
     // The card should now show "推した ✨"
     await waitFor(() => {

@@ -53,13 +53,13 @@ it('hides suggestion chips when value is non-empty', () => {
 it('shows guide text when value is empty', () => {
   render(<ThemeInput value="" onChange={vi.fn()} />)
   expect(
-    screen.getByText('お題は後からでもOK！まず好きな作品を教えて 💜'),
+    screen.getByText('お題は後からでもOK！まず好きな作品を教えて ✨'),
   ).toBeInTheDocument()
 })
 
 it('hides guide text when value is non-empty', () => {
   render(<ThemeInput value="何か" onChange={vi.fn()} />)
   expect(
-    screen.queryByText('お題は後からでもOK！まず好きな作品を教えて 💜'),
+    screen.queryByText('お題は後からでもOK！まず好きな作品を教えて ✨'),
   ).not.toBeInTheDocument()
 })

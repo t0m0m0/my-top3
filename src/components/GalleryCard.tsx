@@ -79,7 +79,10 @@ export default function GalleryCard({
         {/* Theme */}
         <h3
           className="mb-3 truncate text-sm font-bold"
-          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
+          style={{
+            color: 'var(--color-text-primary)',
+            fontFamily: 'var(--font-display)',
+          }}
         >
           {theme || 'No Theme'}
         </h3>

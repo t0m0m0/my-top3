@@ -27,7 +27,10 @@ export default function StepGuide() {
                 }}
               >
                 <Icon
-                  sx={{ color: 'var(--color-primary-dark)', fontSize: { xs: 20, sm: 24 } }}
+                  sx={{
+                    color: 'var(--color-primary-dark)',
+                    fontSize: { xs: 20, sm: 24 },
+                  }}
                   aria-hidden
                 />
               </div>
