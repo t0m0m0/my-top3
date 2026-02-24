@@ -117,27 +117,27 @@ test.describe('Happy path', () => {
 
     await page.goto('/')
 
-    const searchInput = page.getByPlaceholder('作品名やアーティスト名で検索')
+    const searchInput = page.getByPlaceholder('好きな作品を検索 🔍')
 
     // --- Book (default tab) ---
     await searchInput.fill('銀河鉄道')
     await expect(page.getByText(BOOK.title)).toBeVisible()
-    await page.getByRole('button', { name: '#1に選ぶ', exact: true }).click()
+    await page.getByRole('button', { name: '推す！💜', exact: true }).click()
 
     // --- Music ---
-    await page.getByRole('tab', { name: /Music/ }).click()
+    await page.getByRole('tab', { name: /音楽/ }).click()
     await searchInput.fill('Bohemian')
     await expect(page.getByText(MUSIC.title)).toBeVisible()
-    await page.getByRole('button', { name: '#1に選ぶ', exact: true }).click()
+    await page.getByRole('button', { name: '推す！💜', exact: true }).click()
 
     // --- Movie ---
-    await page.getByRole('tab', { name: /Movie/ }).click()
+    await page.getByRole('tab', { name: /映画/ }).click()
     await searchInput.fill('千と千尋')
     await expect(page.getByText(MOVIE.title)).toBeVisible()
-    await page.getByRole('button', { name: '#1に選ぶ', exact: true }).click()
+    await page.getByRole('button', { name: '推す！💜', exact: true }).click()
 
-    // Click create button (matches both desktop "Top3を作成" and mobile "Top3を作成 🎉")
-    const createButton = page.getByRole('button', { name: /Top3を作成/ })
+    // Click create button
+    const createButton = page.getByRole('button', { name: /できた！シェアする/ })
     await createButton.first().click()
 
     await page.waitForURL('**/my-no1s?**')
@@ -197,7 +197,7 @@ test.describe('Rate limit error', () => {
 
     await page.goto('/')
 
-    const searchInput = page.getByPlaceholder('作品名やアーティスト名で検索')
+    const searchInput = page.getByPlaceholder('好きな作品を検索 🔍')
     await searchInput.fill('テスト検索')
 
     const alert = page.getByRole('alert')
@@ -229,7 +229,7 @@ test.describe('Infinite scroll', () => {
 
     await page.goto('/')
 
-    const searchInput = page.getByPlaceholder('作品名やアーティスト名で検索')
+    const searchInput = page.getByPlaceholder('好きな作品を検索 🔍')
     await searchInput.fill('書籍')
 
     // Verify first batch is rendered

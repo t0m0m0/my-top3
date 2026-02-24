@@ -14,13 +14,13 @@ test.beforeEach(async ({ page }) => {
 
 test('search page loads', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle(/My No.1s/)
+  await expect(page).toHaveTitle(/すきコレ/)
 })
 
 test('tab switching works', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('tab', { name: /Music/ }).click()
-  await expect(page.getByRole('tab', { name: /Music/ })).toHaveAttribute(
+  await page.getByRole('tab', { name: /音楽/ }).click()
+  await expect(page.getByRole('tab', { name: /音楽/ })).toHaveAttribute(
     'aria-selected',
     'true',
   )
