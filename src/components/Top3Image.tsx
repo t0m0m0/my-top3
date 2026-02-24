@@ -71,7 +71,7 @@ function Top3Image({
             style={{
               width: IMAGE_SIZE,
               height: IMAGE_SIZE,
-              background: '#0a0a0f',
+              background: '#2a2420',
               position: 'relative',
               overflow: 'hidden',
               fontFamily:
@@ -142,7 +142,7 @@ function Top3Image({
               <span
                 style={{
                   fontSize: 11,
-                  color: 'rgba(255,255,255,0.18)',
+                  color: 'rgba(255, 252, 248, 0.2)',
                   letterSpacing: 3,
                   fontWeight: 500,
                   textShadow: '0 1px 4px rgba(0,0,0,0.5)',
@@ -153,7 +153,7 @@ function Top3Image({
               <div
                 style={{
                   fontSize: 9,
-                  color: 'rgba(255,255,255,0.15)',
+                  color: 'rgba(255, 252, 248, 0.15)',
                   letterSpacing: 1,
                   fontWeight: 400,
                   marginTop: 2,

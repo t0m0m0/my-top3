@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useReaction } from '../hooks/useReaction'
 
 const PLACEHOLDER =
-  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="%23e5e7eb"><rect width="80" height="80"/></svg>'
+  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="%23e8e0d8"><rect width="80" height="80"/></svg>'
 
 type Props = {
   id: string
@@ -62,23 +62,27 @@ export default function GalleryCard({
   return (
     <Link
       to={`/s/${id}`}
-      className="group block rounded-xl p-[2px] transition-transform duration-200 hover:-translate-y-1"
+      className="group block transition-all duration-200 hover:-translate-y-1"
       style={{
-        background:
-          'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+        borderRadius: 20,
+        border: '1.5px solid var(--color-border)',
+        boxShadow: '0 2px 12px rgba(62, 42, 20, 0.06)',
       }}
     >
       <div
-        className="flex flex-col rounded-[10px] p-4"
+        className="flex flex-col p-4"
         style={{
+          borderRadius: 18,
           background: 'var(--color-surface)',
-          boxShadow: 'var(--shadow-card)',
         }}
       >
         {/* Theme */}
         <h3
           className="mb-3 truncate text-sm font-bold"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{
+            color: 'var(--color-text-primary)',
+            fontFamily: 'var(--font-display)',
+          }}
         >
           {theme || 'No Theme'}
         </h3>

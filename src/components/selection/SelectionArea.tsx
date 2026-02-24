@@ -108,7 +108,7 @@ function SelectionArea({
           style={{
             paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
             background:
-              'linear-gradient(transparent, rgba(255,255,255,0.95) 30%)',
+              'linear-gradient(transparent, rgba(250, 248, 245, 0.95) 30%)',
           }}
         >
           <Button

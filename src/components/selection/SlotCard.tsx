@@ -36,7 +36,7 @@ export function SlotCard({
         >
           {CATEGORY_LABELS_DISPLAY[category]}
         </span>
-        <span className="text-xs font-medium" style={{ color: '#52525b' }}>
+        <span className="text-xs font-medium" style={{ color: '#8c7e72' }}>
           未選択
         </span>
       </button>

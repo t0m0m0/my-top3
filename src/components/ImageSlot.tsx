@@ -31,7 +31,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
           width: style.width,
           height: style.height,
           overflow: 'hidden',
-          background: '#111827',
+          background: '#2a2420',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -40,7 +40,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
       >
         <span
           style={{
-            color: '#6b7280',
+            color: '#a89888',
             fontSize: 16,
             fontWeight: 600,
             letterSpacing: 2,
@@ -48,7 +48,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
         >
           {CATEGORY_LABELS[category]}
         </span>
-        <span style={{ color: '#4b5563', fontSize: 14, marginTop: 4 }}>
+        <span style={{ color: '#8c7e72', fontSize: 14, marginTop: 4 }}>
           No Data
         </span>
       </div>

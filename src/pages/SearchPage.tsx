@@ -34,7 +34,7 @@ function SearchPage() {
   const mainStyle = useMemo(
     () => ({
       background:
-        'linear-gradient(180deg, #7c6544 0%, #a0845e 12%, var(--color-bg) 32%, #f5f0ea 100%)',
+        'linear-gradient(180deg, #d4c4aa 0%, #e8ddd0 12%, var(--color-bg) 32%, #faf8f5 100%)',
       paddingBottom: selectionComplete
         ? 'calc(72px + env(safe-area-inset-bottom))'
         : undefined,
@@ -62,7 +62,7 @@ function SearchPage() {
                 cx={40 * col + 20}
                 cy={40 * row + 20}
                 r="4"
-                fill="white"
+                fill="#c4a882"
               />
             )),
           )}
@@ -71,25 +71,25 @@ function SearchPage() {
           className="animate-fade-in-up relative text-3xl font-extrabold tracking-tight sm:text-4xl"
           style={{
             fontFamily: 'var(--font-display)',
-            color: '#fff',
+            color: '#3d3028',
           }}
         >
           すきコレ
         </h1>
         <p
           className="animate-fade-in-up animate-delay-200 relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
-          style={{ color: 'rgba(255,255,255,0.9)' }}
+          style={{ color: 'rgba(61, 48, 40, 0.8)' }}
         >
-          好きな作品を3つ選んで、みんなにシェアしよう 💜
+          好きな作品を3つ選んで、みんなにシェアしよう ✨
         </p>
         <div className="animate-fade-in-up animate-delay-200 relative mt-3">
           <Link
             to="/gallery"
             className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
             style={{
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.5)',
-              backgroundColor: 'rgba(255,255,255,0.15)',
+              color: 'var(--color-primary-dark)',
+              border: '1px solid rgba(160, 132, 94, 0.3)',
+              backgroundColor: 'rgba(255, 252, 248, 0.6)',
             }}
           >
             みんなの推しを見る 👀

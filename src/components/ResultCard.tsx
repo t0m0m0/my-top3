@@ -92,7 +92,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
           <h3 className="text-base font-semibold leading-[1.3] overflow-hidden text-ellipsis [-webkit-line-clamp:2] [-webkit-box-orient:vertical] [display:-webkit-box]">
             {item.title}
           </h3>
-          <p className="mt-1 text-sm text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">
+          <p className="mt-1 text-sm text-stone-500 overflow-hidden text-ellipsis whitespace-nowrap">
             {item.subtitle}
           </p>
           {isSelected ? (
@@ -124,7 +124,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
               }}
               sx={{ mt: 1, fontSize: '0.8rem', minHeight: 36 }}
             >
-              推す！💜
+              推す！✨
             </Button>
           )}
         </CardContent>

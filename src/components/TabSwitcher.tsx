@@ -43,7 +43,7 @@ export default function TabSwitcher({ value, onChange }: TabSwitcherProps) {
             height: '100%',
             borderRadius: '9999px',
             backgroundColor: 'var(--color-primary)',
-            opacity: 0.12,
+            opacity: 0.15,
             zIndex: 0,
           },
           '& .MuiTab-root': {

@@ -41,7 +41,7 @@ function ThemeInput({ value, onChange }: ThemeInputProps) {
             className="mt-2 text-xs"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            お題は後からでもOK！まず好きな作品を教えて 💜
+            お題は後からでもOK！まず好きな作品を教えて ✨
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {THEME_SUGGESTIONS.map((suggestion) => (
