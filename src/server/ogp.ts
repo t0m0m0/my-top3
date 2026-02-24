@@ -1,5 +1,10 @@
 import { getBookById } from '../services/google-books.ts'
-import type { SearchResultItem } from '../types/common.ts'
+import {
+  CATEGORY_ICONS,
+  CATEGORY_LABELS_EN,
+  CATEGORIES,
+} from '../constants/category.ts'
+import type { MediaCategory, SearchResultItem } from '../types/common.ts'
 
 const MAX_THEME_LENGTH = 50
 const DEFAULT_SITE_NAME = 'My No.1s'
@@ -54,33 +59,48 @@ export function buildMetaTags(options: {
   return tags.join('\n    ')
 }
 
+type CategoryConfig = {
+  envKey: string
+  getById: (
+    apiKey: string,
+    id: string,
+  ) => Promise<{ ok: boolean; data?: SearchResultItem }>
+}
+
+const CATEGORY_CONFIG: Record<MediaCategory, () => Promise<CategoryConfig>> = {
+  book: async () => ({
+    envKey: 'GOOGLE_BOOKS_API_KEY',
+    getById: getBookById,
+  }),
+  music: async () => {
+    const { getMusicById } = await import('../services/lastfm.ts')
+    return { envKey: 'LASTFM_API_KEY', getById: getMusicById }
+  },
+  movie: async () => {
+    const { getMovieById } = await import('../services/tmdb.ts')
+    return { envKey: 'TMDB_API_KEY', getById: getMovieById }
+  },
+}
+
+function buildCategoryLabel(category: MediaCategory): string {
+  return `${CATEGORY_ICONS[category]}${CATEGORY_LABELS_EN[category]}`
+}
+
 async function fetchWorkTitle(
-  category: 'book' | 'music' | 'movie',
+  category: MediaCategory,
   id: string,
 ): Promise<WorkInfo | null> {
-  const categoryLabels = { book: '📚Book', music: '🎵Music', movie: '🎬Movie' }
-
   try {
-    let result: { ok: boolean; data?: SearchResultItem }
+    const { envKey, getById } = await CATEGORY_CONFIG[category]()
+    const apiKey = process.env[envKey] ?? ''
+    if (!apiKey) return null
 
-    if (category === 'book') {
-      const apiKey = process.env['GOOGLE_BOOKS_API_KEY'] ?? ''
-      if (!apiKey) return null
-      result = await getBookById(apiKey, id)
-    } else if (category === 'music') {
-      const apiKey = process.env['LASTFM_API_KEY'] ?? ''
-      if (!apiKey) return null
-      const { getMusicById } = await import('../services/lastfm.ts')
-      result = await getMusicById(apiKey, id)
-    } else {
-      const apiKey = process.env['TMDB_API_KEY'] ?? ''
-      if (!apiKey) return null
-      const { getMovieById } = await import('../services/tmdb.ts')
-      result = await getMovieById(apiKey, id)
-    }
-
+    const result = await getById(apiKey, id)
     if (result.ok && result.data) {
-      return { title: result.data.title, category: categoryLabels[category] }
+      return {
+        title: result.data.title,
+        category: buildCategoryLabel(category),
+      }
     }
   } catch (e) {
     console.error(`[ogp] Failed to fetch ${category} (id: ${id}):`, e)
@@ -99,45 +119,23 @@ export async function injectOgpTags(
   const musicId = searchParams.get('music') ?? ''
   const movieId = searchParams.get('movie') ?? ''
 
-  const works: WorkInfo[] = []
+  const idByCategory: Record<MediaCategory, string> = {
+    book: bookId,
+    music: musicId,
+    movie: movieId,
+  }
 
   // Fetch work titles in parallel
-  const fetchPromises: Promise<void>[] = []
-
-  if (bookId) {
-    fetchPromises.push(
-      fetchWorkTitle('book', bookId).then((w) => {
-        if (w) works.push(w)
-      }),
-    )
-  }
-  if (musicId) {
-    fetchPromises.push(
-      fetchWorkTitle('music', musicId).then((w) => {
-        if (w) works.push(w)
-      }),
-    )
-  }
-  if (movieId) {
-    fetchPromises.push(
-      fetchWorkTitle('movie', movieId).then((w) => {
-        if (w) works.push(w)
-      }),
-    )
-  }
+  const fetchPromises = CATEGORIES.filter((cat) => idByCategory[cat]).map(
+    (cat) => fetchWorkTitle(cat, idByCategory[cat]),
+  )
 
   // Wait with timeout to avoid blocking crawlers for too long
-  await Promise.race([
-    Promise.allSettled(fetchPromises),
-    new Promise((resolve) => setTimeout(resolve, 3000)),
-  ])
-
-  // Sort works in consistent order: book, music, movie
-  const categoryOrder = ['📚Book', '🎵Music', '🎬Movie']
-  works.sort(
-    (a, b) =>
-      categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category),
+  const timeout = new Promise<(WorkInfo | null)[]>((resolve) =>
+    setTimeout(() => resolve(fetchPromises.map(() => null)), 3000),
   )
+  const results = await Promise.race([Promise.all(fetchPromises), timeout])
+  const works = results.filter((w): w is WorkInfo => w !== null)
 
   const title = buildOgTitle(theme)
   const description = buildOgDescription(works)
