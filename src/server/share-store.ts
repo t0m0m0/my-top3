@@ -115,6 +115,12 @@ function validateParams(params: ShareParams): void {
 export type ShareListItem = Required<ShareParams> & {
   id: string
   createdAt: number
+  reactionCount: number
+}
+
+export type ReactionResult = {
+  count: number
+  reacted: boolean
 }
 
 export type ShareListResult = {
@@ -127,12 +133,29 @@ export type ShareListOptions = {
   offset: number
 }
 
+const MAX_CLIENT_ID_LENGTH = 100
+
+function validateClientId(clientId: string): void {
+  if (!clientId) {
+    throw new Error('client_id is required')
+  }
+  if (clientId.length > MAX_CLIENT_ID_LENGTH) {
+    throw new Error(
+      `client_id exceeds maximum length of ${MAX_CLIENT_ID_LENGTH}`,
+    )
+  }
+}
+
 export type ShareStore = {
   save: (params: ShareParams) => string
   get: (id: string) => ShareParams | null
   list: (options: ShareListOptions) => ShareListResult
   delete: (id: string) => boolean
   purgeExpired: () => number
+  addReaction: (shareId: string, clientId: string) => ReactionResult
+  removeReaction: (shareId: string, clientId: string) => ReactionResult
+  getReactionCount: (shareId: string) => number
+  hasReacted: (shareId: string, clientId: string) => boolean
   close: () => void
 }
 
@@ -172,6 +195,16 @@ export function createShareStore(
       ON shares(params_hash) WHERE params_hash != '';
   `)
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS reactions (
+      share_id TEXT NOT NULL,
+      client_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      PRIMARY KEY (share_id, client_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_reactions_share_id ON reactions(share_id);
+  `)
+
   const insertStmt = db.prepare(`
     INSERT INTO shares (id, theme, book_id, music_id, movie_id, params_hash, book_thumb, music_thumb, movie_thumb, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
@@ -200,10 +233,34 @@ export function createShareStore(
   const countStmt = db.prepare(`SELECT COUNT(*) as cnt FROM shares`)
 
   const listStmt = db.prepare(`
-    SELECT id, theme, book_id, music_id, movie_id, book_thumb, music_thumb, movie_thumb, created_at
-    FROM shares
-    ORDER BY created_at DESC
+    SELECT s.id, s.theme, s.book_id, s.music_id, s.movie_id,
+           s.book_thumb, s.music_thumb, s.movie_thumb, s.created_at,
+           COALESCE(r.cnt, 0) as reaction_count
+    FROM shares s
+    LEFT JOIN (SELECT share_id, COUNT(*) as cnt FROM reactions GROUP BY share_id) r
+      ON s.id = r.share_id
+    ORDER BY s.created_at DESC
     LIMIT ? OFFSET ?
+  `)
+
+  const insertReactionStmt = db.prepare(`
+    INSERT OR IGNORE INTO reactions (share_id, client_id) VALUES (?, ?)
+  `)
+
+  const deleteReactionStmt = db.prepare(`
+    DELETE FROM reactions WHERE share_id = ? AND client_id = ?
+  `)
+
+  const countReactionsStmt = db.prepare(`
+    SELECT COUNT(*) as cnt FROM reactions WHERE share_id = ?
+  `)
+
+  const hasReactedStmt = db.prepare(`
+    SELECT 1 FROM reactions WHERE share_id = ? AND client_id = ? LIMIT 1
+  `)
+
+  const deleteReactionsByShareStmt = db.prepare(`
+    DELETE FROM reactions WHERE share_id = ?
   `)
 
   const deleteOldestStmt = db.prepare(`
@@ -306,12 +363,14 @@ export function createShareStore(
       const rows = listStmt.all(options.limit, options.offset) as (ShareRow & {
         id: string
         created_at: number
+        reaction_count: number
       })[]
       return {
         items: rows.map((row) => ({
           ...mapRow(row),
           id: row.id,
           createdAt: row.created_at,
+          reactionCount: row.reaction_count,
         })),
         total: cnt,
       }
@@ -319,6 +378,7 @@ export function createShareStore(
 
     delete(id: string): boolean {
       if (!isValidShareId(id)) return false
+      deleteReactionsByShareStmt.run(id)
       const result = deleteByIdStmt.run(id)
       return result.changes > 0
     },
@@ -327,6 +387,29 @@ export function createShareStore(
       if (ttlSeconds <= 0) return 0
       const result = purgeExpiredStmt.run(ttlSeconds)
       return result.changes
+    },
+
+    addReaction(shareId: string, clientId: string): ReactionResult {
+      validateClientId(clientId)
+      insertReactionStmt.run(shareId, clientId)
+      const { cnt } = countReactionsStmt.get(shareId) as { cnt: number }
+      return { count: cnt, reacted: true }
+    },
+
+    removeReaction(shareId: string, clientId: string): ReactionResult {
+      validateClientId(clientId)
+      deleteReactionStmt.run(shareId, clientId)
+      const { cnt } = countReactionsStmt.get(shareId) as { cnt: number }
+      return { count: cnt, reacted: false }
+    },
+
+    getReactionCount(shareId: string): number {
+      const { cnt } = countReactionsStmt.get(shareId) as { cnt: number }
+      return cnt
+    },
+
+    hasReacted(shareId: string, clientId: string): boolean {
+      return !!hasReactedStmt.get(shareId, clientId)
     },
 
     close(): void {

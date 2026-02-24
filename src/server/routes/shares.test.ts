@@ -380,4 +380,101 @@ describe('shares route', () => {
       expect(res.status).toBe(404)
     })
   })
+
+  describe('POST /:id/reactions', () => {
+    async function createShare() {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+        }),
+      })
+      const json = (await res.json()) as { id: string }
+      return json.id
+    }
+
+    it('adds a reaction and returns count', async () => {
+      const id = await createShare()
+      const res = await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1' }),
+      })
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { count: number; reacted: boolean }
+      }
+      expect(json.ok).toBe(true)
+      expect(json.data.count).toBe(1)
+      expect(json.data.reacted).toBe(true)
+    })
+
+    it('removes a reaction when already reacted (toggle)', async () => {
+      const id = await createShare()
+      // First: add
+      await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1' }),
+      })
+      // Second: toggle off
+      const res = await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1', toggle: true }),
+      })
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { count: number; reacted: boolean }
+      }
+      expect(json.data.count).toBe(0)
+      expect(json.data.reacted).toBe(false)
+    })
+
+    it('returns 400 when clientId is missing', async () => {
+      const id = await createShare()
+      const res = await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('returns 404 for non-existent share', async () => {
+      const res = await app.request('/nonexist/reactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1' }),
+      })
+      expect(res.status).toBe(404)
+    })
+
+    it('includes reactionCount in list response', async () => {
+      const id = await createShare()
+      await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1' }),
+      })
+      await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-2' }),
+      })
+
+      const listRes = await app.request('/')
+      const listJson = (await listRes.json()) as {
+        ok: boolean
+        data: { items: { reactionCount: number }[] }
+      }
+      expect(listJson.data.items[0]!.reactionCount).toBe(2)
+    })
+  })
 })

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useReaction } from '../hooks/useReaction'
 
 const PLACEHOLDER =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="%23e5e7eb"><rect width="80" height="80"/></svg>'
@@ -10,6 +11,7 @@ type Props = {
   musicThumb: string
   movieThumb: string
   createdAt: number
+  reactionCount: number
 }
 
 function Thumbnail({ src, alt }: { src: string; alt: string }) {
@@ -43,8 +45,19 @@ export default function GalleryCard({
   musicThumb,
   movieThumb,
   createdAt,
+  reactionCount: initialReactionCount,
 }: Props) {
   const hasThumbs = bookThumb || musicThumb || movieThumb
+  const { count, reacted, toggleReaction } = useReaction(
+    id,
+    initialReactionCount,
+  )
+
+  const handleReaction = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleReaction()
+  }
 
   return (
     <Link
@@ -91,13 +104,35 @@ export default function GalleryCard({
           </div>
         )}
 
-        {/* Date */}
-        <p
-          className="mt-3 text-xs"
-          style={{ color: 'var(--color-text-secondary)' }}
-        >
-          {formatDate(createdAt)}
-        </p>
+        {/* Footer: Date + Reaction */}
+        <div className="mt-3 flex items-center justify-between">
+          <p
+            className="text-xs"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            {formatDate(createdAt)}
+          </p>
+
+          <button
+            type="button"
+            onClick={handleReaction}
+            aria-label="いいね"
+            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-colors duration-150"
+            style={{
+              color: reacted
+                ? 'var(--color-primary)'
+                : 'var(--color-text-secondary)',
+            }}
+          >
+            <span
+              className="transition-transform duration-150"
+              style={{ transform: reacted ? 'scale(1.2)' : 'scale(1)' }}
+            >
+              {reacted ? '❤️' : '🩵'}
+            </span>
+            <span>{count}</span>
+          </button>
+        </div>
       </div>
     </Link>
   )

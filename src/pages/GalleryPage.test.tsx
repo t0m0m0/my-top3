@@ -28,6 +28,14 @@ beforeEach(() => {
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
+vi.mock('../hooks/useReaction', () => ({
+  useReaction: (_shareId: string, initialCount: number) => ({
+    count: initialCount,
+    reacted: false,
+    toggleReaction: vi.fn(),
+  }),
+}))
+
 const makeFakeShares = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     id: `id-${i}`,
@@ -39,6 +47,7 @@ const makeFakeShares = (count: number) =>
     musicThumb: `https://example.com/music-${i}.jpg`,
     movieThumb: `https://example.com/movie-${i}.jpg`,
     createdAt: 1700000000 - i,
+    reactionCount: 0,
   }))
 
 function renderPage() {
