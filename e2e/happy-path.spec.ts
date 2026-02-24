@@ -122,19 +122,19 @@ test.describe('Happy path', () => {
     // --- Book (default tab) ---
     await searchInput.fill('銀河鉄道')
     await expect(page.getByText(BOOK.title)).toBeVisible()
-    await page.getByRole('button', { name: '推す！💜', exact: true }).click()
+    await page.getByRole('button', { name: '推す！✨', exact: true }).click()
 
     // --- Music ---
     await page.getByRole('tab', { name: /音楽/ }).click()
     await searchInput.fill('Bohemian')
     await expect(page.getByText(MUSIC.title)).toBeVisible()
-    await page.getByRole('button', { name: '推す！💜', exact: true }).click()
+    await page.getByRole('button', { name: '推す！✨', exact: true }).click()
 
     // --- Movie ---
     await page.getByRole('tab', { name: /映画/ }).click()
     await searchInput.fill('千と千尋')
     await expect(page.getByText(MOVIE.title)).toBeVisible()
-    await page.getByRole('button', { name: '推す！💜', exact: true }).click()
+    await page.getByRole('button', { name: '推す！✨', exact: true }).click()
 
     // Click create button
     const createButton = page.getByRole('button', { name: /できた！シェアする/ })
