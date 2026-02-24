@@ -4,29 +4,24 @@ import PageHeader from './PageHeader'
 
 describe('PageHeader', () => {
   it('renders the title', () => {
-    render(<PageHeader title="My No.1s" />)
+    render(<PageHeader title="すきコレ" />)
     expect(
-      screen.getByRole('heading', { level: 1, name: 'My No.1s' }),
+      screen.getByRole('heading', { level: 1, name: 'すきコレ' }),
     ).toBeInTheDocument()
   })
 
   it('renders subtitle when provided', () => {
     render(
-      <PageHeader
-        title="みんなのNo.1s"
-        subtitle="みんなが選んだお気に入りの作品たち"
-      />,
+      <PageHeader title="みんなの推し" subtitle="みんなが選んだ推し作品たち" />,
     )
     expect(
-      screen.getByRole('heading', { level: 1, name: 'みんなのNo.1s' }),
+      screen.getByRole('heading', { level: 1, name: 'みんなの推し' }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText('みんなが選んだお気に入りの作品たち'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('みんなが選んだ推し作品たち')).toBeInTheDocument()
   })
 
   it('does not render subtitle element when not provided', () => {
-    const { container } = render(<PageHeader title="My No.1s" />)
+    const { container } = render(<PageHeader title="すきコレ" />)
     expect(container.querySelector('p')).toBeNull()
   })
 

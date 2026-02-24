@@ -69,10 +69,10 @@ describe('image-layout constants', () => {
   })
 
   describe('CATEGORY_LABELS', () => {
-    it('has uppercase English labels', () => {
-      expect(CATEGORY_LABELS.book).toBe('BOOK')
-      expect(CATEGORY_LABELS.music).toBe('MUSIC')
-      expect(CATEGORY_LABELS.movie).toBe('MOVIE')
+    it('has Japanese labels with emoji', () => {
+      expect(CATEGORY_LABELS.book).toBe('📚 本')
+      expect(CATEGORY_LABELS.music).toBe('🎵 音楽')
+      expect(CATEGORY_LABELS.movie).toBe('🎬 映画')
     })
   })
 

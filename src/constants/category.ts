@@ -7,9 +7,9 @@ export const CATEGORY_LABELS_JA: Record<MediaCategory, string> = {
 }
 
 export const CATEGORY_LABELS_EN: Record<MediaCategory, string> = {
-  book: 'Book',
-  music: 'Music',
-  movie: 'Movie',
+  book: '📚 本',
+  music: '🎵 音楽',
+  movie: '🎬 映画',
 }
 
 export const API_ENDPOINTS: Record<MediaCategory, string> = {

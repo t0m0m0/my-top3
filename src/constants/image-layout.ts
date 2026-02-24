@@ -8,15 +8,15 @@ export const HALF = IMAGE_SIZE / 2
 export const SEP = 2
 
 export const CATEGORY_COLORS: Record<MediaCategory, string> = {
-  book: '#818cf8',
-  music: '#a78bfa',
-  movie: '#fb7185',
+  book: '#c084fc',
+  music: '#f472b6',
+  movie: '#fda4af',
 }
 
 export const CATEGORY_BORDER_COLORS: Record<MediaCategory, string> = {
-  book: 'rgba(129,140,248,0.4)',
-  music: 'rgba(167,139,250,0.4)',
-  movie: 'rgba(251,113,133,0.4)',
+  book: 'rgba(192,132,252,0.4)',
+  music: 'rgba(244,114,182,0.4)',
+  movie: 'rgba(253,164,175,0.4)',
 }
 
 /** @deprecated Use CANVAS_PLACEHOLDER from constants/placeholders instead */
@@ -35,9 +35,9 @@ export const SLOT_LABELS: Record<SlotPosition, string> = {
 }
 
 export const CATEGORY_LABELS: Record<MediaCategory, string> = {
-  book: 'BOOK',
-  music: 'MUSIC',
-  movie: 'MOVIE',
+  book: '📚 本',
+  music: '🎵 音楽',
+  movie: '🎬 映画',
 }
 
 export type SlotStyle = {

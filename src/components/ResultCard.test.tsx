@@ -30,7 +30,7 @@ describe('ResultCard', () => {
     const onSelect = vi.fn()
     const item = createSearchResultItem()
     render(<ResultCard item={item} onSelect={onSelect} />)
-    await user.click(screen.getByText('#1に選ぶ'))
+    await user.click(screen.getByText('推す！💜'))
     expect(onSelect).toHaveBeenCalledWith(item)
   })
 
@@ -47,6 +47,6 @@ describe('ResultCard', () => {
 
   it('shows select button text', () => {
     render(<ResultCard item={createSearchResultItem()} onSelect={vi.fn()} />)
-    expect(screen.getByText('#1に選ぶ')).toBeInTheDocument()
+    expect(screen.getByText('推す！💜')).toBeInTheDocument()
   })
 })

@@ -34,7 +34,7 @@ function SearchPage() {
   const mainStyle = useMemo(
     () => ({
       background:
-        'linear-gradient(180deg, #3730a3 0%, var(--color-primary-dark) 12%, var(--color-bg) 32%, #eef2ff 100%)',
+        'linear-gradient(180deg, #7e22ce 0%, #a855f7 12%, var(--color-bg) 32%, #fdf4ff 100%)',
       paddingBottom: selectionComplete
         ? 'calc(72px + env(safe-area-inset-bottom))'
         : undefined,
@@ -74,13 +74,13 @@ function SearchPage() {
             color: '#fff',
           }}
         >
-          My No.1s
+          すきコレ
         </h1>
         <p
           className="animate-fade-in-up animate-delay-200 relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
           style={{ color: 'rgba(255,255,255,0.9)' }}
         >
-          テーマを決めて、お気に入りの3作品を選ぼう
+          好きな作品を3つ選んで、みんなにシェアしよう 💜
         </p>
         <div className="animate-fade-in-up animate-delay-200 relative mt-3">
           <Link
@@ -92,7 +92,7 @@ function SearchPage() {
               backgroundColor: 'rgba(255,255,255,0.15)',
             }}
           >
-            🎨 みんなのNo.1sを見る →
+            みんなの推しを見る 👀
           </Link>
         </div>
         <div className="animate-fade-in-up animate-delay-400 relative mt-5">

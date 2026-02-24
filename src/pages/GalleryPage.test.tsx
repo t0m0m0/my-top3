@@ -103,7 +103,7 @@ describe('GalleryPage', () => {
     )
     renderPage()
     await waitFor(() => {
-      expect(screen.getByText('まだ作品がありません')).toBeInTheDocument()
+      expect(screen.getByText('まだ投稿がないよ')).toBeInTheDocument()
     })
   })
 
@@ -129,7 +129,7 @@ describe('GalleryPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows "全件表示しました" when all items loaded', async () => {
+  it('shows "ぜんぶ見たよ！" when all items loaded', async () => {
     server.use(
       http.get('/api/shares', () =>
         HttpResponse.json({
@@ -141,7 +141,7 @@ describe('GalleryPage', () => {
 
     renderPage()
     await waitFor(() => expect(screen.getByText('Theme 0')).toBeInTheDocument())
-    expect(screen.getByText('全件表示しました')).toBeInTheDocument()
+    expect(screen.getByText('ぜんぶ見たよ！')).toBeInTheDocument()
   })
 
   it('has a link back to top page', async () => {
@@ -155,7 +155,7 @@ describe('GalleryPage', () => {
     )
     renderPage()
     await waitFor(() => {
-      const link = screen.getByRole('link', { name: /Top3を作成/ })
+      const link = screen.getByRole('link', { name: /作品を選ぶ/ })
       expect(link).toHaveAttribute('href', '/')
     })
   })

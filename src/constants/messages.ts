@@ -14,15 +14,14 @@ export const MESSAGES = {
 
   // UI labels
   UNSELECTED: '未選択',
-  SELECTED_WORKS: '選択中の作品',
-  CREATE_TOP3: 'Top3を作成',
-  CREATE_TOP3_EMOJI: 'Top3を作成 🎉',
-  CREATE_TOP3_CTA: 'Top3を作成する',
-  BACK_TO_TOP: '← トップページに戻る',
-  BACK_TO_TOP_SIMPLE: 'トップページに戻る',
-  DOWNLOAD_IMAGE: '画像をダウンロード',
+  SELECTED_WORKS: 'あなたのセレクト',
+  CREATE_TOP3: 'できた！シェアする 🎨',
+  CREATE_TOP3_EMOJI: 'できた！シェアする 🎉',
+  CREATE_TOP3_CTA: '作品を選ぶ ✨',
+  BACK_TO_TOP: '← 戻る',
+  BACK_TO_TOP_SIMPLE: '戻る',
+  DOWNLOAD_IMAGE: '保存する 📥',
   GENERATING: '生成中...',
   IMAGE_SAVED: '画像を保存しました',
-  NO_WORKS_SELECTED:
-    '作品が選択されていません。トップページから3作品を選んでください。',
+  NO_WORKS_SELECTED: '作品が選ばれていません。トップページから3つ選んでね！',
 } as const

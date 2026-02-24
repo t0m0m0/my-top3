@@ -27,7 +27,7 @@ type ShareButtonsProps = {
 }
 
 function buildShareText(theme?: string, url?: string): string {
-  const base = theme ? `「${theme}」 #MyNo1s` : '#MyNo1s'
+  const base = theme ? `「${theme}」 #すきコレ` : '#すきコレ'
   return url ? `${base}\n${url}` : base
 }
 
@@ -151,7 +151,7 @@ export default function ShareButtons({
 
       // Fallback: text + URL only
       await navigator.share({
-        title: 'My No.1s',
+        title: 'すきコレ',
         text: buildShareText(theme, shareUrl),
         url: shareUrl,
       })

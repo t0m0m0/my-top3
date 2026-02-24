@@ -17,14 +17,14 @@ export default function ThemeHistory({ onSelect }: ThemeHistoryProps) {
     <div
       className="mt-2 rounded-lg p-3"
       style={{ backgroundColor: 'var(--color-surface)' }}
-      aria-label="テーマ履歴"
+      aria-label="お題の履歴"
     >
       <div className="mb-2 flex items-center justify-between">
         <span
           className="text-sm font-medium"
           style={{ color: 'var(--color-text-primary)' }}
         >
-          最近のテーマ
+          最近のお題
         </span>
         <Button
           variant="text"

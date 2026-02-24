@@ -25,11 +25,11 @@ describe('CATEGORY_LABELS_JA', () => {
 })
 
 describe('CATEGORY_LABELS_EN', () => {
-  it('has English labels for all categories', () => {
+  it('has Japanese labels for all categories', () => {
     expect(CATEGORY_LABELS_EN).toEqual({
-      book: 'Book',
-      music: 'Music',
-      movie: 'Movie',
+      book: '📚 本',
+      music: '🎵 音楽',
+      movie: '🎬 映画',
     })
   })
 

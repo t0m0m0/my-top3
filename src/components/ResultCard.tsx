@@ -109,7 +109,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
                 pointerEvents: 'none',
               }}
             >
-              選択済み
+              推した ✨
             </Button>
           ) : (
             <Button
@@ -124,7 +124,7 @@ export default function ResultCard({ item, onSelect }: ResultCardProps) {
               }}
               sx={{ mt: 1, fontSize: '0.8rem', minHeight: 36 }}
             >
-              #1に選ぶ
+              推す！💜
             </Button>
           )}
         </CardContent>

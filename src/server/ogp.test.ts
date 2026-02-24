@@ -22,7 +22,7 @@ const SAMPLE_HTML = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>My No.1s</title>
+    <title>すきコレ</title>
   </head>
   <body>
     <div id="root"></div>
@@ -51,44 +51,44 @@ describe('escapeHtml', () => {
 
 describe('buildOgTitle', () => {
   it('includes theme name and site name', () => {
-    expect(buildOgTitle('夏の思い出')).toBe('夏の思い出 | My No.1s')
+    expect(buildOgTitle('夏の思い出')).toBe('夏の思い出 | すきコレ')
   })
 
   it('returns site name when theme is empty', () => {
-    expect(buildOgTitle('')).toBe('My No.1s')
+    expect(buildOgTitle('')).toBe('すきコレ')
   })
 })
 
 describe('buildOgDescription', () => {
   it('returns default description when no works', () => {
     expect(buildOgDescription([])).toBe(
-      '本・音楽・映画からあなたのNo.1を選んで、みんなにシェアしよう！',
+      '好きな作品を3つ選んで、みんなにシェアしよう！',
     )
   })
 
   it('joins work titles with slash separator', () => {
     const works = [
-      { title: '1Q84', category: '📖Book' },
-      { title: 'Bohemian Rhapsody', category: '🎵Music' },
+      { title: '1Q84', category: '📚 本' },
+      { title: 'Bohemian Rhapsody', category: '🎵 音楽' },
     ]
     expect(buildOgDescription(works)).toBe(
-      '📖Book: 1Q84 / 🎵Music: Bohemian Rhapsody',
+      '📚 本: 1Q84 / 🎵 音楽: Bohemian Rhapsody',
     )
   })
 
   it('handles single work', () => {
-    const works = [{ title: 'Inception', category: '🎬Movie' }]
-    expect(buildOgDescription(works)).toBe('🎬Movie: Inception')
+    const works = [{ title: 'Inception', category: '🎬 映画' }]
+    expect(buildOgDescription(works)).toBe('🎬 映画: Inception')
   })
 
   it('handles all three works', () => {
     const works = [
-      { title: '1Q84', category: '📖Book' },
-      { title: 'Shape of You', category: '🎵Music' },
-      { title: 'Inception', category: '🎬Movie' },
+      { title: '1Q84', category: '📚 本' },
+      { title: 'Shape of You', category: '🎵 音楽' },
+      { title: 'Inception', category: '🎬 映画' },
     ]
     expect(buildOgDescription(works)).toBe(
-      '📖Book: 1Q84 / 🎵Music: Shape of You / 🎬Movie: Inception',
+      '📚 本: 1Q84 / 🎵 音楽: Shape of You / 🎬 映画: Inception',
     )
   })
 })
@@ -96,8 +96,8 @@ describe('buildOgDescription', () => {
 describe('buildMetaTags', () => {
   it('generates all required OGP and Twitter meta tags', () => {
     const result = buildMetaTags({
-      title: 'テスト | My No.1s',
-      description: '📖Book: 1Q84',
+      title: 'テスト | すきコレ',
+      description: '📚 本: 1Q84',
       url: 'https://example.com/my-no1s?theme=test',
     })
 
@@ -153,7 +153,7 @@ describe('injectOgpTags', () => {
     )
 
     expect(result).toContain('og:title')
-    expect(result).toContain('夏の思い出 | My No.1s')
+    expect(result).toContain('夏の思い出 | すきコレ')
     expect(result).toContain('</head>')
     // Meta tags should be before </head>
     const ogIndex = result.indexOf('og:title')
@@ -169,7 +169,7 @@ describe('injectOgpTags', () => {
       params,
     )
 
-    expect(result).toContain('content="My No.1s"')
+    expect(result).toContain('content="すきコレ"')
   })
 
   it('truncates theme to 50 characters', async () => {
@@ -182,7 +182,7 @@ describe('injectOgpTags', () => {
     )
 
     const truncated = 'あ'.repeat(50)
-    expect(result).toContain(`${truncated} | My No.1s`)
+    expect(result).toContain(`${truncated} | すきコレ`)
   })
 
   it('fetches book title and includes it in description', async () => {
@@ -211,7 +211,7 @@ describe('injectOgpTags', () => {
       params,
     )
 
-    expect(result).toContain('📖Book: 1Q84')
+    expect(result).toContain('📚 本: 1Q84')
     expect(getBookById).toHaveBeenCalledWith('test-key', 'book1')
   })
 
@@ -270,9 +270,9 @@ describe('injectOgpTags', () => {
       params,
     )
 
-    expect(result).toContain('📖Book: 1Q84')
-    expect(result).toContain('🎵Music: Shape of You')
-    expect(result).toContain('🎬Movie: Inception')
+    expect(result).toContain('📚 本: 1Q84')
+    expect(result).toContain('🎵 音楽: Shape of You')
+    expect(result).toContain('🎬 映画: Inception')
   })
 
   it('gracefully handles API errors', async () => {
@@ -296,10 +296,8 @@ describe('injectOgpTags', () => {
 
     // Should still inject OGP tags, just with default description
     expect(result).toContain('og:title')
-    expect(result).toContain('テスト | My No.1s')
-    expect(result).toContain(
-      '本・音楽・映画からあなたのNo.1を選んで、みんなにシェアしよう！',
-    )
+    expect(result).toContain('テスト | すきコレ')
+    expect(result).toContain('好きな作品を3つ選んで、みんなにシェアしよう！')
   })
 
   it('skips fetching when API keys are not set', async () => {

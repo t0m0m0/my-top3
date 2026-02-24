@@ -21,7 +21,7 @@ describe('SearchBar', () => {
   it('shows default placeholder', () => {
     render(<SearchBar value="" onChange={vi.fn()} />)
     expect(
-      screen.getByPlaceholderText('作品名やアーティスト名で検索'),
+      screen.getByPlaceholderText('好きな作品を検索 🔍'),
     ).toBeInTheDocument()
   })
 

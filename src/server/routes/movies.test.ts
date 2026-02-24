@@ -33,7 +33,7 @@ describe('movies routes', () => {
             {
               id: 'v1',
               category: 'movie',
-              title: 'Movie',
+              title: '🎬 映画',
               subtitle: 'Director',
               thumbnailUrl: '',
               externalUrl: '',
@@ -72,7 +72,7 @@ describe('movies routes', () => {
         data: {
           id: 'v1',
           category: 'movie',
-          title: 'Movie',
+          title: '🎬 映画',
           subtitle: 'Director',
           thumbnailUrl: '',
           externalUrl: '',

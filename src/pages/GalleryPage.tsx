@@ -18,13 +18,13 @@ export default function GalleryPage() {
       className="min-h-screen"
       style={{
         background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #eef2ff 50%, #e0e7ff 100%)',
+          'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 50%, #fce7f3 100%)',
       }}
     >
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
         <PageHeader
-          title="みんなのNo.1s"
-          subtitle="みんなが選んだお気に入りの作品たち"
+          title="みんなの推し"
+          subtitle="みんなが選んだ推し作品たち"
         />
 
         {/* Loading */}
@@ -39,7 +39,7 @@ export default function GalleryPage() {
           <div className="mt-8 text-center">
             <ErrorMessage message={error}>
               <Button component={Link} to="/" variant="outlined" size="small">
-                Top3を作成する
+                作品を選ぶ ✨
               </Button>
             </ErrorMessage>
           </div>
@@ -52,7 +52,7 @@ export default function GalleryPage() {
               className="text-sm"
               style={{ color: 'var(--color-text-secondary)' }}
             >
-              まだ作品がありません
+              まだ投稿がないよ
             </p>
             <Button
               component={Link}
@@ -62,7 +62,7 @@ export default function GalleryPage() {
               className="mt-4"
               sx={{ mt: 2 }}
             >
-              Top3を作成する
+              作品を選ぶ ✨
             </Button>
           </div>
         )}
@@ -97,7 +97,7 @@ export default function GalleryPage() {
                   className="text-sm"
                   style={{ color: 'var(--color-text-secondary)' }}
                 >
-                  全件表示しました
+                  ぜんぶ見たよ！
                 </p>
               </div>
             )}
@@ -106,7 +106,7 @@ export default function GalleryPage() {
 
         {/* Navigation */}
         <div className="mt-8 text-center">
-          <PillLinkButton to="/">← Top3を作成する</PillLinkButton>
+          <PillLinkButton to="/">← 作品を選ぶ ✨</PillLinkButton>
         </div>
       </div>
 

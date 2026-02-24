@@ -26,44 +26,40 @@ describe('ThemeInput', () => {
   it('shows error when over limit', () => {
     const longText = 'a'.repeat(51)
     render(<ThemeInput value={longText} onChange={vi.fn()} />)
-    expect(
-      screen.getByText(/テーマは50文字以内で入力してください/),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/お題は50文字以内で入力してね/)).toBeInTheDocument()
   })
 })
 
 it('renders suggestion chips', () => {
   render(<ThemeInput value="" onChange={vi.fn()} />)
-  expect(screen.getByText('夏に読みたい')).toBeInTheDocument()
-  expect(screen.getByText('青春')).toBeInTheDocument()
-  expect(
-    screen.getByText(`${new Date().getFullYear()}年ベスト`),
-  ).toBeInTheDocument()
+  expect(screen.getByText('推し')).toBeInTheDocument()
+  expect(screen.getByText('泣ける作品')).toBeInTheDocument()
+  expect(screen.getByText('人生変わった')).toBeInTheDocument()
 })
 
 it('calls onChange when a suggestion chip is clicked', async () => {
   const user = userEvent.setup()
   const onChange = vi.fn()
   render(<ThemeInput value="" onChange={onChange} />)
-  await user.click(screen.getByText('青春'))
-  expect(onChange).toHaveBeenCalledWith('青春')
+  await user.click(screen.getByText('泣ける作品'))
+  expect(onChange).toHaveBeenCalledWith('泣ける作品')
 })
 
 it('hides suggestion chips when value is non-empty', () => {
   render(<ThemeInput value="何か" onChange={vi.fn()} />)
-  expect(screen.queryByText('夏に読みたい')).not.toBeInTheDocument()
+  expect(screen.queryByText('推し')).not.toBeInTheDocument()
 })
 
 it('shows guide text when value is empty', () => {
   render(<ThemeInput value="" onChange={vi.fn()} />)
   expect(
-    screen.getByText('テーマは後からでもOK！まず好きな作品を検索しよう'),
+    screen.getByText('お題は後からでもOK！まず好きな作品を教えて 💜'),
   ).toBeInTheDocument()
 })
 
 it('hides guide text when value is non-empty', () => {
   render(<ThemeInput value="何か" onChange={vi.fn()} />)
   expect(
-    screen.queryByText('テーマは後からでもOK！まず好きな作品を検索しよう'),
+    screen.queryByText('お題は後からでもOK！まず好きな作品を教えて 💜'),
   ).not.toBeInTheDocument()
 })

@@ -2,11 +2,7 @@ import TextField from '@mui/material/TextField'
 import Chip from '@mui/material/Chip'
 import { MAX_THEME_LENGTH } from '../hooks/useTheme'
 
-const THEME_SUGGESTIONS = [
-  '夏に読みたい',
-  '青春',
-  `${new Date().getFullYear()}年ベスト`,
-]
+const THEME_SUGGESTIONS = ['推し', '泣ける作品', '人生変わった']
 
 type ThemeInputProps = {
   value: string
@@ -21,13 +17,13 @@ function ThemeInput({ value, onChange }: ThemeInputProps) {
     <div>
       <TextField
         fullWidth
-        label="テーマ"
-        placeholder="例: 雨の日に楽しむ3作品"
+        label="お題"
+        placeholder="例: 推し、泣ける作品"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         helperText={
           isOverLimit
-            ? `テーマは${MAX_THEME_LENGTH}文字以内で入力してください (${value.length} / ${MAX_THEME_LENGTH})`
+            ? `お題は${MAX_THEME_LENGTH}文字以内で入力してね (${value.length} / ${MAX_THEME_LENGTH})`
             : `${value.length} / ${MAX_THEME_LENGTH}`
         }
         error={isOverLimit}
@@ -45,7 +41,7 @@ function ThemeInput({ value, onChange }: ThemeInputProps) {
             className="mt-2 text-xs"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            テーマは後からでもOK！まず好きな作品を検索しよう
+            お題は後からでもOK！まず好きな作品を教えて 💜
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {THEME_SUGGESTIONS.map((suggestion) => (
