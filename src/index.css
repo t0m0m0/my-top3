@@ -24,6 +24,17 @@
   --color-text-secondary: #8c7e72;
   --color-border: #e8e0d8;
 
+  /* Canvas - Dark warm background for share images */
+  --color-canvas-dark: #2a2420;
+
+  /* Rank Badge */
+  --color-rank-badge: #e8d5b8;
+  --color-rank-text: #5c4a2e;
+
+  /* Card radius */
+  --radius-card: 20px;
+  --radius-card-inner: 18px;
+
   /* Fonts */
   --font-display:
     'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
@@ -47,14 +58,19 @@ body {
 /* Glass Card utility */
 .glass-card {
   backdrop-filter: blur(12px);
-  background: rgba(255, 252, 248, 0.85);
-  border: 1px solid rgba(160, 132, 94, 0.1);
+  background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 10%, transparent);
   box-shadow: var(--shadow-card);
 }
 
 /* Gradient text utility */
 .gradient-text {
-  background: linear-gradient(135deg, #7c6544 0%, #a0845e 50%, #c4a882 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-dark) 0%,
+    var(--color-primary) 50%,
+    var(--color-primary-light) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -75,7 +91,7 @@ body {
   background: linear-gradient(
     135deg,
     var(--color-border) 0%,
-    #d4829c 50%,
+    var(--color-secondary) 50%,
     var(--color-border) 100%
   );
   mask:

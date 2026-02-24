@@ -23,7 +23,8 @@ export default function StepGuide() {
               <div
                 className="flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12"
                 style={{
-                  backgroundColor: 'rgba(160, 132, 94, 0.15)',
+                  backgroundColor:
+                    'color-mix(in srgb, var(--color-primary) 15%, transparent)',
                 }}
               >
                 <Icon
@@ -36,13 +37,16 @@ export default function StepGuide() {
               </div>
               <span
                 className="text-xs font-bold sm:text-sm"
-                style={{ color: '#3d3028' }}
+                style={{ color: 'var(--color-text-primary)' }}
               >
                 {step.number}
               </span>
               <span
                 className="text-xs sm:text-sm"
-                style={{ color: 'rgba(61, 48, 40, 0.8)' }}
+                style={{
+                  color:
+                    'color-mix(in srgb, var(--color-text-primary) 80%, transparent)',
+                }}
               >
                 {step.label}
               </span>
@@ -50,7 +54,8 @@ export default function StepGuide() {
             {i < steps.length - 1 && (
               <ArrowForwardIcon
                 sx={{
-                  color: 'rgba(160, 132, 94, 0.5)',
+                  color:
+                    'color-mix(in srgb, var(--color-primary) 50%, transparent)',
                   fontSize: { xs: 16, sm: 20 },
                 }}
                 aria-hidden

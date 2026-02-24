@@ -1,4 +1,5 @@
 import type { MediaCategory } from '../types/common'
+import { PRIMARY_LIGHT, SECONDARY, ACCENT } from './image-colors'
 
 export type SlotPosition = 'top' | 'bottom-left' | 'bottom-right'
 export type LayoutConfig = Record<SlotPosition, MediaCategory>
@@ -8,15 +9,15 @@ export const HALF = IMAGE_SIZE / 2
 export const SEP = 2
 
 export const CATEGORY_COLORS: Record<MediaCategory, string> = {
-  book: '#c4a882',
-  music: '#d4829c',
-  movie: '#7dad8e',
+  book: PRIMARY_LIGHT,
+  music: SECONDARY,
+  movie: ACCENT,
 }
 
 export const CATEGORY_BORDER_COLORS: Record<MediaCategory, string> = {
-  book: 'rgba(196, 168, 130, 0.4)',
-  music: 'rgba(212, 130, 156, 0.4)',
-  movie: 'rgba(125, 173, 142, 0.4)',
+  book: `${PRIMARY_LIGHT}66`,
+  music: `${SECONDARY}66`,
+  movie: `${ACCENT}66`,
 }
 
 /** @deprecated Use CANVAS_PLACEHOLDER from constants/placeholders instead */
