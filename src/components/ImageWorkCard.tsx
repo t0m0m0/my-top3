@@ -10,12 +10,12 @@ export type ImageWorkCardProps = {
 
 export const COLORS = {
   textPrimary: '#fff',
-  textSecondary: '#d1d5db',
-  textMuted: '#9ca3af',
-  textSubheading: '#e5e7eb',
-  badgeBg: '#1f2937',
-  rankBadgeBg: '#facc15',
-  canvasBg: '#111827',
+  textSecondary: '#e8ddd0',
+  textMuted: '#c4b5a5',
+  textSubheading: '#f0e8de',
+  badgeBg: '#3d3028',
+  rankBadgeBg: '#e8d5b8',
+  canvasBg: '#2a2420',
 } as const
 
 const TRUNCATED_TEXT: React.CSSProperties = {
@@ -62,7 +62,7 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Category label badge */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #312e81, #1e1b4b)',
+          background: 'linear-gradient(135deg, #3d3028, #2a2420)',
           color: COLORS.textPrimary,
           fontSize: 15,
           fontWeight: 700,
@@ -79,8 +79,8 @@ export function ImageWorkCard({ item, label }: ImageWorkCardProps) {
       {/* Rank badge - larger, gold, with glow */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #c4a882, #a0845e, #c4a882)',
-          color: '#78350f',
+          background: 'linear-gradient(135deg, #e8d5b8, #c4a882, #e8d5b8)',
+          color: '#5c4a2e',
           fontSize: 18,
           fontWeight: 800,
           width: 48,
