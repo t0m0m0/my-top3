@@ -26,9 +26,7 @@ describe('SearchResults', () => {
 
   it('shows emotional prompt with emoji when query is empty', () => {
     render(<SearchResults {...defaultProps} query="" />)
-    expect(
-      screen.getByText('お気に入りの作品を検索してみよう'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('好きな作品を教えて！')).toBeInTheDocument()
   })
 
   it('shows no results with suggestion message', () => {
@@ -89,7 +87,7 @@ describe('SearchResults', () => {
         hasMore={false}
       />,
     )
-    expect(screen.getByText('全件表示しました')).toBeInTheDocument()
+    expect(screen.getByText('ぜんぶ見たよ！')).toBeInTheDocument()
   })
 
   it('uses responsive grid layout (1-col mobile, 2-col sm+)', () => {

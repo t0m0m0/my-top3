@@ -52,13 +52,13 @@ export default function Top3Content({ params, existingShareId }: Props) {
         className="min-h-screen"
         style={{
           background:
-            'linear-gradient(180deg, var(--color-bg) 0%, #eef2ff 100%)',
+            'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 100%)',
         }}
       >
         <div className="mx-auto max-w-4xl px-3 py-4 text-center sm:px-4 sm:py-6 lg:py-8">
           <ErrorMessage message="作品が選択されていません。トップページから3作品を選んでください。">
             <Button component={Link} to="/" variant="outlined" size="small">
-              Top3を作成する
+              作品を選ぶ ✨
             </Button>
           </ErrorMessage>
         </div>
@@ -71,11 +71,11 @@ export default function Top3Content({ params, existingShareId }: Props) {
       className="min-h-screen"
       style={{
         background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #eef2ff 50%, #e0e7ff 100%)',
+          'linear-gradient(180deg, var(--color-bg) 0%, #fdf4ff 50%, #fce7f3 100%)',
       }}
     >
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        <PageHeader title="My No.1s" />
+        <PageHeader title="すきコレ" />
 
         {/* Theme display with decorative quotes via CSS pseudo-elements */}
         {params.theme && (
@@ -95,7 +95,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
               work={book.data}
               loading={book.loading}
               error={book.error}
-              label="BOOK"
+              label="📚 本"
               onRetry={book.error ? book.retry : undefined}
             />
           </div>
@@ -104,7 +104,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
               work={music.data}
               loading={music.loading}
               error={music.error}
-              label="MUSIC"
+              label="🎵 音楽"
               onRetry={music.error ? music.retry : undefined}
             />
           </div>
@@ -113,7 +113,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
               work={movie.data}
               loading={movie.loading}
               error={movie.error}
-              label="MOVIE"
+              label="🎬 映画"
               onRetry={movie.error ? movie.retry : undefined}
             />
           </div>
@@ -147,11 +147,9 @@ export default function Top3Content({ params, existingShareId }: Props) {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <PillLinkButton to={buildEditUrl(params)}>
-            ← トップページに戻る
-          </PillLinkButton>
+          <PillLinkButton to={buildEditUrl(params)}>← 戻る</PillLinkButton>
           <PillLinkButton to="/gallery" color="secondary">
-            🎨 みんなのNo.1s
+            🎨 みんなの推し
           </PillLinkButton>
         </div>
       </div>

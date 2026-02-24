@@ -174,9 +174,9 @@ describe('Top3Image', () => {
         />,
       )
       // Category labels appear in both LayoutSelector toggles and image slots
-      expect(screen.getAllByText('BOOK').length).toBeGreaterThanOrEqual(1)
-      expect(screen.getAllByText('MUSIC').length).toBeGreaterThanOrEqual(1)
-      expect(screen.getAllByText('MOVIE').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('📚 本').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('🎵 音楽').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('🎬 映画').length).toBeGreaterThanOrEqual(1)
     })
 
     it('does not display #1 badges', () => {
@@ -191,7 +191,7 @@ describe('Top3Image', () => {
       expect(screen.queryByText('#1')).not.toBeInTheDocument()
     })
 
-    it('does not display My No.1s title', () => {
+    it('displays すきコレ watermark', () => {
       render(
         <Top3Image
           theme=""
@@ -200,7 +200,7 @@ describe('Top3Image', () => {
           movie={mockMovie}
         />,
       )
-      expect(screen.queryByText('My No.1s')).not.toBeInTheDocument()
+      expect(screen.getByText('すきコレ')).toBeInTheDocument()
     })
 
     it('shows download button', () => {
@@ -212,7 +212,7 @@ describe('Top3Image', () => {
           movie={mockMovie}
         />,
       )
-      expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
+      expect(screen.getByText('保存する 📥')).toBeInTheDocument()
     })
 
     it('handles null items gracefully with fallback', () => {
@@ -345,7 +345,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(html2canvas).toHaveBeenCalledTimes(1)
@@ -375,7 +375,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(html2canvas).toHaveBeenCalled()
@@ -399,7 +399,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(html2canvas).toHaveBeenCalled()
@@ -430,7 +430,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(screen.getByText('生成中...')).toBeInTheDocument()
@@ -440,11 +440,9 @@ describe('Top3Image', () => {
       resolveCanvas(createMockCanvas() as unknown as HTMLCanvasElement)
 
       await waitFor(() => {
-        expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
+        expect(screen.getByText('保存する 📥')).toBeInTheDocument()
       })
-      expect(
-        screen.getByRole('button', { name: /画像をダウンロード/ }),
-      ).toBeEnabled()
+      expect(screen.getByRole('button', { name: /保存する 📥/ })).toBeEnabled()
     })
 
     it('shows error when toBlob returns null', async () => {
@@ -464,7 +462,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(
@@ -491,7 +489,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(
@@ -517,7 +515,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(
@@ -542,14 +540,12 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
-        expect(screen.getByText('画像をダウンロード')).toBeInTheDocument()
+        expect(screen.getByText('保存する 📥')).toBeInTheDocument()
       })
-      expect(
-        screen.getByRole('button', { name: /画像をダウンロード/ }),
-      ).toBeEnabled()
+      expect(screen.getByRole('button', { name: /保存する 📥/ })).toBeEnabled()
     })
 
     it('clears previous error on new download attempt', async () => {
@@ -566,7 +562,7 @@ describe('Top3Image', () => {
         />,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(
@@ -580,7 +576,7 @@ describe('Top3Image', () => {
         createMockCanvas() as unknown as HTMLCanvasElement,
       )
 
-      fireEvent.click(screen.getByText('画像をダウンロード'))
+      fireEvent.click(screen.getByText('保存する 📥'))
 
       await waitFor(() => {
         expect(

@@ -7,13 +7,21 @@ import type { MediaCategory } from '../types/common'
 import type { ReactElement } from 'react'
 
 const TABS: { label: string; value: MediaCategory; icon: ReactElement }[] = [
-  { label: 'Book', value: 'book', icon: <MenuBookOutlined fontSize="small" /> },
   {
-    label: 'Music',
+    label: '📚 本',
+    value: 'book',
+    icon: <MenuBookOutlined fontSize="small" />,
+  },
+  {
+    label: '🎵 音楽',
     value: 'music',
     icon: <MusicNoteOutlined fontSize="small" />,
   },
-  { label: 'Movie', value: 'movie', icon: <MovieOutlined fontSize="small" /> },
+  {
+    label: '🎬 映画',
+    value: 'movie',
+    icon: <MovieOutlined fontSize="small" />,
+  },
 ]
 
 type TabSwitcherProps = {

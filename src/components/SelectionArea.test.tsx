@@ -60,9 +60,9 @@ describe('SelectionArea — 基本表示', () => {
     expect(slots.length).toBeGreaterThanOrEqual(3)
   })
 
-  it('未完了時は「Top3を作成」ボタンを表示しない', () => {
+  it('未完了時は「できた！シェアする」ボタンを表示しない', () => {
     render(<SelectionArea theme="" />)
-    expect(screen.queryByText('Top3を作成')).not.toBeInTheDocument()
+    expect(screen.queryByText('できた！シェアする 🎨')).not.toBeInTheDocument()
   })
 
   it('デスクトップ用の横並びスロットコンテナがある', () => {
@@ -80,7 +80,7 @@ describe('SelectionArea — スロットクリック', () => {
     const user = userEvent.setup()
     const onSlotClick = vi.fn()
     render(<SelectionArea theme="" onSlotClick={onSlotClick} />)
-    const bookSlots = screen.getAllByRole('button', { name: /Book.*選ぶ/ })
+    const bookSlots = screen.getAllByRole('button', { name: /📚 本.*選ぶ/ })
     await user.click(bookSlots[0])
     expect(onSlotClick).toHaveBeenCalledWith('book')
   })
@@ -93,7 +93,7 @@ describe('SelectionArea — スロットクリック', () => {
     const user = userEvent.setup()
     render(<SelectionArea theme="" />)
     const removeButtons = screen.getAllByRole('button', {
-      name: /Bookの選択を解除/,
+      name: /📚 本の選択を解除/,
     })
     await user.click(removeButtons[0])
     expect(mockContext.deselectItem).toHaveBeenCalledWith('book')
@@ -106,7 +106,7 @@ describe('SelectionArea — スロットクリック', () => {
 describe('SelectionArea — モバイル折りたたみ', () => {
   it('未選択時に折りたたみヘッダーと進捗ドットを表示する', () => {
     render(<SelectionArea theme="" />)
-    expect(screen.getByText('選択中 0/3')).toBeInTheDocument()
+    expect(screen.getByText('セレクト 0/3')).toBeInTheDocument()
     expect(screen.getByText('作品を選ぼう')).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /選択エリアを展開/ }),
@@ -130,7 +130,7 @@ describe('SelectionArea — モバイル折りたたみ', () => {
       selection: { book: bookItem, music: null, movie: null },
     }
     render(<SelectionArea theme="" />)
-    expect(screen.getByText('選択中 1/3')).toBeInTheDocument()
+    expect(screen.getByText('セレクト 1/3')).toBeInTheDocument()
     // ヘッダー + フローティングボタン両方に表示される
     const labels = screen.getAllByText(/あと2つ選ぼう/)
     expect(labels.length).toBeGreaterThanOrEqual(1)
@@ -142,7 +142,7 @@ describe('SelectionArea — モバイル折りたたみ', () => {
       selection: { book: bookItem, music: musicItem, movie: null },
     }
     render(<SelectionArea theme="" />)
-    expect(screen.getByText('選択中 2/3')).toBeInTheDocument()
+    expect(screen.getByText('セレクト 2/3')).toBeInTheDocument()
     const labels = screen.getAllByText(/あと1つ選ぼう/)
     expect(labels.length).toBeGreaterThanOrEqual(1)
   })
@@ -154,7 +154,7 @@ describe('SelectionArea — モバイル折りたたみ', () => {
       isComplete: true,
     }
     render(<SelectionArea theme="" />)
-    expect(screen.getByText('選択中 3/3')).toBeInTheDocument()
+    expect(screen.getByText('セレクト 3/3')).toBeInTheDocument()
     expect(screen.getByText('準備完了！')).toBeInTheDocument()
   })
 
@@ -176,7 +176,7 @@ describe('SelectionArea — フローティングボタン', () => {
   it('未選択時はフローティングボタンを表示しない', () => {
     render(<SelectionArea theme="" />)
     expect(screen.queryByText(/あと.*つ選ぼう/)).not.toBeInTheDocument()
-    expect(screen.queryByText('Top3を作成 🎉')).not.toBeInTheDocument()
+    expect(screen.queryByText('できた！シェアする 🎉')).not.toBeInTheDocument()
   })
 
   it('1つ選択時に disabled のフローティングボタン「あと2つ選ぼう」を表示する', () => {
@@ -205,7 +205,7 @@ describe('SelectionArea — フローティングボタン', () => {
     expect(floatingBtn).toBeDisabled()
   })
 
-  it('3つ揃うと「Top3を作成 🎉」ボタンが有効化される', () => {
+  it('3つ揃うと「できた！シェアする 🎉」ボタンが有効化される', () => {
     mockContext = {
       ...mockContext,
       selection: { book: bookItem, music: musicItem, movie: movieItem },
@@ -213,7 +213,7 @@ describe('SelectionArea — フローティングボタン', () => {
     }
     render(<SelectionArea theme="" />)
     const createBtn = screen.getByRole('button', {
-      name: 'Top3を作成 🎉',
+      name: 'できた！シェアする 🎉',
     })
     expect(createBtn).toBeEnabled()
   })
@@ -223,7 +223,7 @@ describe('SelectionArea — フローティングボタン', () => {
 // デスクトップ完了時
 // ====================================
 describe('SelectionArea — デスクトップ完了時', () => {
-  it('3つ揃うとデスクトップに「Top3を作成」ボタンを表示する', () => {
+  it('3つ揃うとデスクトップに「できた！シェアする」ボタンを表示する', () => {
     mockContext = {
       ...mockContext,
       selection: { book: bookItem, music: musicItem, movie: movieItem },
@@ -231,7 +231,7 @@ describe('SelectionArea — デスクトップ完了時', () => {
     }
     render(<SelectionArea theme="" />)
     // Desktop button (not emoji version)
-    expect(screen.getByText('Top3を作成')).toBeInTheDocument()
+    expect(screen.getByText('できた！シェアする 🎨')).toBeInTheDocument()
   })
 
   it('選択済み作品のタイトルが表示される', () => {

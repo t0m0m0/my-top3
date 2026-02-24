@@ -56,7 +56,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
     await user.type(input, '村上春樹')
 
     // Wait for debounce + API response
@@ -103,7 +103,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
 
     // Search in Book tab
     await user.type(input, 'test')
@@ -115,7 +115,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
     )
 
     // Switch to Music tab
-    await user.click(screen.getByRole('tab', { name: /Music/ }))
+    await user.click(screen.getByRole('tab', { name: /音楽/ }))
 
     // Input should be empty for the new tab
     expect(input).toHaveValue('')
@@ -155,7 +155,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
     await user.type(input, 'テスト')
 
     await waitFor(
@@ -166,11 +166,11 @@ describe('SearchPage integration (no mocked hooks)', () => {
     )
 
     // Click the select button
-    await user.click(screen.getByRole('button', { name: '#1に選ぶ' }))
+    await user.click(screen.getByRole('button', { name: '推す！💜' }))
 
-    // The card should now show "選択済み"
+    // The card should now show "推した ✨"
     await waitFor(() => {
-      expect(screen.getByText('選択済み')).toBeInTheDocument()
+      expect(screen.getByText('推した ✨')).toBeInTheDocument()
     })
 
     // The selection area should show the selected work title
@@ -189,7 +189,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
     await user.type(input, 'error test')
 
     await waitFor(

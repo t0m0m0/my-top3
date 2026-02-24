@@ -12,7 +12,7 @@ describe('MobileCollapsedBar', () => {
         onToggle={vi.fn()}
       />,
     )
-    expect(screen.getByText('選択中 0/3')).toBeInTheDocument()
+    expect(screen.getByText('セレクト 0/3')).toBeInTheDocument()
     expect(screen.getByText('作品を選ぼう')).toBeInTheDocument()
   })
 
@@ -24,7 +24,7 @@ describe('MobileCollapsedBar', () => {
         onToggle={vi.fn()}
       />,
     )
-    expect(screen.getByText('選択中 1/3')).toBeInTheDocument()
+    expect(screen.getByText('セレクト 1/3')).toBeInTheDocument()
     expect(screen.getByText('あと2つ選ぼう')).toBeInTheDocument()
   })
 

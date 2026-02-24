@@ -50,7 +50,7 @@ function SelectionArea({
             className="text-sm font-bold"
             style={{ color: 'var(--color-primary-dark)' }}
           >
-            選択中の作品
+            あなたのセレクト
           </span>
           <span
             className="text-xs font-semibold"
@@ -73,7 +73,7 @@ function SelectionArea({
         {isComplete && (
           <div className="mt-3 text-center">
             <Button variant="contained" onClick={handleCreate} size="medium">
-              Top3を作成
+              できた！シェアする 🎨
             </Button>
           </div>
         )}
@@ -132,7 +132,7 @@ function SelectionArea({
             }}
           >
             {isComplete ? (
-              'Top3を作成 🎉'
+              'できた！シェアする 🎉'
             ) : (
               <span className="flex items-center gap-2">
                 あと{3 - selectedCount}つ選ぼう

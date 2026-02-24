@@ -22,9 +22,9 @@ describe('SlotCard', () => {
       />,
     )
     expect(screen.getByText('未選択')).toBeInTheDocument()
-    expect(screen.getByText('Book')).toBeInTheDocument()
+    expect(screen.getByText('📚 本')).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: /Bookを選ぶ/ }),
+      screen.getByRole('button', { name: /📚 本を選ぶ/ }),
     ).toBeInTheDocument()
   })
 
@@ -39,7 +39,7 @@ describe('SlotCard', () => {
         onSlotClick={onSlotClick}
       />,
     )
-    await user.click(screen.getByRole('button', { name: /Musicを選ぶ/ }))
+    await user.click(screen.getByRole('button', { name: /🎵 音楽を選ぶ/ }))
     expect(onSlotClick).toHaveBeenCalledWith('music')
   })
 
@@ -67,7 +67,7 @@ describe('SlotCard', () => {
         onSlotClick={vi.fn()}
       />,
     )
-    await user.click(screen.getByRole('button', { name: /Bookの選択を解除/ }))
+    await user.click(screen.getByRole('button', { name: /📚 本の選択を解除/ }))
     expect(onDeselect).toHaveBeenCalledWith('book')
   })
 })

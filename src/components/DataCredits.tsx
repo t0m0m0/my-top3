@@ -15,10 +15,10 @@ function DataCredits() {
         }}
       >
         <p
-          className="mb-3 text-xs font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--color-text-secondary)' }}
+          className="mb-3 text-[0.65rem] font-medium uppercase tracking-wider"
+          style={{ color: 'var(--color-text-secondary)', opacity: 0.6 }}
         >
-          Data Credits
+          credits
         </p>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">

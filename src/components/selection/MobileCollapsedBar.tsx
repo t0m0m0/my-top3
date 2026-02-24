@@ -34,7 +34,7 @@ export function MobileCollapsedBar({
           className="text-sm font-bold"
           style={{ color: 'var(--color-primary-dark)' }}
         >
-          選択中 {selectedCount}/3
+          セレクト {selectedCount}/3
         </span>
         <span
           className="text-xs"

@@ -148,7 +148,7 @@ function Top3Image({
                   textShadow: '0 1px 4px rgba(0,0,0,0.5)',
                 }}
               >
-                my-no1s.app
+                すきコレ
               </span>
               <div
                 style={{
@@ -181,7 +181,7 @@ function Top3Image({
           onClick={handleDownload}
           disabled={isGenerating}
         >
-          {isGenerating ? '生成中...' : '画像をダウンロード'}
+          {isGenerating ? '生成中...' : '保存する 📥'}
         </Button>
       </div>
 

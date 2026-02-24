@@ -134,8 +134,8 @@ describe('ShareButtons', () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
-          title: 'My No.1s',
-          text: `「雨の日に」 #MyNo1s\n${window.location.href}`,
+          title: 'すきコレ',
+          text: `「雨の日に」 #すきコレ\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -151,7 +151,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            text: `#MyNo1s\n${window.location.href}`,
+            text: `#すきコレ\n${window.location.href}`,
           }),
         )
       })
@@ -166,8 +166,8 @@ describe('ShareButtons', () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
-          title: 'My No.1s',
-          text: `#MyNo1s\n${window.location.href}`,
+          title: 'すきコレ',
+          text: `#すきコレ\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -190,7 +190,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            text: `「テスト」 #MyNo1s\n${window.location.href}`,
+            text: `「テスト」 #すきコレ\n${window.location.href}`,
             url: window.location.href,
             files: expect.arrayContaining([expect.any(File)]),
           }),
@@ -241,8 +241,8 @@ describe('ShareButtons', () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
-          title: 'My No.1s',
-          text: `「テスト」 #MyNo1s\n${window.location.href}`,
+          title: 'すきコレ',
+          text: `「テスト」 #すきコレ\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -261,8 +261,8 @@ describe('ShareButtons', () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith({
-          title: 'My No.1s',
-          text: `「テスト」 #MyNo1s\n${window.location.href}`,
+          title: 'すきコレ',
+          text: `「テスト」 #すきコレ\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -379,8 +379,8 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledTimes(2)
         expect(shareMock).toHaveBeenLastCalledWith({
-          title: 'My No.1s',
-          text: `「テスト」 #MyNo1s\n${window.location.href}`,
+          title: 'すきコレ',
+          text: `「テスト」 #すきコレ\n${window.location.href}`,
           url: window.location.href,
         })
       })
@@ -453,7 +453,7 @@ describe('ShareButtons', () => {
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            text: `「テスト」 #MyNo1s\n${window.location.origin}/s/abc123`,
+            text: `「テスト」 #すきコレ\n${window.location.origin}/s/abc123`,
             url: `${window.location.origin}/s/abc123`,
           }),
         )

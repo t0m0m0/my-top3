@@ -33,8 +33,8 @@ describe('movies routes', () => {
             {
               id: 'v1',
               category: 'movie',
-              title: 'Movie',
-              subtitle: 'Director',
+              title: 'Inception',
+              subtitle: 'Christopher Nolan',
               thumbnailUrl: '',
               externalUrl: '',
             },
@@ -72,8 +72,8 @@ describe('movies routes', () => {
         data: {
           id: 'v1',
           category: 'movie',
-          title: 'Movie',
-          subtitle: 'Director',
+          title: 'Inception',
+          subtitle: 'Christopher Nolan',
           thumbnailUrl: '',
           externalUrl: '',
         },

@@ -48,7 +48,7 @@ export default function SearchResults({
           className="mt-2 text-sm font-medium"
           style={{ color: 'var(--color-text-secondary)' }}
         >
-          お気に入りの作品を検索してみよう
+          好きな作品を教えて！
         </p>
       </div>
     )
@@ -112,7 +112,7 @@ export default function SearchResults({
             className="text-sm"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            全件表示しました
+            ぜんぶ見たよ！
           </p>
         </div>
       )}

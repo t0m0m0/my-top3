@@ -26,7 +26,7 @@ describe('ImageSlot', () => {
   describe('when item is null', () => {
     it('shows category label and No Data', () => {
       render(<ImageSlot item={null} category="book" slot="top" />)
-      expect(screen.getByText('BOOK')).toBeInTheDocument()
+      expect(screen.getByText('📚 本')).toBeInTheDocument()
       expect(screen.getByText('No Data')).toBeInTheDocument()
     })
 
@@ -54,7 +54,7 @@ describe('ImageSlot', () => {
 
     it('renders category badge', () => {
       render(<ImageSlot item={mockBook} category="book" slot="bottom-left" />)
-      expect(screen.getByText('BOOK')).toBeInTheDocument()
+      expect(screen.getByText('📚 本')).toBeInTheDocument()
     })
 
     it('shows theme text on top slot when theme is provided', () => {

@@ -45,7 +45,7 @@ describe('SearchPage - search history integration', () => {
 
     expect(screen.getByText('過去の検索')).toBeInTheDocument()
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
     await user.type(input, 'test')
 
     expect(screen.queryByText('過去の検索')).not.toBeInTheDocument()
@@ -57,7 +57,7 @@ describe('SearchPage - search history integration', () => {
 
     await user.click(screen.getByText('過去の検索'))
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
     expect(input).toHaveValue('過去の検索')
   })
 
@@ -65,7 +65,7 @@ describe('SearchPage - search history integration', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('作品名やアーティスト名で検索')
+    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
     await user.type(input, '村上春樹')
 
     await act(async () => {
@@ -96,7 +96,7 @@ describe('SearchPage - mobile layout: sticky tab & search bar', () => {
 
   it('selection area should not be sticky on mobile', () => {
     render(<SearchPage />)
-    const selectionHeading = screen.getByText('選択中の作品')
+    const selectionHeading = screen.getByText('あなたのセレクト')
     // SelectionArea の親カードが sticky でないことを確認
     const selectionCard = selectionHeading.closest(
       '[data-testid="selection-area-wrapper"]',

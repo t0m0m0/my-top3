@@ -5,9 +5,9 @@ import { SafeImage } from './SafeImage'
 import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  BOOK: { bg: '#6366f1', text: '#ffffff' },
-  MUSIC: { bg: '#8b5cf6', text: '#ffffff' },
-  MOVIE: { bg: '#f43f5e', text: '#ffffff' },
+  '📚 本': { bg: '#a855f7', text: '#ffffff' },
+  '🎵 音楽': { bg: '#ec4899', text: '#ffffff' },
+  '🎬 映画': { bg: '#f472b6', text: '#ffffff' },
 }
 
 type WorkCardProps = {
@@ -153,7 +153,7 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             className="mt-2 text-xs transition-colors hover:underline"
             style={{ color: 'var(--color-primary)' }}
           >
-            詳細を見る →
+            チェックする 👀
           </a>
         )}
       </div>

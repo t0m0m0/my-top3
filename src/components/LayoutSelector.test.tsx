@@ -33,9 +33,9 @@ describe('LayoutSelector', () => {
   it('renders category buttons with labels for each slot', () => {
     render(<LayoutSelector layout={defaultLayout} onLayoutChange={vi.fn()} />)
     // Each slot has 3 category buttons → 9 total
-    const bookButtons = screen.getAllByText('BOOK')
-    const musicButtons = screen.getAllByText('MUSIC')
-    const movieButtons = screen.getAllByText('MOVIE')
+    const bookButtons = screen.getAllByText('📚 本')
+    const musicButtons = screen.getAllByText('🎵 音楽')
+    const movieButtons = screen.getAllByText('🎬 映画')
     expect(bookButtons).toHaveLength(3)
     expect(musicButtons).toHaveLength(3)
     expect(movieButtons).toHaveLength(3)
@@ -46,17 +46,17 @@ describe('LayoutSelector', () => {
     // top slot: music is selected
     const topGroup = screen.getByTestId('layout-slot-top')
     const topSelected = topGroup.querySelector('[aria-pressed="true"]')
-    expect(topSelected).toHaveTextContent('MUSIC')
+    expect(topSelected).toHaveTextContent('🎵 音楽')
 
     // bottom-left slot: book is selected
     const blGroup = screen.getByTestId('layout-slot-bottom-left')
     const blSelected = blGroup.querySelector('[aria-pressed="true"]')
-    expect(blSelected).toHaveTextContent('BOOK')
+    expect(blSelected).toHaveTextContent('📚 本')
 
     // bottom-right slot: movie is selected
     const brGroup = screen.getByTestId('layout-slot-bottom-right')
     const brSelected = brGroup.querySelector('[aria-pressed="true"]')
-    expect(brSelected).toHaveTextContent('MOVIE')
+    expect(brSelected).toHaveTextContent('🎬 映画')
   })
 
   it('calls onLayoutChange with slot and category when a toggle button is clicked', () => {

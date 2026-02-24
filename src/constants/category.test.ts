@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   CATEGORY_LABELS_JA,
-  CATEGORY_LABELS_EN,
+  CATEGORY_LABELS_DISPLAY,
   API_ENDPOINTS,
 } from './category'
 import type { MediaCategory } from '../types/common'
@@ -24,18 +24,18 @@ describe('CATEGORY_LABELS_JA', () => {
   })
 })
 
-describe('CATEGORY_LABELS_EN', () => {
-  it('has English labels for all categories', () => {
-    expect(CATEGORY_LABELS_EN).toEqual({
-      book: 'Book',
-      music: 'Music',
-      movie: 'Movie',
+describe('CATEGORY_LABELS_DISPLAY', () => {
+  it('has display labels with emoji for all categories', () => {
+    expect(CATEGORY_LABELS_DISPLAY).toEqual({
+      book: '📚 本',
+      music: '🎵 音楽',
+      movie: '🎬 映画',
     })
   })
 
   it('covers all MediaCategory values', () => {
     for (const cat of CATEGORIES) {
-      expect(CATEGORY_LABELS_EN[cat]).toBeDefined()
+      expect(CATEGORY_LABELS_DISPLAY[cat]).toBeDefined()
     }
   })
 })
