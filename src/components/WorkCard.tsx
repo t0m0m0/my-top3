@@ -81,17 +81,18 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
 
   return (
     <div
-      className="relative rounded-xl p-[2px]"
+      className="relative"
       style={{
-        background:
-          'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+        borderRadius: 20,
+        border: '1.5px solid var(--color-border)',
+        boxShadow: '0 2px 12px rgba(62, 42, 20, 0.06)',
       }}
     >
       <div
-        className="group relative flex min-h-[280px] flex-1 flex-col items-center rounded-[10px] p-4 pt-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+        className="group relative flex min-h-[280px] flex-1 flex-col items-center p-4 pt-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         style={{
+          borderRadius: 18,
           background: 'var(--color-surface)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
         }}
       >
         {/* Category tag */}
@@ -117,13 +118,13 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             style={{
               width: 36,
               height: 36,
-              background: 'linear-gradient(135deg, #c4a882, #a0845e, #c4a882)',
-              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
+              background: 'linear-gradient(135deg, #e8d5b8, #c4a882, #e8d5b8)',
+              boxShadow: '0 2px 8px rgba(160, 132, 94, 0.3)',
             }}
           >
             <span
               className="text-[0.8rem] font-extrabold leading-none"
-              style={{ color: '#78350f' }}
+              style={{ color: '#5c4a2e' }}
             >
               #1
             </span>
