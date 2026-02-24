@@ -17,3 +17,11 @@ export const API_ENDPOINTS: Record<MediaCategory, string> = {
   music: '/api/music',
   movie: '/api/movies',
 }
+
+export const CATEGORY_ICONS: Record<MediaCategory, string> = {
+  book: '📖',
+  music: '🎵',
+  movie: '🎬',
+}
+
+export const CATEGORIES: MediaCategory[] = ['book', 'music', 'movie']

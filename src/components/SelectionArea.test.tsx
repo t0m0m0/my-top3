@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '../test/test-utils'
 import userEvent from '@testing-library/user-event'
-import SelectionArea from './SelectionArea'
+import SelectionArea from './selection/SelectionArea'
 import { createSearchResultItem } from '../test/fixtures'
 import type { SelectionContextValue } from '../contexts/selection-context-value'
 

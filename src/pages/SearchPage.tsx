@@ -7,7 +7,7 @@ import SearchHistory from '../components/SearchHistory'
 import SearchResults from '../components/SearchResults'
 import ThemeInput from '../components/ThemeInput'
 import ThemeHistory from '../components/ThemeHistory'
-import SelectionArea from '../components/SelectionArea'
+import SelectionArea from '../components/selection/SelectionArea'
 import DataCredits from '../components/DataCredits'
 import { useSearchPage } from '../hooks/useSearchPage'
 
