@@ -396,6 +396,22 @@ body {
   color: #1e40af;
 }
 
+/* Work card for board detail (screen-2 style) */
+.work-card-board {
+  border-radius: 18px;
+  overflow: visible;
+  flex: 0 0 auto;
+  width: 100%;
+}
+@media (min-width: 640px) {
+  .work-card-board {
+    width: 240px;
+  }
+}
+.work-card-board:hover {
+  box-shadow: 0 12px 36px rgba(80, 60, 40, 0.2) !important;
+}
+
 /* Gentle float animation */
 @keyframes gentleFloat {
   0%,

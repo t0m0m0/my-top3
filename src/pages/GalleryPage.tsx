@@ -14,20 +14,49 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        {/* Header */}
+        {/* Header — screen-3 style */}
         <div className="mb-6 text-center sm:mb-8">
           <h1
-            className="brand-gradient-text mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="mb-4 text-[26px] font-bold"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-text-primary)',
+            }}
           >
-            さがす
+            さがす 🔍
           </h1>
-          <p
-            className="mx-auto mb-5 max-w-md text-sm sm:text-base"
-            style={{ color: 'var(--color-text-secondary)' }}
+
+          {/* Search bar (decorative for now) */}
+          <div
+            className="mx-auto mb-5 flex max-w-[700px] items-center gap-2.5 rounded-[18px] bg-white px-5 py-3.5"
+            style={{
+              boxShadow: '0 2px 10px rgba(80,60,40,0.06)',
+            }}
           >
-            みんなが作ったコレクションボード
-          </p>
+            <span className="text-base opacity-50">🔍</span>
+            <span className="text-[15px]" style={{ color: '#bbb0a2' }}>
+              ボードやテーマを探す...
+            </span>
+          </div>
+
+          {/* Tag pills — screen-3 style */}
+          <div className="mb-6 flex flex-wrap justify-center gap-2.5">
+            <span className="tag-hot cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
+              🔥 推し
+            </span>
+            <span className="tag-spring cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
+              🌸 春アニメ
+            </span>
+            <span className="tag-novel cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
+              📖 小説
+            </span>
+            <span className="tag-music cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
+              🎵 邦楽
+            </span>
+            <span className="tag-movie cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
+              🎬 泣ける映画
+            </span>
+          </div>
 
           {/* Navigation pill */}
           <Link

@@ -33,6 +33,22 @@ function hashToHeight(s: string): string {
   return HEIGHT_CLASSES[Math.abs(h) % HEIGHT_CLASSES.length]
 }
 
+/** Deterministic avatar gradient */
+const AVATAR_GRADIENTS = [
+  'linear-gradient(135deg, #fce7f3, #fbcfe8)',
+  'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+  'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+  'linear-gradient(135deg, #fef3c7, #fde68a)',
+  'linear-gradient(135deg, #d1fae5, #a7f3d0)',
+  'linear-gradient(135deg, #fecaca, #fed7aa)',
+] as const
+
+function hashToAvatarGradient(s: string): string {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 41 + s.charCodeAt(i)) | 0
+  return AVATAR_GRADIENTS[Math.abs(h) % AVATAR_GRADIENTS.length]
+}
+
 type Props = {
   id: string
   theme: string
@@ -74,6 +90,7 @@ export default function GalleryCard({
   )
   const gradClass = hashToGradient(id)
   const heightClass = hashToHeight(id)
+  const avatarGradient = hashToAvatarGradient(id)
 
   const handleReaction = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -84,11 +101,15 @@ export default function GalleryCard({
   return (
     <Link
       to={`/s/${id}`}
-      className="masonry-item block overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+      className="masonry-item block overflow-hidden rounded-2xl bg-white transition-all duration-300 hover:-translate-y-1"
+      style={{
+        boxShadow:
+          '0 3px 14px rgba(80,60,40,0.07), 0 1px 3px rgba(80,60,40,0.05)',
+      }}
     >
-      {/* Hero image area */}
+      {/* Hero gradient area */}
       <div
-        className={`${gradClass} ${heightClass} relative flex items-center justify-content-center`}
+        className={`${gradClass} ${heightClass} relative flex items-center justify-center`}
       >
         {hasThumbs ? (
           <div className="flex w-full items-end justify-center gap-1.5 p-3">
@@ -136,7 +157,7 @@ export default function GalleryCard({
         )}
       </div>
 
-      {/* Body */}
+      {/* Body — screen-3 style */}
       <div className="px-3 pb-3 pt-2.5">
         <h3
           className="mb-2 line-clamp-2 text-sm font-bold leading-snug"
@@ -157,26 +178,44 @@ export default function GalleryCard({
           </div>
         )}
 
-        {/* Reaction */}
-        <button
-          type="button"
-          onClick={handleReaction}
-          aria-label="いいね"
-          className="flex items-center gap-1 text-xs transition-colors duration-150"
-          style={{
-            color: reacted
-              ? 'var(--color-primary)'
-              : 'var(--color-text-secondary)',
-          }}
-        >
-          <span
-            className="transition-transform duration-150"
-            style={{ transform: reacted ? 'scale(1.2)' : 'scale(1)' }}
+        {/* User avatar + reaction row */}
+        <div className="flex items-center justify-between">
+          {/* Pseudo user avatar */}
+          <div className="flex items-center gap-2">
+            <div
+              className="h-6 w-6 flex-shrink-0 rounded-full"
+              style={{ background: avatarGradient }}
+              aria-hidden="true"
+            />
+            <span
+              className="text-xs"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              ユーザー
+            </span>
+          </div>
+
+          {/* Reaction */}
+          <button
+            type="button"
+            onClick={handleReaction}
+            aria-label="いいね"
+            className="flex items-center gap-1 text-xs transition-colors duration-150"
+            style={{
+              color: reacted
+                ? 'var(--color-primary)'
+                : 'var(--color-text-secondary)',
+            }}
           >
-            {reacted ? '❤️' : '💜'}
-          </span>
-          <span>{count}</span>
-        </button>
+            <span
+              className="transition-transform duration-150"
+              style={{ transform: reacted ? 'scale(1.2)' : 'scale(1)' }}
+            >
+              {reacted ? '❤️' : '💜'}
+            </span>
+            <span>{count}</span>
+          </button>
+        </div>
       </div>
     </Link>
   )

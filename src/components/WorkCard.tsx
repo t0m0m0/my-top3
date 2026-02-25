@@ -3,12 +3,37 @@ import Button from '@mui/material/Button'
 import type { SearchResultItem } from '../types/common'
 import { SafeImage } from './SafeImage'
 import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
-import { PRIMARY, SECONDARY, ACCENT } from '../constants/image-colors'
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  '📚 本': { bg: PRIMARY, text: '#ffffff' },
-  '🎵 音楽': { bg: SECONDARY, text: '#ffffff' },
-  '🎬 映画': { bg: ACCENT, text: '#ffffff' },
+/** Screen-2 style: gradient background + badge + card info */
+const CATEGORY_CONFIG: Record<
+  string,
+  { gradient: string; badgeClass: string; badgeLabel: string; emoji: string }
+> = {
+  '📚 本': {
+    gradient: 'grad-warm',
+    badgeClass: 'badge-book',
+    badgeLabel: '📖 本',
+    emoji: '📚',
+  },
+  '🎵 音楽': {
+    gradient: 'grad-cool',
+    badgeClass: 'badge-music',
+    badgeLabel: '🎵 音楽',
+    emoji: '🎵',
+  },
+  '🎬 映画': {
+    gradient: 'grad-sky',
+    badgeClass: 'badge-movie',
+    badgeLabel: '🎬 映画',
+    emoji: '🎬',
+  },
+}
+
+const DEFAULT_CONFIG = {
+  gradient: 'grad-warm',
+  badgeClass: 'badge-book',
+  badgeLabel: '作品',
+  emoji: '📌',
 }
 
 type WorkCardProps = {
@@ -20,27 +45,30 @@ type WorkCardProps = {
 }
 
 function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
+  const config = CATEGORY_CONFIG[label] ?? DEFAULT_CONFIG
+
   if (loading) {
     return (
       <div
-        className="flex min-h-[280px] flex-1 flex-col items-center rounded-xl border p-4"
+        className="overflow-hidden rounded-[18px] bg-white"
         style={{
-          borderColor: 'var(--color-border)',
-          backgroundColor: 'var(--color-surface)',
+          boxShadow:
+            '0 6px 24px rgba(80,60,40,0.13), 0 2px 6px rgba(80,60,40,0.08)',
         }}
       >
-        <Skeleton variant="rounded" width={56} height={20} sx={{ mb: 0.5 }} />
-        <Skeleton variant="rounded" width={32} height={18} sx={{ mb: 1 }} />
-        <Skeleton variant="rounded" width={128} height={176} sx={{ mb: 1 }} />
-        <Skeleton variant="text" width={100} height={18} />
-        <Skeleton variant="text" width={72} height={14} />
+        <Skeleton variant="rounded" height={160} sx={{ borderRadius: 0 }} />
+        <div className="p-4">
+          <Skeleton variant="rounded" width={80} height={20} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width={140} height={22} />
+          <Skeleton variant="text" width={100} height={16} />
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex min-h-[280px] flex-1 flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-4">
+      <div className="flex min-h-[240px] flex-col items-center justify-center overflow-hidden rounded-[18px] border border-red-200 bg-red-50">
         <span className="text-xs text-red-500">{error}</span>
         {onRetry && (
           <Button
@@ -59,10 +87,10 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
   if (!work) {
     return (
       <div
-        className="flex min-h-[280px] flex-1 flex-col items-center justify-center rounded-xl border p-4"
+        className="flex min-h-[240px] flex-col items-center justify-center overflow-hidden rounded-[18px]"
         style={{
-          borderColor: 'var(--color-border)',
           backgroundColor: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
         }}
       >
         <span
@@ -75,91 +103,61 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
     )
   }
 
-  const categoryColor = CATEGORY_COLORS[label] ?? {
-    bg: 'var(--color-primary)',
-    text: '#ffffff',
-  }
-
   return (
     <div
-      className="relative"
+      className="work-card-board group cursor-pointer overflow-visible transition-all duration-400 hover:z-10"
       style={{
-        borderRadius: 'var(--radius-card)',
-        border: '1.5px solid var(--color-border)',
-        boxShadow: '0 2px 12px rgba(62, 42, 20, 0.06)',
+        boxShadow:
+          '0 6px 24px rgba(80,60,40,0.13), 0 2px 6px rgba(80,60,40,0.08)',
       }}
     >
-      <div
-        className="group relative flex min-h-[280px] flex-1 flex-col items-center p-4 pt-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-        style={{
-          borderRadius: 'var(--radius-card-inner)',
-          background: 'var(--color-surface)',
-        }}
-      >
-        {/* Category tag */}
+      <div className="overflow-hidden rounded-[18px] bg-white">
+        {/* Image area with gradient background */}
         <div
-          className="absolute left-3 top-3 rounded-md px-2 py-0.5"
-          style={{
-            backgroundColor: categoryColor.bg,
-            color: categoryColor.text,
-          }}
+          className={`${config.gradient} relative flex h-40 items-center justify-center`}
         >
-          <span
-            className="text-[0.6rem] font-bold tracking-widest"
-            style={{ color: 'inherit' }}
-          >
-            {label}
-          </span>
+          {work.thumbnailUrl ? (
+            <SafeImage
+              src={work.thumbnailUrl}
+              alt={work.title}
+              fallbackSrc={DEFAULT_PLACEHOLDER}
+              className="h-28 w-20 rounded-lg object-cover shadow-lg transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <span className="text-5xl">{config.emoji}</span>
+          )}
         </div>
 
-        {/* Rank badge overlapping image top */}
-        <div className="relative mb-[-14px] z-10">
-          <div
-            className="flex items-center justify-center rounded-full"
+        {/* Card body */}
+        <div className="bg-white px-4 pb-4 pt-3">
+          {/* Category badge */}
+          <span
+            className={`${config.badgeClass} mb-1.5 inline-flex items-center gap-1 rounded-[10px] px-2.5 py-0.5 text-[11px] font-bold`}
+          >
+            {config.badgeLabel}
+          </span>
+
+          {/* Title */}
+          <p
+            className="line-clamp-2 text-base font-bold leading-snug"
             style={{
-              width: 36,
-              height: 36,
-              background:
-                'linear-gradient(135deg, var(--color-rank-badge), var(--color-primary-light), var(--color-rank-badge))',
-              boxShadow:
-                '0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent)',
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-text-primary)',
             }}
           >
-            <span
-              className="text-[0.8rem] font-extrabold leading-none"
-              style={{ color: 'var(--color-rank-text)' }}
-            >
-              #1
-            </span>
-          </div>
-        </div>
+            {work.title}
+          </p>
 
-        <SafeImage
-          src={work.thumbnailUrl}
-          alt={work.title}
-          fallbackSrc={DEFAULT_PLACEHOLDER}
-          className="mb-3 h-44 w-32 rounded-lg object-cover shadow-md transition-transform duration-300 group-hover:scale-105"
-        />
-        <p className="text-center text-[0.85rem] font-semibold leading-tight">
-          {work.title}
-        </p>
-        <span
-          className="mt-1 text-center text-[0.7rem]"
-          style={{ color: 'var(--color-text-secondary)' }}
-        >
-          {work.subtitle}
-        </span>
-        {work.externalUrl && (
-          <a
-            href={work.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 text-xs transition-colors hover:underline"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            チェックする 👀
-          </a>
-        )}
+          {/* Author / subtitle */}
+          {work.subtitle && (
+            <p
+              className="mt-0.5 text-[13px]"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              {work.subtitle}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -92,37 +92,31 @@ export default function Top3Content({ params, existingShareId }: Props) {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        {/* Header */}
-        <div className="mb-2 text-center">
+        {/* Header — screen-2 style */}
+        <div className="mb-4">
           <Link
             to="/gallery"
             className="mb-3 inline-flex items-center gap-1 text-sm font-medium transition-colors"
-            style={{ color: 'var(--color-primary)' }}
+            style={{ color: '#a855f7' }}
           >
-            ← みんなのボード
+            ← ボード一覧
           </Link>
           <h1
-            className="brand-gradient-text text-3xl font-extrabold tracking-tight sm:text-4xl"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="text-[30px] font-bold leading-snug"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-text-primary)',
+            }}
           >
-            すきコレ
+            {params.theme || 'マイコレクション'}
           </h1>
+          <p
+            className="mt-1 text-sm"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            3作品
+          </p>
         </div>
-
-        {/* Theme title */}
-        {params.theme && (
-          <div className="mt-2 text-center">
-            <h2
-              className="text-xl font-bold sm:text-2xl"
-              style={{
-                fontFamily: 'var(--font-display)',
-                color: 'var(--color-text-primary)',
-              }}
-            >
-              {params.theme}
-            </h2>
-          </div>
-        )}
 
         {/* Cork board area */}
         <div className="cork-bg relative mt-6 rounded-3xl p-5 sm:p-8">
@@ -143,11 +137,11 @@ export default function Top3Content({ params, existingShareId }: Props) {
             aria-hidden="true"
           />
 
-          {/* Work cards with slight rotation */}
-          <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:justify-center sm:gap-6">
+          {/* Work cards — screen-2 flex layout with rotation */}
+          <div className="flex flex-col items-center gap-5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6">
             <div
-              className="animate-fade-in-up relative flex-1"
-              style={{ transform: 'rotate(-1.5deg)' }}
+              className="animate-fade-in-up relative"
+              style={{ transform: 'rotate(-2deg)' }}
             >
               <WashiTape
                 color="linear-gradient(90deg, #fbcfe8, #fce7f3)"
@@ -163,11 +157,8 @@ export default function Top3Content({ params, existingShareId }: Props) {
               />
             </div>
             <div
-              className="animate-fade-in-up animate-delay-100 relative flex-1"
-              style={{
-                transform: 'rotate(1deg)',
-                marginTop: 'var(--card-offset, 0px)',
-              }}
+              className="animate-fade-in-up animate-delay-100 relative"
+              style={{ transform: 'rotate(1.5deg)', marginTop: 30 }}
             >
               <WashiTape
                 color="linear-gradient(90deg, #ddd6fe, #ede9fe)"
@@ -183,8 +174,8 @@ export default function Top3Content({ params, existingShareId }: Props) {
               />
             </div>
             <div
-              className="animate-fade-in-up animate-delay-200 relative flex-1"
-              style={{ transform: 'rotate(-0.5deg)' }}
+              className="animate-fade-in-up animate-delay-200 relative"
+              style={{ transform: 'rotate(-0.8deg)' }}
             >
               <WashiTape
                 color="linear-gradient(90deg, #bfdbfe, #dbeafe)"
