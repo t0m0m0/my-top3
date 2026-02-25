@@ -90,7 +90,7 @@ function ShortUrlPage() {
     )
   }
 
-  return <Top3Content params={data} existingShareId={id} />
+  return <Top3Content params={data} existingShareId={id} readOnly />
 }
 
 export default ShortUrlPage

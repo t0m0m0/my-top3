@@ -18,6 +18,7 @@ type Top3ImageProps = {
   music: SearchResultItem | null
   movie: SearchResultItem | null
   captureRef?: React.Ref<HTMLDivElement>
+  readOnly?: boolean
 }
 
 function Top3Image({
@@ -26,6 +27,7 @@ function Top3Image({
   music,
   movie,
   captureRef: externalCaptureRef,
+  readOnly,
 }: Top3ImageProps) {
   const {
     captureRef: internalCaptureRef,
@@ -54,7 +56,9 @@ function Top3Image({
 
   return (
     <div>
-      <LayoutSelector layout={layout} onLayoutChange={handleLayoutChange} />
+      {!readOnly && (
+        <LayoutSelector layout={layout} onLayoutChange={handleLayoutChange} />
+      )}
 
       {/* Capture target */}
       <div ref={containerRef} style={{ overflow: 'hidden', maxWidth: '100%' }}>
@@ -169,22 +173,24 @@ function Top3Image({
       </div>
 
       {/* Download button */}
-      <div className="mt-4 text-center">
-        <Button
-          variant="contained"
-          startIcon={
-            isGenerating ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : (
-              <DownloadIcon />
-            )
-          }
-          onClick={handleDownload}
-          disabled={isGenerating}
-        >
-          {isGenerating ? '生成中...' : '保存する 📥'}
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="mt-4 text-center">
+          <Button
+            variant="contained"
+            startIcon={
+              isGenerating ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <DownloadIcon />
+              )
+            }
+            onClick={handleDownload}
+            disabled={isGenerating}
+          >
+            {isGenerating ? '生成中...' : '保存する 📥'}
+          </Button>
+        </div>
+      )}
 
       <StatusSnackbar
         open={successOpen}

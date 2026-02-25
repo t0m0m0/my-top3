@@ -22,6 +22,7 @@ type Top3Params = {
 type Props = {
   params: Top3Params
   existingShareId?: string
+  readOnly?: boolean
 }
 
 /** Decorative washi tape above a work card */
@@ -48,7 +49,11 @@ function WashiTape({
   )
 }
 
-export default function Top3Content({ params, existingShareId }: Props) {
+export default function Top3Content({
+  params,
+  existingShareId,
+  readOnly,
+}: Props) {
   const captureRef = useRef<HTMLDivElement>(null)
   const [captureElement, setCaptureElement] = useState<HTMLDivElement | null>(
     null,
@@ -201,6 +206,7 @@ export default function Top3Content({ params, existingShareId }: Props) {
               music={music.data}
               movie={movie.data}
               captureRef={captureRefCallback}
+              readOnly={readOnly}
             />
           </div>
         )}
@@ -221,9 +227,14 @@ export default function Top3Content({ params, existingShareId }: Props) {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <PillLinkButton to={buildEditUrl(params)}>← 戻る</PillLinkButton>
-          <PillLinkButton to="/gallery" color="secondary">
-            🔍 みんなのボード
+          {!readOnly && (
+            <PillLinkButton to={buildEditUrl(params)}>← 戻る</PillLinkButton>
+          )}
+          <PillLinkButton
+            to="/gallery"
+            color={readOnly ? undefined : 'secondary'}
+          >
+            {readOnly ? '← みんなのボード' : '🔍 みんなのボード'}
           </PillLinkButton>
         </div>
       </div>

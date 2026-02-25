@@ -604,3 +604,44 @@ describe('Top3Image', () => {
     })
   })
 })
+
+describe('readOnly mode', () => {
+  it('hides layout selector when readOnly is true', () => {
+    render(
+      <Top3Image
+        theme=""
+        book={mockBook}
+        music={mockMusic}
+        movie={mockMovie}
+        readOnly
+      />,
+    )
+    expect(screen.queryByTestId('layout-selector')).not.toBeInTheDocument()
+  })
+
+  it('hides download button when readOnly is true', () => {
+    render(
+      <Top3Image
+        theme=""
+        book={mockBook}
+        music={mockMusic}
+        movie={mockMovie}
+        readOnly
+      />,
+    )
+    expect(screen.queryByText('保存する 📥')).not.toBeInTheDocument()
+  })
+
+  it('still renders the capture area when readOnly is true', () => {
+    render(
+      <Top3Image
+        theme=""
+        book={mockBook}
+        music={mockMusic}
+        movie={mockMovie}
+        readOnly
+      />,
+    )
+    expect(screen.getByTestId('top3-image-capture')).toBeInTheDocument()
+  })
+})

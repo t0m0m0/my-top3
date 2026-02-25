@@ -15,9 +15,11 @@ vi.mock('../components/Top3Content', () => ({
   default: ({
     params,
     existingShareId,
+    readOnly,
   }: {
     params: { theme: string; bookId: string; musicId: string; movieId: string }
     existingShareId?: string
+    readOnly?: boolean
   }) => (
     <div data-testid="top3-content">
       <span>{params.theme}</span>
@@ -25,6 +27,7 @@ vi.mock('../components/Top3Content', () => ({
       {existingShareId && (
         <span data-testid="existing-share-id">{existingShareId}</span>
       )}
+      {readOnly && <span data-testid="read-only">readOnly</span>}
     </div>
   ),
 }))
@@ -116,5 +119,25 @@ describe('ShortUrlPage', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith('/api/shares/xyz789')
     })
+  })
+})
+
+it('passes readOnly to Top3Content', async () => {
+  mockUseParams.mockReturnValue({ id: 'abc123' })
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      ok: true,
+      data: {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+      },
+    }),
+  })
+  render(<ShortUrlPage />)
+  await waitFor(() => {
+    expect(screen.getByTestId('read-only')).toBeInTheDocument()
   })
 })
