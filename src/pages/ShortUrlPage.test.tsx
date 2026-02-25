@@ -120,24 +120,24 @@ describe('ShortUrlPage', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/shares/xyz789')
     })
   })
-})
 
-it('passes readOnly to Top3Content', async () => {
-  mockUseParams.mockReturnValue({ id: 'abc123' })
-  globalThis.fetch = vi.fn().mockResolvedValue({
-    ok: true,
-    json: async () => ({
+  it('passes readOnly to Top3Content', async () => {
+    mockUseParams.mockReturnValue({ id: 'abc123' })
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      data: {
-        theme: 'テスト',
-        bookId: 'b1',
-        musicId: 'm1',
-        movieId: 'mv1',
-      },
-    }),
-  })
-  render(<ShortUrlPage />)
-  await waitFor(() => {
-    expect(screen.getByTestId('read-only')).toBeInTheDocument()
+      json: async () => ({
+        ok: true,
+        data: {
+          theme: 'テスト',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'mv1',
+        },
+      }),
+    })
+    render(<ShortUrlPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId('read-only')).toBeInTheDocument()
+    })
   })
 })
