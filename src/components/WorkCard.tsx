@@ -103,13 +103,22 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
     )
   }
 
+  const hasLink = !!work.externalUrl
+
+  const handleCardClick = () => {
+    if (hasLink) {
+      window.open(work.externalUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   return (
     <div
-      className="work-card-board group cursor-pointer overflow-visible transition-all duration-400 hover:z-10"
+      className={`work-card-board group overflow-visible transition-all duration-400 hover:z-10 ${hasLink ? 'cursor-pointer' : ''}`}
       style={{
         boxShadow:
           '0 6px 24px rgba(80,60,40,0.13), 0 2px 6px rgba(80,60,40,0.08)',
       }}
+      onClick={handleCardClick}
     >
       <div className="overflow-hidden rounded-[18px] bg-white">
         {/* Image area with gradient background */}
@@ -125,6 +134,16 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             />
           ) : (
             <span className="text-5xl">{config.emoji}</span>
+          )}
+
+          {/* External link indicator */}
+          {hasLink && (
+            <span
+              className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/40 text-white text-xs opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              aria-label="外部リンク"
+            >
+              ↗
+            </span>
           )}
         </div>
 
