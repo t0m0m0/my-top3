@@ -240,3 +240,202 @@ body {
   font-family: Georgia, serif;
   line-height: 1;
 }
+
+/* ========================================
+   Collection Board UI - Shared Styles
+   ======================================== */
+
+/* Cork board texture background */
+.cork-bg {
+  background-color: #e8ddd0;
+  background-image:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(200, 170, 130, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 60%,
+      rgba(180, 150, 110, 0.2) 0%,
+      transparent 50%
+    ),
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.6' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.1'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23c)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Gradient presets for board card images */
+.grad-warm {
+  background: linear-gradient(135deg, #fde68a 0%, #fed7aa 50%, #fecaca 100%);
+}
+.grad-cool {
+  background: linear-gradient(135deg, #c4b5fd 0%, #818cf8 50%, #6366f1 100%);
+}
+.grad-sky {
+  background: linear-gradient(135deg, #7dd3fc 0%, #93c5fd 50%, #a78bfa 100%);
+}
+.grad-sunset {
+  background: linear-gradient(135deg, #fda4af 0%, #fb923c 50%, #fbbf24 100%);
+}
+.grad-forest {
+  background: linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #a3e635 100%);
+}
+.grad-night {
+  background: linear-gradient(
+    135deg,
+    #1e1b4b 0%,
+    #312e81 40%,
+    #4f46e5 80%,
+    #7c3aed 100%
+  );
+}
+.grad-sakura {
+  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 50%, #f9a8d4 100%);
+}
+.grad-ocean {
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
+}
+.grad-autumn {
+  background: linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #d97706 100%);
+}
+.grad-pastel {
+  background: linear-gradient(135deg, #e9d5ff 0%, #fbcfe8 50%, #fef3c7 100%);
+}
+.grad-starry {
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e3a5f 25%,
+    #3b82f6 50%,
+    #8b5cf6 75%,
+    #c084fc 100%
+  );
+}
+
+/* Masonry layout */
+.masonry-grid {
+  column-count: 2;
+  column-gap: 12px;
+}
+@media (min-width: 640px) {
+  .masonry-grid {
+    column-gap: 16px;
+  }
+}
+@media (min-width: 768px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+@media (min-width: 1024px) {
+  .masonry-grid {
+    column-count: 4;
+  }
+}
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+@media (min-width: 640px) {
+  .masonry-item {
+    margin-bottom: 16px;
+  }
+}
+
+/* Washi tape decoration */
+.washi-tape {
+  position: absolute;
+  height: 22px;
+  border-radius: 2px;
+  opacity: 0.5;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Pushpin decoration */
+.pushpin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 6;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+.pushpin::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+}
+.pushpin-red {
+  background: radial-gradient(circle at 40% 35%, #f87171, #dc2626);
+}
+.pushpin-blue {
+  background: radial-gradient(circle at 40% 35%, #60a5fa, #2563eb);
+}
+.pushpin-yellow {
+  background: radial-gradient(circle at 40% 35%, #fbbf24, #d97706);
+}
+
+/* Category badge */
+.badge-book {
+  background: #fef3c7;
+  color: #92400e;
+}
+.badge-music {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+.badge-movie {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Gentle float animation */
+@keyframes gentleFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.animate-gentle-float {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+/* Brand gradient text */
+.brand-gradient-text {
+  background: linear-gradient(135deg, #a855f7, #ec4899, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tag pill styles */
+.tag-hot {
+  background: linear-gradient(135deg, #fecaca, #fed7aa);
+  color: #9a3412;
+}
+.tag-spring {
+  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+  color: #9d174d;
+}
+.tag-novel {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+}
+.tag-music {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  color: #5b21b6;
+}
+.tag-movie {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+}

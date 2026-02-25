@@ -4,8 +4,6 @@ import Button from '@mui/material/Button'
 import ErrorMessage from '../components/ErrorMessage'
 import GalleryCard from '../components/GalleryCard'
 import DataCredits from '../components/DataCredits'
-import PageHeader from '../components/PageHeader'
-import PillLinkButton from '../components/PillLinkButton'
 import { useGallery } from '../hooks/useGallery'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 
@@ -14,18 +12,38 @@ export default function GalleryPage() {
   const sentinelRef = useIntersectionObserver(loadMore)
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          'linear-gradient(180deg, var(--color-bg) 0%, #f5f0eb 50%, #efe8e0 100%)',
-      }}
-    >
+    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        <PageHeader
-          title="みんなの推し"
-          subtitle="みんなが選んだ推し作品たち"
-        />
+        {/* Header */}
+        <div className="mb-6 text-center sm:mb-8">
+          <h1
+            className="brand-gradient-text mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            さがす
+          </h1>
+          <p
+            className="mx-auto mb-5 max-w-md text-sm sm:text-base"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            みんなが作ったコレクションボード
+          </p>
+
+          {/* Navigation pill */}
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+            style={{
+              color: 'var(--color-primary-dark)',
+              border:
+                '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+              backgroundColor:
+                'color-mix(in srgb, var(--color-bg) 60%, transparent)',
+            }}
+          >
+            ✨ ボードをつくる
+          </Link>
+        </div>
 
         {/* Loading */}
         {loading && (
@@ -59,7 +77,6 @@ export default function GalleryPage() {
               to="/"
               variant="outlined"
               size="small"
-              className="mt-4"
               sx={{ mt: 2 }}
             >
               作品を選ぶ ✨
@@ -67,10 +84,10 @@ export default function GalleryPage() {
           </div>
         )}
 
-        {/* Gallery Grid */}
+        {/* Masonry Gallery */}
         {!loading && !error && items.length > 0 && (
           <>
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="masonry-grid">
               {items.map((item) => (
                 <GalleryCard key={item.id} {...item} />
               ))}
@@ -103,11 +120,6 @@ export default function GalleryPage() {
             )}
           </>
         )}
-
-        {/* Navigation */}
-        <div className="mt-8 text-center">
-          <PillLinkButton to="/">← 作品を選ぶ ✨</PillLinkButton>
-        </div>
       </div>
 
       <DataCredits />
