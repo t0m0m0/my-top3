@@ -13,6 +13,8 @@ function isValidBody(body: unknown): body is {
   return typeof body === 'object' && body !== null && !Array.isArray(body)
 }
 
+const str = (v: unknown): string => (typeof v === 'string' ? v : '')
+
 export type SharesAppOptions = {
   adminApiKey?: string
   ttlSeconds?: number
@@ -59,13 +61,13 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
     }
 
     const params: ShareParams = {
-      theme: typeof body.theme === 'string' ? body.theme : '',
-      bookId: typeof body.bookId === 'string' ? body.bookId : '',
-      musicId: typeof body.musicId === 'string' ? body.musicId : '',
-      movieId: typeof body.movieId === 'string' ? body.movieId : '',
-      bookThumb: typeof body.bookThumb === 'string' ? body.bookThumb : '',
-      musicThumb: typeof body.musicThumb === 'string' ? body.musicThumb : '',
-      movieThumb: typeof body.movieThumb === 'string' ? body.movieThumb : '',
+      theme: str(body.theme),
+      bookId: str(body.bookId),
+      musicId: str(body.musicId),
+      movieId: str(body.movieId),
+      bookThumb: str(body.bookThumb),
+      musicThumb: str(body.musicThumb),
+      movieThumb: str(body.movieThumb),
     }
 
     if (!params.bookId && !params.musicId && !params.movieId) {
