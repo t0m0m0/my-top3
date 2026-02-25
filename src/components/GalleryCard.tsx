@@ -33,22 +33,6 @@ function hashToHeight(s: string): string {
   return HEIGHT_CLASSES[Math.abs(h) % HEIGHT_CLASSES.length]
 }
 
-/** Deterministic avatar gradient */
-const AVATAR_GRADIENTS = [
-  'linear-gradient(135deg, #fce7f3, #fbcfe8)',
-  'linear-gradient(135deg, #dbeafe, #bfdbfe)',
-  'linear-gradient(135deg, #ede9fe, #ddd6fe)',
-  'linear-gradient(135deg, #fef3c7, #fde68a)',
-  'linear-gradient(135deg, #d1fae5, #a7f3d0)',
-  'linear-gradient(135deg, #fecaca, #fed7aa)',
-] as const
-
-function hashToAvatarGradient(s: string): string {
-  let h = 0
-  for (let i = 0; i < s.length; i++) h = (h * 41 + s.charCodeAt(i)) | 0
-  return AVATAR_GRADIENTS[Math.abs(h) % AVATAR_GRADIENTS.length]
-}
-
 type Props = {
   id: string
   theme: string
@@ -90,7 +74,6 @@ export default function GalleryCard({
   )
   const gradClass = hashToGradient(id)
   const heightClass = hashToHeight(id)
-  const avatarGradient = hashToAvatarGradient(id)
 
   const handleReaction = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -178,24 +161,8 @@ export default function GalleryCard({
           </div>
         )}
 
-        {/* User avatar + reaction row */}
-        <div className="flex items-center justify-between">
-          {/* Pseudo user avatar */}
-          <div className="flex items-center gap-2">
-            <div
-              className="h-6 w-6 flex-shrink-0 rounded-full"
-              style={{ background: avatarGradient }}
-              aria-hidden="true"
-            />
-            <span
-              className="text-xs"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              ユーザー
-            </span>
-          </div>
-
-          {/* Reaction */}
+        {/* Reaction */}
+        <div className="flex items-center">
           <button
             type="button"
             onClick={handleReaction}

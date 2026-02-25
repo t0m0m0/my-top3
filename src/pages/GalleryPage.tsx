@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import CircularProgress from '@mui/material/CircularProgress'
 import Button from '@mui/material/Button'
@@ -10,6 +11,13 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 export default function GalleryPage() {
   const { items, loading, loadingMore, error, hasMore, loadMore } = useGallery()
   const sentinelRef = useIntersectionObserver(loadMore)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return items
+    return items.filter((item) => item.theme.toLowerCase().includes(q))
+  }, [items, searchQuery])
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
@@ -26,7 +34,7 @@ export default function GalleryPage() {
             さがす 🔍
           </h1>
 
-          {/* Search bar (decorative for now) */}
+          {/* Search bar */}
           <div
             className="mx-auto mb-5 flex max-w-[700px] items-center gap-2.5 rounded-[18px] bg-white px-5 py-3.5"
             style={{
@@ -34,28 +42,17 @@ export default function GalleryPage() {
             }}
           >
             <span className="text-base opacity-50">🔍</span>
-            <span className="text-[15px]" style={{ color: '#bbb0a2' }}>
-              ボードやテーマを探す...
-            </span>
-          </div>
-
-          {/* Tag pills — screen-3 style */}
-          <div className="mb-6 flex flex-wrap justify-center gap-2.5">
-            <span className="tag-hot cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
-              🔥 推し
-            </span>
-            <span className="tag-spring cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
-              🌸 春アニメ
-            </span>
-            <span className="tag-novel cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
-              📖 小説
-            </span>
-            <span className="tag-music cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
-              🎵 邦楽
-            </span>
-            <span className="tag-movie cursor-pointer rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-transform hover:scale-105">
-              🎬 泣ける映画
-            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ボードやテーマを探す..."
+              className="flex-1 bg-transparent text-[15px] outline-none"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-body)',
+              }}
+            />
           </div>
 
           {/* Navigation pill */}
@@ -116,8 +113,19 @@ export default function GalleryPage() {
         {/* Masonry Gallery */}
         {!loading && !error && items.length > 0 && (
           <>
+            {searchQuery.trim() && filteredItems.length === 0 && (
+              <div className="py-8 text-center">
+                <p
+                  className="text-sm"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  「{searchQuery}」に一致するボードが見つかりません
+                </p>
+              </div>
+            )}
+
             <div className="masonry-grid">
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <GalleryCard key={item.id} {...item} />
               ))}
             </div>
