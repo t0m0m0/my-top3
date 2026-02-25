@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import CircularProgress from '@mui/material/CircularProgress'
 import Button from '@mui/material/Button'
@@ -10,24 +11,49 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 export default function GalleryPage() {
   const { items, loading, loadingMore, error, hasMore, loadMore } = useGallery()
   const sentinelRef = useIntersectionObserver(loadMore)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return items
+    return items.filter((item) => item.theme.toLowerCase().includes(q))
+  }, [items, searchQuery])
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
-        {/* Header */}
+        {/* Header — screen-3 style */}
         <div className="mb-6 text-center sm:mb-8">
           <h1
-            className="brand-gradient-text mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl"
-            style={{ fontFamily: 'var(--font-display)' }}
+            className="mb-4 text-[26px] font-bold"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-text-primary)',
+            }}
           >
-            さがす
+            さがす 🔍
           </h1>
-          <p
-            className="mx-auto mb-5 max-w-md text-sm sm:text-base"
-            style={{ color: 'var(--color-text-secondary)' }}
+
+          {/* Search bar */}
+          <div
+            className="mx-auto mb-5 flex max-w-[700px] items-center gap-2.5 rounded-[18px] bg-white px-5 py-3.5"
+            style={{
+              boxShadow: '0 2px 10px rgba(80,60,40,0.06)',
+            }}
           >
-            みんなが作ったコレクションボード
-          </p>
+            <span className="text-base opacity-50">🔍</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ボードやテーマを探す..."
+              className="flex-1 bg-transparent text-[15px] outline-none"
+              style={{
+                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-body)',
+              }}
+            />
+          </div>
 
           {/* Navigation pill */}
           <Link
@@ -87,8 +113,19 @@ export default function GalleryPage() {
         {/* Masonry Gallery */}
         {!loading && !error && items.length > 0 && (
           <>
+            {searchQuery.trim() && filteredItems.length === 0 && (
+              <div className="py-8 text-center">
+                <p
+                  className="text-sm"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  「{searchQuery}」に一致するボードが見つかりません
+                </p>
+              </div>
+            )}
+
             <div className="masonry-grid">
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <GalleryCard key={item.id} {...item} />
               ))}
             </div>
