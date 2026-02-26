@@ -99,13 +99,7 @@ function SearchPage() {
       {/* Sticky Tabs + Search Bar */}
       <div className="sticky-search-bar pb-1">
         <div className="mx-auto max-w-3xl px-3 sm:px-4">
-          <div
-            className="clay px-3 pb-3 pt-3 sm:px-4"
-            style={{
-              borderRadius: '0 0 20px 20px',
-              borderTop: 'none',
-            }}
-          >
+          <div className="clay px-3 pb-3 pt-3 sm:px-4">
             <TabSwitcher value={activeTab} onChange={setActiveTab} />
             <SearchBar value={currentQuery} onChange={handleQueryChange} />
           </div>
