@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@mui/material/Button'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { buildEditUrl } from '../utils/url-params'
 import PillLinkButton from './PillLinkButton'
 import ErrorMessage from './ErrorMessage'
 import ShareButtons from './ShareButtons'
 import Top3Image from './Top3Image'
 import WorkCard from './WorkCard'
+import MobileCarousel from './MobileCarousel'
 import { useWorkFetch } from '../hooks/useWorkFetch'
 import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
 import { useMergedRef } from '../hooks/useMergedRef'
@@ -54,6 +56,7 @@ export default function Top3Content({
   existingShareId,
   readOnly,
 }: Props) {
+  const isMobile = useMediaQuery('(max-width:639px)')
   const captureRef = useRef<HTMLDivElement>(null)
   const [captureElement, setCaptureElement] = useState<HTMLDivElement | null>(
     null,
@@ -142,60 +145,121 @@ export default function Top3Content({
             aria-hidden="true"
           />
 
-          {/* Work cards — screen-2 flex layout with rotation */}
-          <div className="flex flex-col items-center gap-5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-6">
-            <div
-              className="animate-fade-in-up relative"
-              style={{ transform: 'rotate(-2deg)' }}
-            >
-              <WashiTape
-                color="linear-gradient(90deg, #fbcfe8, #fce7f3)"
-                rotate="2deg"
-                left="30%"
-              />
-              <WorkCard
-                work={book.data}
-                loading={book.loading}
-                error={book.error}
-                label="📚 本"
-                onRetry={book.error ? book.retry : undefined}
-              />
+          {/* Work cards */}
+          {isMobile ? (
+            <MobileCarousel>
+              {[
+                <div
+                  key="book"
+                  className="animate-fade-in-up relative"
+                  style={{ transform: 'rotate(-2deg)' }}
+                >
+                  <WashiTape
+                    color="linear-gradient(90deg, #fbcfe8, #fce7f3)"
+                    rotate="2deg"
+                    left="30%"
+                  />
+                  <WorkCard
+                    work={book.data}
+                    loading={book.loading}
+                    error={book.error}
+                    label="📚 本"
+                    onRetry={book.error ? book.retry : undefined}
+                  />
+                </div>,
+                <div
+                  key="music"
+                  className="animate-fade-in-up relative"
+                  style={{ transform: 'rotate(1.5deg)' }}
+                >
+                  <WashiTape
+                    color="linear-gradient(90deg, #ddd6fe, #ede9fe)"
+                    rotate="-3deg"
+                    left="25%"
+                  />
+                  <WorkCard
+                    work={music.data}
+                    loading={music.loading}
+                    error={music.error}
+                    label="🎵 音楽"
+                    onRetry={music.error ? music.retry : undefined}
+                  />
+                </div>,
+                <div
+                  key="movie"
+                  className="animate-fade-in-up relative"
+                  style={{ transform: 'rotate(-0.8deg)' }}
+                >
+                  <WashiTape
+                    color="linear-gradient(90deg, #bfdbfe, #dbeafe)"
+                    rotate="1deg"
+                    left="35%"
+                  />
+                  <WorkCard
+                    work={movie.data}
+                    loading={movie.loading}
+                    error={movie.error}
+                    label="🎬 映画"
+                    onRetry={movie.error ? movie.retry : undefined}
+                  />
+                </div>,
+              ]}
+            </MobileCarousel>
+          ) : (
+            <div className="flex flex-row flex-wrap justify-center gap-6">
+              <div
+                className="animate-fade-in-up relative"
+                style={{ transform: 'rotate(-2deg)' }}
+              >
+                <WashiTape
+                  color="linear-gradient(90deg, #fbcfe8, #fce7f3)"
+                  rotate="2deg"
+                  left="30%"
+                />
+                <WorkCard
+                  work={book.data}
+                  loading={book.loading}
+                  error={book.error}
+                  label="📚 本"
+                  onRetry={book.error ? book.retry : undefined}
+                />
+              </div>
+              <div
+                className="animate-fade-in-up animate-delay-100 relative"
+                style={{ transform: 'rotate(1.5deg)', marginTop: 30 }}
+              >
+                <WashiTape
+                  color="linear-gradient(90deg, #ddd6fe, #ede9fe)"
+                  rotate="-3deg"
+                  left="25%"
+                />
+                <WorkCard
+                  work={music.data}
+                  loading={music.loading}
+                  error={music.error}
+                  label="🎵 音楽"
+                  onRetry={music.error ? music.retry : undefined}
+                />
+              </div>
+              <div
+                className="animate-fade-in-up animate-delay-200 relative"
+                style={{ transform: 'rotate(-0.8deg)' }}
+              >
+                <WashiTape
+                  color="linear-gradient(90deg, #bfdbfe, #dbeafe)"
+                  rotate="1deg"
+                  left="35%"
+                />
+                <WorkCard
+                  work={movie.data}
+                  loading={movie.loading}
+                  error={movie.error}
+                  label="🎬 映画"
+                  onRetry={movie.error ? movie.retry : undefined}
+                />
+              </div>
             </div>
-            <div
-              className="animate-fade-in-up animate-delay-100 relative"
-              style={{ transform: 'rotate(1.5deg)', marginTop: 30 }}
-            >
-              <WashiTape
-                color="linear-gradient(90deg, #ddd6fe, #ede9fe)"
-                rotate="-3deg"
-                left="25%"
-              />
-              <WorkCard
-                work={music.data}
-                loading={music.loading}
-                error={music.error}
-                label="🎵 音楽"
-                onRetry={music.error ? music.retry : undefined}
-              />
-            </div>
-            <div
-              className="animate-fade-in-up animate-delay-200 relative"
-              style={{ transform: 'rotate(-0.8deg)' }}
-            >
-              <WashiTape
-                color="linear-gradient(90deg, #bfdbfe, #dbeafe)"
-                rotate="1deg"
-                left="35%"
-              />
-              <WorkCard
-                work={movie.data}
-                loading={movie.loading}
-                error={movie.error}
-                label="🎬 映画"
-                onRetry={movie.error ? movie.retry : undefined}
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {showImage && (

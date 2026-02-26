@@ -480,6 +480,46 @@ body {
     width: 240px;
   }
 }
+
+/* ===== Mobile Carousel ===== */
+.mobile-carousel {
+  overflow: hidden;
+  position: relative;
+}
+.mobile-carousel-track {
+  display: flex;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-carousel-slide {
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px;
+}
+.mobile-carousel-slide .work-card-board {
+  width: 240px;
+}
+.mobile-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.mobile-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: var(--color-border, #ccc);
+  transition: all 0.25s ease;
+}
+.mobile-carousel-dot.active {
+  background: var(--color-primary, #a855f7);
+  width: 22px;
+  border-radius: 4px;
+}
 .work-card-board:hover {
   box-shadow: 0 12px 36px var(--color-primary-a15) !important;
 }
