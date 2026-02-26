@@ -14,27 +14,27 @@ const displayFontFamily = [
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#a0845e', // warm brown
-      light: '#c4a882', // light brown
-      dark: '#7c6544', // dark brown
+      main: '#EC4899', // pink
+      light: '#F9A8D4', // light pink
+      dark: '#BE185D', // dark pink
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#d4829c', // rose pink
-      light: '#f0b4c8', // light rose
-      dark: '#b5607a', // dark rose
+      main: '#8B5CF6', // lavender
+      light: '#C4B5FD', // light lavender
+      dark: '#6D28D9', // dark lavender
       contrastText: '#ffffff',
     },
     error: {
       main: '#ef4444',
     },
     background: {
-      default: '#faf8f5', // warm cream
+      default: '#FDF2F8', // pink-white
       paper: '#ffffff',
     },
     text: {
-      primary: '#3d3028', // dark brown
-      secondary: '#8c7e72', // warm grey
+      primary: '#831843', // deep rose
+      secondary: '#9CA3AF', // muted
     },
   },
   typography: {
@@ -72,11 +72,11 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #a0845e 0%, #d4829c 100%)',
-          boxShadow: '0 4px 14px rgba(160, 132, 94, 0.3)',
+          background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)',
+          boxShadow: '0 4px 14px rgba(236,72,153,0.3)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #7c6544 0%, #b5607a 100%)',
-            boxShadow: '0 6px 20px rgba(160, 132, 94, 0.4)',
+            background: 'linear-gradient(135deg, #BE185D 0%, #6D28D9 100%)',
+            boxShadow: '0 6px 20px rgba(236,72,153,0.4)',
           },
         },
       },
@@ -121,7 +121,7 @@ const theme = createTheme({
         root: {
           borderRadius: 10,
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#a0845e',
+            borderColor: '#EC4899',
           },
         },
       },

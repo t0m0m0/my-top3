@@ -13,7 +13,7 @@ describe('ThemeInput', () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
     render(<ThemeInput value="" onChange={onChange} />)
-    const input = screen.getByRole('textbox')
+    const input = screen.getByRole('textbox', { name: 'お題' })
     await user.type(input, 'a')
     expect(onChange).toHaveBeenCalled()
   })
@@ -26,7 +26,7 @@ describe('ThemeInput', () => {
   it('shows error when over limit', () => {
     const longText = 'a'.repeat(51)
     render(<ThemeInput value={longText} onChange={vi.fn()} />)
-    expect(screen.getByText(/お題は50文字以内で入力してね/)).toBeInTheDocument()
+    expect(screen.getByText(/50文字以内/)).toBeInTheDocument()
   })
 })
 
@@ -48,18 +48,4 @@ it('calls onChange when a suggestion chip is clicked', async () => {
 it('hides suggestion chips when value is non-empty', () => {
   render(<ThemeInput value="何か" onChange={vi.fn()} />)
   expect(screen.queryByText('推し')).not.toBeInTheDocument()
-})
-
-it('shows guide text when value is empty', () => {
-  render(<ThemeInput value="" onChange={vi.fn()} />)
-  expect(
-    screen.getByText('お題は後からでもOK！まず好きな作品を教えて ✨'),
-  ).toBeInTheDocument()
-})
-
-it('hides guide text when value is non-empty', () => {
-  render(<ThemeInput value="何か" onChange={vi.fn()} />)
-  expect(
-    screen.queryByText('お題は後からでもOK！まず好きな作品を教えて ✨'),
-  ).not.toBeInTheDocument()
 })

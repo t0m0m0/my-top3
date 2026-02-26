@@ -56,7 +56,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
     await user.type(input, '村上春樹')
 
     // Wait for debounce + API response
@@ -103,7 +103,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
 
     // Search in Book tab
     await user.type(input, 'test')
@@ -155,7 +155,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
     await user.type(input, 'テスト')
 
     await waitFor(
@@ -189,7 +189,7 @@ describe('SearchPage integration (no mocked hooks)', () => {
 
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
     await user.type(input, 'error test')
 
     await waitFor(

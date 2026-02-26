@@ -117,7 +117,7 @@ test.describe('Happy path', () => {
 
     await page.goto('/')
 
-    const searchInput = page.getByPlaceholder('好きな作品を検索 🔍')
+    const searchInput = page.getByPlaceholder('タイトルやキーワードで検索...')
 
     // --- Book (default tab) ---
     await searchInput.fill('銀河鉄道')
@@ -197,7 +197,7 @@ test.describe('Rate limit error', () => {
 
     await page.goto('/')
 
-    const searchInput = page.getByPlaceholder('好きな作品を検索 🔍')
+    const searchInput = page.getByPlaceholder('タイトルやキーワードで検索...')
     await searchInput.fill('テスト検索')
 
     const alert = page.getByRole('alert')
@@ -229,7 +229,7 @@ test.describe('Infinite scroll', () => {
 
     await page.goto('/')
 
-    const searchInput = page.getByPlaceholder('好きな作品を検索 🔍')
+    const searchInput = page.getByPlaceholder('タイトルやキーワードで検索...')
     await searchInput.fill('書籍')
 
     // Verify first batch is rendered

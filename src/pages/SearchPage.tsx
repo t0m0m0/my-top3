@@ -1,7 +1,4 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { PRIMARY_LIGHT } from '../constants/image-colors'
-import StepGuide from '../components/StepGuide'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
 import SearchHistory from '../components/SearchHistory'
@@ -32,131 +29,92 @@ function SearchPage() {
     handleCompleteChange,
   } = useSearchPage()
 
-  const mainStyle = useMemo(
-    () => ({
-      background:
-        'linear-gradient(180deg, color-mix(in srgb, var(--color-primary-light) 50%, var(--color-bg)) 0%, color-mix(in srgb, var(--color-primary-light) 20%, var(--color-bg)) 12%, var(--color-bg) 32%, var(--color-bg) 100%)',
-      paddingBottom: selectionComplete
-        ? 'calc(72px + env(safe-area-inset-bottom))'
-        : undefined,
-    }),
-    [selectionComplete],
-  )
-
   return (
-    <div className="min-h-screen" style={mainStyle}>
-      {/* Hero Section */}
-      <div className="relative overflow-hidden px-3 pb-6 pt-8 text-center sm:px-4 sm:pb-8 sm:pt-12">
-        {/* Decorative dots pattern */}
-        <svg
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 opacity-10"
-          width="320"
-          height="120"
-          viewBox="0 0 320 120"
-          fill="none"
-          aria-hidden="true"
-        >
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((col) =>
-            [0, 1, 2].map((row) => (
-              <circle
-                key={`${col}-${row}`}
-                cx={40 * col + 20}
-                cy={40 * row + 20}
-                r="4"
-                fill={PRIMARY_LIGHT}
-              />
-            )),
-          )}
-        </svg>
-        <h1
-          className="animate-fade-in-up brand-gradient-text relative text-3xl font-extrabold tracking-tight sm:text-4xl"
-          style={{
-            fontFamily: 'var(--font-display)',
-          }}
-        >
-          すきコレ
-        </h1>
-        <p
-          className="animate-fade-in-up animate-delay-200 relative mx-auto mt-2 max-w-md text-sm sm:mt-3 sm:text-base"
-          style={{
-            color:
-              'color-mix(in srgb, var(--color-text-primary) 80%, transparent)',
-          }}
-        >
-          好きな作品を3つ選んで、みんなにシェアしよう ✨
-        </p>
-        <div className="animate-fade-in-up animate-delay-200 relative mt-3">
+    <div
+      className="min-h-screen bg-decorative-gradient"
+      style={{
+        backgroundColor: 'var(--color-bg)',
+        paddingBottom: selectionComplete
+          ? 'calc(72px + env(safe-area-inset-bottom))'
+          : undefined,
+      }}
+    >
+      {/* Compact Header */}
+      <header className="px-3 pb-2 pt-4 sm:px-4 sm:pt-6">
+        <div className="mx-auto flex max-w-3xl items-center justify-between">
+          <div>
+            <h1
+              className="brand-gradient-text text-2xl font-extrabold tracking-tight sm:text-3xl"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              すきコレ
+            </h1>
+            <p
+              className="mt-0.5 text-xs sm:text-sm"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              好きな作品を3つ選んで、シェアしよう
+            </p>
+          </div>
           <Link
             to="/gallery"
-            className="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 sm:text-sm"
             style={{
-              color: 'var(--color-primary-dark)',
-              border:
-                '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-              backgroundColor:
-                'color-mix(in srgb, var(--color-bg) 60%, transparent)',
+              color: 'var(--color-primary)',
+              borderColor: 'var(--color-primary-a15)',
+              backgroundColor: 'var(--color-surface)',
+              boxShadow:
+                '3px 3px 8px var(--color-primary-a8), -1px -1px 4px var(--color-white-a60)',
             }}
           >
-            🔍 みんなのボードを見る
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            みんなのボード
           </Link>
         </div>
-        <div className="animate-fade-in-up animate-delay-400 relative mt-5">
-          <StepGuide />
+      </header>
+
+      <div className="mx-auto max-w-3xl px-3 sm:px-4">
+        {/* Theme Input - Compact pill */}
+        <div className="mb-3">
+          <ThemeInput value={theme} onChange={setTheme} />
+          <ThemeHistory onSelect={setTheme} />
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-3 sm:px-4">
-        {/* Theme Input Section */}
-        <div className="mx-auto max-w-2xl">
+      {/* Sticky Tabs + Search Bar */}
+      <div className="sticky-search-bar pb-1">
+        <div className="mx-auto max-w-3xl px-3 sm:px-4">
           <div
-            className="rounded-xl p-4 shadow-sm sm:p-5"
+            className="clay px-3 pb-3 pt-3 sm:px-4"
             style={{
-              backgroundColor: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-            }}
-          >
-            <ThemeInput value={theme} onChange={setTheme} />
-            <ThemeHistory onSelect={setTheme} />
-          </div>
-        </div>
-
-        {/* Selection Area - Sticky on desktop only */}
-        <div
-          data-testid="selection-area-wrapper"
-          className="mt-4 rounded-xl p-4 shadow-md sm:sticky sm:top-0 sm:z-30 sm:p-5"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <SelectionArea
-            theme={theme}
-            onBeforeCreate={handleBeforeCreate}
-            onCompleteChange={handleCompleteChange}
-            onSlotClick={setActiveTab}
-          />
-        </div>
-
-        {/* Search Section Card */}
-        <div
-          className="mt-4 rounded-xl p-4 shadow-sm sm:p-5"
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          {/* Tab + SearchBar: sticky on mobile, static on desktop */}
-          <div
-            data-testid="search-sticky-header"
-            className="sticky top-0 z-30 -mx-4 -mt-4 mb-2 rounded-t-xl px-4 pb-2 pt-4 sm:static sm:z-auto sm:mx-0 sm:mt-0 sm:mb-0 sm:rounded-none sm:px-0 sm:pb-0 sm:pt-0"
-            style={{
-              backgroundColor: 'var(--color-surface)',
+              borderRadius: '0 0 20px 20px',
+              borderTop: 'none',
             }}
           >
             <TabSwitcher value={activeTab} onChange={setActiveTab} />
             <SearchBar value={currentQuery} onChange={handleQueryChange} />
           </div>
+        </div>
+      </div>
 
+      <div className="mx-auto max-w-3xl px-3 sm:px-4">
+        {/* Search Results */}
+        <div className="clay mb-3 mt-3 p-3 sm:p-4">
           {!currentQuery.trim() && (
             <SearchHistory category={activeTab} onSearch={handleQueryChange} />
           )}
@@ -171,6 +129,26 @@ function SearchPage() {
             error={error}
           />
         </div>
+      </div>
+
+      {/* Selection Area - Sticky bottom tray */}
+      <div
+        data-testid="selection-area-wrapper"
+        className="sticky bottom-0 z-30 mx-auto max-w-3xl rounded-t-2xl border-b-0 p-3 sm:p-4"
+        style={{
+          background: 'var(--color-surface)',
+          border: '3px solid var(--color-primary-a10)',
+          borderBottom: 'none',
+          boxShadow:
+            '6px -4px 16px var(--color-primary-a10), -2px -2px 8px var(--color-white-a80)',
+        }}
+      >
+        <SelectionArea
+          theme={theme}
+          onBeforeCreate={handleBeforeCreate}
+          onCompleteChange={handleCompleteChange}
+          onSlotClick={setActiveTab}
+        />
       </div>
 
       <DataCredits />

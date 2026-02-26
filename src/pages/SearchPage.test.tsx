@@ -45,7 +45,7 @@ describe('SearchPage - search history integration', () => {
 
     expect(screen.getByText('過去の検索')).toBeInTheDocument()
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
     await user.type(input, 'test')
 
     expect(screen.queryByText('過去の検索')).not.toBeInTheDocument()
@@ -57,7 +57,7 @@ describe('SearchPage - search history integration', () => {
 
     await user.click(screen.getByText('過去の検索'))
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
     expect(input).toHaveValue('過去の検索')
   })
 
@@ -65,7 +65,7 @@ describe('SearchPage - search history integration', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     render(<SearchPage />)
 
-    const input = screen.getByPlaceholderText('好きな作品を検索 🔍')
+    const input = screen.getByPlaceholderText('タイトルやキーワードで検索...')
     await user.type(input, '村上春樹')
 
     await act(async () => {
@@ -84,7 +84,7 @@ describe('SearchPage - search history integration', () => {
   })
 })
 
-describe('SearchPage - mobile layout: sticky tab & search bar', () => {
+describe('SearchPage - layout', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     vi.clearAllMocks()
@@ -94,27 +94,18 @@ describe('SearchPage - mobile layout: sticky tab & search bar', () => {
     vi.useRealTimers()
   })
 
-  it('selection area should not be sticky on mobile', () => {
+  it('selection area wrapper has sticky class for bottom tray', () => {
     render(<SearchPage />)
-    const selectionHeading = screen.getByText('あなたのセレクト')
-    // SelectionArea の親カードが sticky でないことを確認
-    const selectionCard = selectionHeading.closest(
-      '[data-testid="selection-area-wrapper"]',
-    )
+    const selectionCard = screen.getByTestId('selection-area-wrapper')
     expect(selectionCard).toBeInTheDocument()
-    // クラス名をスペースで分割し、単独の 'sticky' がないことを確認
-    const classes = selectionCard?.className.split(/\s+/) ?? []
-    expect(classes).not.toContain('sticky')
-    // sm:sticky はデスクトップ用なので含まれているべき
-    expect(selectionCard?.className).toContain('sm:sticky')
+    const classes = selectionCard.className.split(/\s+/)
+    expect(classes).toContain('sticky')
   })
 
-  it('tab and search bar should be sticky on mobile', () => {
+  it('renders category tabs', () => {
     render(<SearchPage />)
-    const stickySearchHeader = screen.getByTestId('search-sticky-header')
-    expect(stickySearchHeader).toBeInTheDocument()
-    // モバイルでは sticky、デスクトップでは static
-    expect(stickySearchHeader.className).toMatch(/(?<![\w-])sticky(?![\w-])/)
-    expect(stickySearchHeader.className).toContain('sm:static')
+    expect(screen.getByRole('tab', { name: /本/ })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /音楽/ })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /映画/ })).toBeInTheDocument()
   })
 })

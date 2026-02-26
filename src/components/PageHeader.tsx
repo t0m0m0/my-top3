@@ -13,17 +13,7 @@ export default function PageHeader({ title, subtitle }: Props) {
             'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
         }}
       />
-      <h1
-        className="text-xl font-extrabold sm:text-2xl"
-        style={{
-          fontFamily: 'var(--font-display)',
-          background:
-            'linear-gradient(135deg, var(--color-primary-dark), var(--color-secondary))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-        }}
-      >
+      <h1 className="brand-gradient-text text-xl font-extrabold sm:text-2xl">
         {title}
       </h1>
       {subtitle && (
