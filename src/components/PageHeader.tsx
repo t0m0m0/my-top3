@@ -14,14 +14,9 @@ export default function PageHeader({ title, subtitle }: Props) {
         }}
       />
       <h1
-        className="text-xl font-extrabold sm:text-2xl"
+        className="brand-gradient-text text-xl font-extrabold sm:text-2xl"
         style={{
           fontFamily: 'var(--font-display)',
-          background:
-            'linear-gradient(135deg, var(--color-primary-dark), var(--color-secondary))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
         }}
       >
         {title}

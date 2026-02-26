@@ -1,26 +1,28 @@
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
-import MusicNoteOutlined from '@mui/icons-material/MusicNoteOutlined'
-import MovieOutlined from '@mui/icons-material/MovieOutlined'
 import type { MediaCategory } from '../types/common'
-import type { ReactElement } from 'react'
 
-const TABS: { label: string; value: MediaCategory; icon: ReactElement }[] = [
+const TABS: {
+  label: string
+  value: MediaCategory
+  icon: string
+  bgClass: string
+}[] = [
   {
-    label: '📚 本',
+    label: '本',
     value: 'book',
-    icon: <MenuBookOutlined fontSize="small" />,
+    icon: '📚',
+    bgClass: 'bg-amber-50 border-amber-200 text-amber-800',
   },
   {
-    label: '🎵 音楽',
+    label: '音楽',
     value: 'music',
-    icon: <MusicNoteOutlined fontSize="small" />,
+    icon: '🎵',
+    bgClass: 'bg-violet-50 border-violet-200 text-violet-800',
   },
   {
-    label: '🎬 映画',
+    label: '映画',
     value: 'movie',
-    icon: <MovieOutlined fontSize="small" />,
+    icon: '🎬',
+    bgClass: 'bg-blue-50 border-blue-200 text-blue-800',
   },
 ]
 
@@ -31,50 +33,30 @@ type TabSwitcherProps = {
 
 export default function TabSwitcher({ value, onChange }: TabSwitcherProps) {
   return (
-    <div className="mt-0">
-      <Tabs
-        value={value}
-        onChange={(_, newValue: MediaCategory) => onChange(newValue)}
-        variant="fullWidth"
-        textColor="primary"
-        indicatorColor="primary"
-        sx={{
-          '& .MuiTabs-indicator': {
-            height: '100%',
-            borderRadius: '9999px',
-            backgroundColor: 'var(--color-primary)',
-            opacity: 0.15,
-            zIndex: 0,
-          },
-          '& .MuiTab-root': {
-            zIndex: 1,
-            minHeight: 44,
-            borderRadius: '9999px',
-            textTransform: 'none',
-            fontWeight: 500,
-            fontSize: '0.875rem',
-            transition: 'color 0.2s ease',
-            '&.Mui-selected': {
-              color: 'var(--color-primary)',
-              fontWeight: 600,
-            },
-          },
-          minHeight: 44,
-          backgroundColor: 'var(--color-surface)',
-          borderRadius: '9999px',
-          padding: '4px',
-        }}
-      >
-        {TABS.map((tab) => (
-          <Tab
+    <div className="flex gap-2" role="tablist" aria-label="カテゴリ選択">
+      {TABS.map((tab) => {
+        const isActive = value === tab.value
+        return (
+          <button
             key={tab.value}
-            label={tab.label}
-            value={tab.value}
-            icon={tab.icon}
-            iconPosition="start"
-          />
-        ))}
-      </Tabs>
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(tab.value)}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-full border-2 px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+              isActive
+                ? `${tab.bgClass} shadow-sm scale-105`
+                : 'border-transparent bg-transparent opacity-60 hover:opacity-100'
+            }`}
+            style={{
+              color: isActive ? undefined : 'var(--color-text-secondary)',
+            }}
+          >
+            <span aria-hidden="true">{tab.icon}</span>
+            {tab.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
