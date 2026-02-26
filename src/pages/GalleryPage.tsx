@@ -20,7 +20,10 @@ export default function GalleryPage() {
   }, [items, searchQuery])
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
+    <div
+      className="min-h-screen bg-decorative-gradient"
+      style={{ background: 'var(--color-bg)' }}
+    >
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:py-8">
         {/* Header — screen-3 style */}
         <div className="mb-6 text-center sm:mb-8">

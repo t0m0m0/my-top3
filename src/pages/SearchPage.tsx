@@ -31,7 +31,7 @@ function SearchPage() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen bg-decorative-gradient"
       style={{
         backgroundColor: 'var(--color-bg)',
         paddingBottom: selectionComplete
@@ -97,15 +97,7 @@ function SearchPage() {
       </div>
 
       {/* Sticky Tabs + Search Bar */}
-      <div
-        className="pb-1"
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
-          backgroundColor: 'var(--color-bg)',
-        }}
-      >
+      <div className="sticky-search-bar pb-1">
         <div className="mx-auto max-w-3xl px-3 sm:px-4">
           <div
             className="clay px-3 pb-3 pt-3 sm:px-4"

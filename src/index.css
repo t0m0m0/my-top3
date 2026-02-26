@@ -80,6 +80,12 @@ body {
   font-family: var(--font-body);
   color: var(--color-text-primary);
   background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Decorative gradients on page wrapper (not body) to avoid iOS sticky issues */
+.bg-decorative-gradient {
   background-image:
     radial-gradient(
       ellipse at 30% 20%,
@@ -91,8 +97,15 @@ body {
       rgba(196, 181, 253, 0.2) 0%,
       transparent 50%
     );
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sticky search bar - iOS Safari compatible */
+.sticky-search-bar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--color-bg);
 }
 
 /* Claymorphism utility */
