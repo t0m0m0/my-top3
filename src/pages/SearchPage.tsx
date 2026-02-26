@@ -128,14 +128,7 @@ function SearchPage() {
       {/* Selection Area - Sticky bottom tray */}
       <div
         data-testid="selection-area-wrapper"
-        className="sticky bottom-0 z-30 mx-auto max-w-3xl rounded-t-2xl border-b-0 p-3 sm:p-4"
-        style={{
-          background: 'var(--color-surface)',
-          border: '3px solid var(--color-primary-a10)',
-          borderBottom: 'none',
-          boxShadow:
-            '6px -4px 16px var(--color-primary-a10), -2px -2px 8px var(--color-white-a80)',
-        }}
+        className="sticky bottom-0 z-30 mx-auto max-w-3xl p-3 sm:p-4 clay"
       >
         <SelectionArea
           theme={theme}
