@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import TabSwitcher from '../components/TabSwitcher'
 import SearchBar from '../components/SearchBar'
@@ -30,19 +29,15 @@ function SearchPage() {
     handleCompleteChange,
   } = useSearchPage()
 
-  const mainStyle = useMemo(
-    () => ({
-      paddingBottom: selectionComplete
-        ? 'calc(72px + env(safe-area-inset-bottom))'
-        : undefined,
-    }),
-    [selectionComplete],
-  )
-
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: 'var(--color-bg)', ...mainStyle }}
+      style={{
+        backgroundColor: 'var(--color-bg)',
+        paddingBottom: selectionComplete
+          ? 'calc(72px + env(safe-area-inset-bottom))'
+          : undefined,
+      }}
     >
       {/* Compact Header */}
       <header className="px-3 pb-2 pt-4 sm:px-4 sm:pt-6">
@@ -63,13 +58,13 @@ function SearchPage() {
           </div>
           <Link
             to="/gallery"
-            className="clay flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 sm:text-sm"
+            className="flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 sm:text-sm"
             style={{
               color: 'var(--color-primary)',
-              borderColor: 'rgba(236,72,153,0.15)',
+              borderColor: 'var(--color-primary-a15)',
               backgroundColor: 'var(--color-surface)',
               boxShadow:
-                '3px 3px 8px rgba(236,72,153,0.08), -1px -1px 4px rgba(255,255,255,0.6)',
+                '3px 3px 8px var(--color-primary-a8), -1px -1px 4px var(--color-white-a60)',
             }}
           >
             <svg
@@ -99,12 +94,35 @@ function SearchPage() {
           <ThemeInput value={theme} onChange={setTheme} />
           <ThemeHistory onSelect={setTheme} />
         </div>
+      </div>
 
-        {/* Search Section - Hero area */}
-        <div className="clay mb-3 p-3 sm:p-4">
-          <TabSwitcher value={activeTab} onChange={setActiveTab} />
-          <SearchBar value={currentQuery} onChange={handleQueryChange} />
+      {/* Sticky Tabs + Search Bar */}
+      <div
+        className="pb-1"
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 20,
+          backgroundColor: 'var(--color-bg)',
+        }}
+      >
+        <div className="mx-auto max-w-3xl px-3 sm:px-4">
+          <div
+            className="clay px-3 pb-3 pt-3 sm:px-4"
+            style={{
+              borderRadius: '0 0 20px 20px',
+              borderTop: 'none',
+            }}
+          >
+            <TabSwitcher value={activeTab} onChange={setActiveTab} />
+            <SearchBar value={currentQuery} onChange={handleQueryChange} />
+          </div>
+        </div>
+      </div>
 
+      <div className="mx-auto max-w-3xl px-3 sm:px-4">
+        {/* Search Results */}
+        <div className="clay mb-3 mt-3 p-3 sm:p-4">
           {!currentQuery.trim() && (
             <SearchHistory category={activeTab} onSearch={handleQueryChange} />
           )}
@@ -121,10 +139,17 @@ function SearchPage() {
         </div>
       </div>
 
-      {/* Selection Area - Sticky bottom on desktop, floating on mobile */}
+      {/* Selection Area - Sticky bottom tray */}
       <div
         data-testid="selection-area-wrapper"
-        className="clay sticky bottom-0 z-30 mx-auto max-w-3xl rounded-b-none rounded-t-2xl border-b-0 p-3 sm:p-4"
+        className="sticky bottom-0 z-30 mx-auto max-w-3xl rounded-t-2xl border-b-0 p-3 sm:p-4"
+        style={{
+          background: 'var(--color-surface)',
+          border: '3px solid var(--color-primary-a10)',
+          borderBottom: 'none',
+          boxShadow:
+            '6px -4px 16px var(--color-primary-a10), -2px -2px 8px var(--color-white-a80)',
+        }}
       >
         <SelectionArea
           theme={theme}

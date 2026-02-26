@@ -18,6 +18,11 @@ describe('ThemeInput', () => {
     expect(onChange).toHaveBeenCalled()
   })
 
+  it('shows character count', () => {
+    render(<ThemeInput value="hello" onChange={vi.fn()} />)
+    expect(screen.getByText('5 / 50')).toBeInTheDocument()
+  })
+
   it('shows error when over limit', () => {
     const longText = 'a'.repeat(51)
     render(<ThemeInput value={longText} onChange={vi.fn()} />)

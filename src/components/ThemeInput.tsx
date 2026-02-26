@@ -71,20 +71,27 @@ function ThemeInput({ value, onChange }: ThemeInputProps) {
               onClick={() => onChange(suggestion)}
               sx={{
                 borderRadius: '9999px',
-                borderColor: 'rgba(236,72,153,0.2)',
+                borderColor: 'var(--color-primary-a20)',
                 color: 'var(--color-primary)',
                 fontSize: '0.75rem',
                 '&:hover': {
-                  backgroundColor: 'rgba(236,72,153,0.08)',
+                  backgroundColor: 'var(--color-primary-a8)',
                 },
               }}
             />
           ))}
         </div>
       )}
-      {isOverLimit && (
-        <span className="text-xs text-red-500">
-          {MAX_THEME_LENGTH}文字以内 ({value.length}/{MAX_THEME_LENGTH})
+      {value.length > 0 && (
+        <span
+          className={`text-xs ${isOverLimit ? 'text-red-500' : ''}`}
+          style={{
+            color: isOverLimit ? undefined : 'var(--color-text-secondary)',
+          }}
+        >
+          {isOverLimit
+            ? `${MAX_THEME_LENGTH}文字以内 (${value.length}/${MAX_THEME_LENGTH})`
+            : `${value.length} / ${MAX_THEME_LENGTH}`}
         </span>
       )}
     </div>

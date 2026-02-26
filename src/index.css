@@ -19,10 +19,33 @@
 
   /* Neutrals - Pink-White */
   --color-bg: #fdf2f8;
+  --color-bg-translucent: rgba(253, 242, 248, 0.6);
   --color-surface: #ffffff;
   --color-text-primary: #831843;
   --color-text-secondary: #9ca3af;
   --color-border: rgba(236, 72, 153, 0.1);
+
+  /* Primary alpha variants */
+  --color-primary-a4: rgba(236, 72, 153, 0.04);
+  --color-primary-a6: rgba(236, 72, 153, 0.06);
+  --color-primary-a8: rgba(236, 72, 153, 0.08);
+  --color-primary-a10: rgba(236, 72, 153, 0.1);
+  --color-primary-a14: rgba(236, 72, 153, 0.14);
+  --color-primary-a15: rgba(236, 72, 153, 0.15);
+  --color-primary-a16: rgba(236, 72, 153, 0.16);
+  --color-primary-a20: rgba(236, 72, 153, 0.2);
+  --color-primary-a25: rgba(236, 72, 153, 0.25);
+
+  /* Category colors */
+  --color-cat-book-bg: #fffbeb;
+  --color-cat-book-border: rgba(245, 158, 11, 0.2);
+  --color-cat-book-text: #92400e;
+  --color-cat-music-bg: #f5f3ff;
+  --color-cat-music-border: rgba(139, 92, 246, 0.2);
+  --color-cat-music-text: #5b21b6;
+  --color-cat-movie-bg: #eff6ff;
+  --color-cat-movie-border: rgba(59, 130, 246, 0.2);
+  --color-cat-movie-text: #1e40af;
 
   /* Canvas - Dark purple-rose background for share images */
   --color-canvas-dark: #4a1942;
@@ -40,12 +63,16 @@
     'Zen Maru Gothic', 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
   --font-body: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
 
+  /* White highlight for claymorphism */
+  --color-white-a60: rgba(255, 255, 255, 0.6);
+  --color-white-a80: rgba(255, 255, 255, 0.8);
+  --color-white-a90: rgba(255, 255, 255, 0.9);
+
   /* Shadows - Claymorphism pink tones */
   --shadow-primary:
-    6px 6px 16px rgba(236, 72, 153, 0.1), -2px -2px 8px rgba(255, 255, 255, 0.8);
+    6px 6px 16px var(--color-primary-a10), -2px -2px 8px var(--color-white-a80);
   --shadow-card:
-    4px 4px 12px rgba(236, 72, 153, 0.08),
-    -2px -2px 6px rgba(255, 255, 255, 0.6);
+    4px 4px 12px var(--color-primary-a8), -2px -2px 6px var(--color-white-a60);
 }
 
 /* Base styles */
@@ -71,32 +98,37 @@ body {
 /* Claymorphism utility */
 .clay {
   background: var(--color-surface);
-  border: 3px solid rgba(236, 72, 153, 0.1);
+  border: 3px solid var(--color-primary-a10);
   border-radius: 20px;
   box-shadow:
-    6px 6px 16px rgba(236, 72, 153, 0.1),
-    -2px -2px 8px rgba(255, 255, 255, 0.8);
+    6px 6px 16px var(--color-primary-a10),
+    -2px -2px 8px var(--color-white-a80);
   transition:
     box-shadow 200ms ease,
     transform 200ms ease;
 }
 .clay:hover {
   box-shadow:
-    8px 8px 20px rgba(236, 72, 153, 0.14),
-    -3px -3px 10px rgba(255, 255, 255, 0.9);
+    8px 8px 20px var(--color-primary-a14),
+    -3px -3px 10px var(--color-white-a90);
 }
 
 /* Glass Card utility */
 .glass-card {
   backdrop-filter: blur(12px);
   background: color-mix(in srgb, var(--color-bg) 85%, transparent);
-  border: 1px solid rgba(236, 72, 153, 0.1);
+  border: 1px solid var(--color-primary-a10);
   box-shadow: var(--shadow-card);
 }
 
 /* Gradient text utility */
 .gradient-text {
-  background: linear-gradient(135deg, #be185d 0%, #ec4899 50%, #f9a8d4 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-dark) 0%,
+    var(--color-primary) 50%,
+    var(--color-primary-light) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -116,9 +148,9 @@ body {
   padding: 1.5px;
   background: linear-gradient(
     135deg,
-    rgba(236, 72, 153, 0.1) 0%,
-    #8b5cf6 50%,
-    rgba(236, 72, 153, 0.1) 100%
+    var(--color-primary-a10) 0%,
+    var(--color-secondary) 50%,
+    var(--color-primary-a10) 100%
   );
   mask:
     linear-gradient(#fff 0 0) content-box,
@@ -134,8 +166,8 @@ body {
 /* Selected slot glow */
 .slot-selected {
   box-shadow:
-    6px 6px 16px rgba(236, 72, 153, 0.14),
-    -2px -2px 8px rgba(255, 255, 255, 0.8);
+    6px 6px 16px var(--color-primary-a14),
+    -2px -2px 8px var(--color-white-a80);
   border-color: var(--color-primary-light);
 }
 
@@ -227,15 +259,15 @@ body {
 
 .chip-search-history {
   border-radius: 8px;
-  background-color: rgba(236, 72, 153, 0.08);
+  background-color: var(--color-primary-a8);
   color: var(--color-text-primary);
   font-weight: 500;
-  border: 1px solid rgba(236, 72, 153, 0.2);
+  border: 1px solid var(--color-primary-a20);
   transition: background-color 0.2s ease;
 }
 
 .chip-search-history:hover {
-  background-color: rgba(236, 72, 153, 0.16);
+  background-color: var(--color-primary-a16);
 }
 
 .theme-quote {
@@ -251,7 +283,7 @@ body {
   left: -4px;
   top: -8px;
   font-size: 2.5rem;
-  color: #ec4899;
+  color: var(--color-primary);
   opacity: 0.3;
   font-family: Georgia, serif;
   line-height: 1;
@@ -263,7 +295,7 @@ body {
   right: -4px;
   bottom: -12px;
   font-size: 2.5rem;
-  color: #ec4899;
+  color: var(--color-primary);
   opacity: 0.3;
   font-family: Georgia, serif;
   line-height: 1;
@@ -437,7 +469,7 @@ body {
   }
 }
 .work-card-board:hover {
-  box-shadow: 0 12px 36px rgba(236, 72, 153, 0.15) !important;
+  box-shadow: 0 12px 36px var(--color-primary-a15) !important;
 }
 
 /* Gentle float animation */
@@ -456,7 +488,13 @@ body {
 
 /* Brand gradient text */
 .brand-gradient-text {
-  background: linear-gradient(135deg, #8b5cf6, #ec4899, #f472b6);
+  background: linear-gradient(
+    135deg,
+    var(--color-secondary),
+    var(--color-primary),
+    var(--color-primary-light)
+  );
+  font-family: var(--font-display);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

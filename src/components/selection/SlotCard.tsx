@@ -9,9 +9,21 @@ const SLOT_COLORS: Record<
   MediaCategory,
   { bg: string; border: string; text: string }
 > = {
-  book: { bg: '#FFFBEB', border: 'rgba(245,158,11,0.2)', text: '#92400E' },
-  music: { bg: '#F5F3FF', border: 'rgba(139,92,246,0.2)', text: '#5B21B6' },
-  movie: { bg: '#EFF6FF', border: 'rgba(59,130,246,0.2)', text: '#1E40AF' },
+  book: {
+    bg: 'var(--color-cat-book-bg)',
+    border: 'var(--color-cat-book-border)',
+    text: 'var(--color-cat-book-text)',
+  },
+  music: {
+    bg: 'var(--color-cat-music-bg)',
+    border: 'var(--color-cat-music-border)',
+    text: 'var(--color-cat-music-text)',
+  },
+  movie: {
+    bg: 'var(--color-cat-movie-bg)',
+    border: 'var(--color-cat-movie-border)',
+    text: 'var(--color-cat-movie-text)',
+  },
 }
 
 type SlotCardProps = {
@@ -41,7 +53,10 @@ export function SlotCard({
         onClick={() => onSlotClick?.(category)}
         aria-label={`${CATEGORY_LABELS_DISPLAY[category]}を選ぶ`}
       >
-        <span className="text-xs font-semibold" style={{ color: colors.text }}>
+        <span
+          className="pointer-events-none select-none text-xs font-semibold"
+          style={{ color: colors.text }}
+        >
           {CATEGORY_LABELS_DISPLAY[category]}
         </span>
         <span

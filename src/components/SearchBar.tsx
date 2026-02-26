@@ -69,18 +69,18 @@ export default function SearchBar({
         }}
         sx={{
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'rgba(253,242,248,0.6)',
+            backgroundColor: 'var(--color-bg-translucent)',
             borderRadius: '16px',
-            border: '3px solid rgba(236,72,153,0.08)',
-            boxShadow: 'inset 2px 2px 4px rgba(236,72,153,0.04)',
+            border: '3px solid var(--color-primary-a8)',
+            boxShadow: 'inset 2px 2px 4px var(--color-primary-a4)',
             transition: 'box-shadow 200ms ease, border-color 200ms ease',
             '& fieldset': {
               border: 'none',
             },
             '&.Mui-focused': {
-              borderColor: 'rgba(236,72,153,0.25)',
+              borderColor: 'var(--color-primary-a25)',
               boxShadow:
-                'inset 2px 2px 4px rgba(236,72,153,0.06), 0 0 0 3px rgba(236,72,153,0.1)',
+                'inset 2px 2px 4px var(--color-primary-a6), 0 0 0 3px var(--color-primary-a10)',
             },
           },
         }}
