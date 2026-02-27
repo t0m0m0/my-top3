@@ -10,6 +10,17 @@ import { createShareStore } from './share-store.ts'
 
 const imagesDir = path.resolve(process.cwd(), 'data', 'images')
 
+/** Build public-facing URL from the request, respecting reverse proxy headers */
+function publicUrl(c: {
+  req: { url: string; header(name: string): string | undefined }
+}): string {
+  const proto = c.req.header('x-forwarded-proto') ?? 'http'
+  const host =
+    c.req.header('x-forwarded-host') ?? c.req.header('host') ?? 'localhost:8000'
+  const pathname = new URL(c.req.url).pathname + new URL(c.req.url).search
+  return `${proto}://${host}${pathname}`
+}
+
 const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
   path.resolve(process.cwd(), 'data', 'shares.db')
@@ -31,7 +42,7 @@ app.get('/my-no1s', async (c) => {
     return c.notFound()
   }
 
-  const url = c.req.url
+  const url = publicUrl(c)
   const searchParams = new URL(url).searchParams
 
   try {
@@ -67,13 +78,14 @@ app.get('/s/:id', async (c) => {
 
     // Check if OGP image exists for this share
     const imageFile = path.join(imagesDir, `${id}.png`)
-    const baseUrl = `${c.req.header('x-forwarded-proto') ?? 'http'}://${c.req.header('host') ?? 'localhost:8000'}`
+    const url = publicUrl(c)
+    const baseUrl = url.replace(/\/s\/.*$/, '')
     const imageUrl = fs.existsSync(imageFile)
       ? `${baseUrl}/api/shares/${id}/image`
       : undefined
 
     try {
-      html = await injectOgpTags(html, c.req.url, searchParams, imageUrl)
+      html = await injectOgpTags(html, url, searchParams, imageUrl)
     } catch (e) {
       console.error('[ogp] Failed to inject OGP tags for short URL:', e)
     }
