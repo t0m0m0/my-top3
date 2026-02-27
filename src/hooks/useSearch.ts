@@ -67,7 +67,16 @@ export function useSearch(
           if (response.status === 429) {
             throw new Error(MESSAGES.RATE_LIMITED)
           }
-          throw new Error(`HTTP ${response.status}`)
+          let serverMessage: string | undefined
+          try {
+            const errorJson = (await response.json()) as {
+              error?: { message?: string }
+            }
+            serverMessage = errorJson?.error?.message
+          } catch {
+            // Response body is not valid JSON – fall through
+          }
+          throw new Error(serverMessage || `HTTP ${response.status}`)
         }
 
         const json = (await response.json()) as {

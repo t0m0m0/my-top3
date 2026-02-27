@@ -239,6 +239,41 @@ describe('useSearch', () => {
     expect(callCount).toBeLessThanOrEqual(3)
   })
 
+  it('displays server error message from response body on 400', async () => {
+    server.use(
+      http.get('/api/books/search', () => {
+        return HttpResponse.json(
+          {
+            ok: false,
+            error: {
+              kind: 'unknown',
+              message: 'Query exceeds maximum length of 200',
+            },
+          },
+          { status: 400 },
+        )
+      }),
+    )
+    const { result } = renderHook(() => useSearch('book', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(result.current.error).toBe('Query exceeds maximum length of 200')
+  })
+
+  it('falls back to HTTP status when error body is not parseable', async () => {
+    server.use(
+      http.get('/api/books/search', () => {
+        return new HttpResponse('Bad Request', { status: 400 })
+      }),
+    )
+    const { result } = renderHook(() => useSearch('book', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(result.current.error).toBe('HTTP 400')
+  })
+
   it('uses API_ENDPOINTS for movie category', async () => {
     let requestedUrl = ''
     server.use(
