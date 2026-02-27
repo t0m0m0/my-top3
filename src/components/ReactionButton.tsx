@@ -25,7 +25,7 @@ export default function ReactionButton({ count, reacted, onToggle }: Props) {
         className="transition-transform duration-150"
         style={{ transform: reacted ? 'scale(1.2)' : 'scale(1)' }}
       >
-        {reacted ? '❤️' : '💜'}
+        {reacted ? '❤️' : '🤍'}
       </span>
       <span>{count}</span>
     </button>

@@ -13,9 +13,9 @@ describe('ReactionButton', () => {
     expect(screen.getByText('❤️')).toBeInTheDocument()
   })
 
-  it('renders 💜 when not reacted', () => {
+  it('renders 🤍 when not reacted', () => {
     render(<ReactionButton count={0} reacted={false} onToggle={() => {}} />)
-    expect(screen.getByText('💜')).toBeInTheDocument()
+    expect(screen.getByText('🤍')).toBeInTheDocument()
   })
 
   it('calls onToggle on click', () => {
