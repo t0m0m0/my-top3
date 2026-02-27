@@ -128,14 +128,16 @@ function SearchPage() {
       {/* Selection Area - Sticky bottom tray */}
       <div
         data-testid="selection-area-wrapper"
-        className="sticky bottom-0 z-30 mx-auto max-w-3xl p-3 sm:p-4 clay"
+        className="sticky bottom-0 z-30 mx-auto max-w-3xl px-3 sm:px-4"
       >
-        <SelectionArea
-          theme={theme}
-          onBeforeCreate={handleBeforeCreate}
-          onCompleteChange={handleCompleteChange}
-          onSlotClick={setActiveTab}
-        />
+        <div className="clay p-3 sm:p-4">
+          <SelectionArea
+            theme={theme}
+            onBeforeCreate={handleBeforeCreate}
+            onCompleteChange={handleCompleteChange}
+            onSlotClick={setActiveTab}
+          />
+        </div>
       </div>
 
       <DataCredits />
