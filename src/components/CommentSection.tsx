@@ -188,11 +188,7 @@ export default function CommentSection({ shareId }: Props) {
             disabled={loading}
             sx={{ textTransform: 'none' }}
           >
-            {loading ? (
-              <CircularProgress size={18} />
-            ) : (
-              'もっと見る'
-            )}
+            {loading ? <CircularProgress size={18} /> : 'もっと見る'}
           </Button>
         </div>
       )}

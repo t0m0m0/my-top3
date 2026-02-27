@@ -131,6 +131,7 @@ export type ShareListItem = Required<Omit<ShareParams, 'tags'>> & {
   id: string
   createdAt: number
   reactionCount: number
+  commentCount: number
   tags: string[]
 }
 
@@ -204,9 +205,7 @@ function validateCommentInput(input: CommentInput): void {
   }
   const nickname = input.nickname.trim()
   if (nickname.length > MAX_NICKNAME_LENGTH) {
-    throw new Error(
-      `nickname exceeds maximum length of ${MAX_NICKNAME_LENGTH}`,
-    )
+    throw new Error(`nickname exceeds maximum length of ${MAX_NICKNAME_LENGTH}`)
   }
   if (nickname && CONTROL_CHAR_RE.test(nickname)) {
     throw new Error('nickname contains invalid characters')
@@ -331,10 +330,13 @@ export function createShareStore(
   const listStmt = db.prepare(`
     SELECT s.id, s.theme, s.book_id, s.music_id, s.movie_id,
            s.book_thumb, s.music_thumb, s.movie_thumb, s.created_at,
-           COALESCE(r.cnt, 0) as reaction_count
+           COALESCE(r.cnt, 0) as reaction_count,
+           COALESCE(cm.cnt, 0) as comment_count
     FROM shares s
     LEFT JOIN (SELECT share_id, COUNT(*) as cnt FROM reactions GROUP BY share_id) r
       ON s.id = r.share_id
+    LEFT JOIN (SELECT share_id, COUNT(*) as cnt FROM comments GROUP BY share_id) cm
+      ON s.id = cm.share_id
     ORDER BY s.created_at DESC
     LIMIT ? OFFSET ?
   `)
@@ -406,11 +408,14 @@ export function createShareStore(
   const listByTagStmt = db.prepare(`
     SELECT s.id, s.theme, s.book_id, s.music_id, s.movie_id,
            s.book_thumb, s.music_thumb, s.movie_thumb, s.created_at,
-           COALESCE(r.cnt, 0) as reaction_count
+           COALESCE(r.cnt, 0) as reaction_count,
+           COALESCE(cm.cnt, 0) as comment_count
     FROM shares s
     INNER JOIN share_tags st ON s.id = st.share_id
     LEFT JOIN (SELECT share_id, COUNT(*) as cnt FROM reactions GROUP BY share_id) r
       ON s.id = r.share_id
+    LEFT JOIN (SELECT share_id, COUNT(*) as cnt FROM comments GROUP BY share_id) cm
+      ON s.id = cm.share_id
     WHERE st.tag = ?
     ORDER BY s.created_at DESC
     LIMIT ? OFFSET ?
@@ -539,11 +544,14 @@ export function createShareStore(
         purgeExpiredStmt.run(ttlSeconds)
       }
 
-      let rows: (ShareRow & {
+      type ListRow = ShareRow & {
         id: string
         created_at: number
         reaction_count: number
-      })[]
+        comment_count: number
+      }
+
+      let rows: ListRow[]
       let total: number
 
       if (options.tag) {
@@ -553,19 +561,11 @@ export function createShareStore(
           options.tag,
           options.limit,
           options.offset,
-        ) as (ShareRow & {
-          id: string
-          created_at: number
-          reaction_count: number
-        })[]
+        ) as ListRow[]
       } else {
         const { cnt } = countStmt.get() as { cnt: number }
         total = cnt
-        rows = listStmt.all(options.limit, options.offset) as (ShareRow & {
-          id: string
-          created_at: number
-          reaction_count: number
-        })[]
+        rows = listStmt.all(options.limit, options.offset) as ListRow[]
       }
 
       return {
@@ -574,6 +574,7 @@ export function createShareStore(
           id: row.id,
           createdAt: row.created_at,
           reactionCount: row.reaction_count,
+          commentCount: row.comment_count,
           tags: getTagsForShare(row.id),
         })),
         total,
@@ -623,12 +624,7 @@ export function createShareStore(
       const nickname = input.nickname.trim() || DEFAULT_NICKNAME
       const body = input.body.trim()
       const clientId = input.clientId ?? ''
-      const result = insertCommentStmt.run(
-        shareId,
-        nickname,
-        body,
-        clientId,
-      )
+      const result = insertCommentStmt.run(shareId, nickname, body, clientId)
       return {
         id: Number(result.lastInsertRowid),
         nickname,

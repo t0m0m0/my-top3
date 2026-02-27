@@ -720,7 +720,10 @@ describe('share-store', () => {
     it('adds a comment and retrieves it', () => {
       const store = createShareStore(dbPath)
       const id = store.save(sampleParams)
-      const comment = store.addComment(id, { nickname: 'テスター', body: 'いいね！' })
+      const comment = store.addComment(id, {
+        nickname: 'テスター',
+        body: 'いいね！',
+      })
       expect(comment.id).toBeDefined()
       expect(comment.nickname).toBe('テスター')
       expect(comment.body).toBe('いいね！')
@@ -782,9 +785,9 @@ describe('share-store', () => {
     it('rejects empty comment body', () => {
       const store = createShareStore(dbPath)
       const id = store.save(sampleParams)
-      expect(() =>
-        store.addComment(id, { nickname: '', body: '' }),
-      ).toThrow(/body/)
+      expect(() => store.addComment(id, { nickname: '', body: '' })).toThrow(
+        /body/,
+      )
       store.close()
     })
 
@@ -830,18 +833,30 @@ describe('share-store', () => {
     it('deletes a comment by id and clientId', () => {
       const store = createShareStore(dbPath)
       const shareId = store.save(sampleParams)
-      const comment = store.addComment(shareId, { nickname: '', body: 'delete me', clientId: 'client-1' })
+      const comment = store.addComment(shareId, {
+        nickname: '',
+        body: 'delete me',
+        clientId: 'client-1',
+      })
       expect(store.deleteComment(comment.id, 'client-1')).toBe(true)
-      expect(store.listComments(shareId, { limit: 10, offset: 0 }).total).toBe(0)
+      expect(store.listComments(shareId, { limit: 10, offset: 0 }).total).toBe(
+        0,
+      )
       store.close()
     })
 
     it('does not delete a comment with wrong clientId', () => {
       const store = createShareStore(dbPath)
       const shareId = store.save(sampleParams)
-      const comment = store.addComment(shareId, { nickname: '', body: 'keep me', clientId: 'client-1' })
+      const comment = store.addComment(shareId, {
+        nickname: '',
+        body: 'keep me',
+        clientId: 'client-1',
+      })
       expect(store.deleteComment(comment.id, 'client-2')).toBe(false)
-      expect(store.listComments(shareId, { limit: 10, offset: 0 }).total).toBe(1)
+      expect(store.listComments(shareId, { limit: 10, offset: 0 }).total).toBe(
+        1,
+      )
       store.close()
     })
   })

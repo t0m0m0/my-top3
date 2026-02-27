@@ -196,10 +196,7 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
       ),
       COMMENT_MAX_LIMIT,
     )
-    const offset = Math.max(
-      Number.isFinite(offsetParam) ? offsetParam : 0,
-      0,
-    )
+    const offset = Math.max(Number.isFinite(offsetParam) ? offsetParam : 0, 0)
 
     const result = store.listComments(id, { limit, offset })
     return c.json({ ok: true, data: result })
@@ -232,7 +229,11 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
       )
     }
 
-    const { nickname, body: commentBody, clientId } = body as {
+    const {
+      nickname,
+      body: commentBody,
+      clientId,
+    } = body as {
       nickname?: unknown
       body?: unknown
       clientId?: unknown

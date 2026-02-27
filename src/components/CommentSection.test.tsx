@@ -27,9 +27,7 @@ describe('CommentSection', () => {
       /コメント/,
     )
     await waitFor(() => {
-      expect(
-        screen.getByText(/まだコメントはありません/),
-      ).toBeInTheDocument()
+      expect(screen.getByText(/まだコメントはありません/)).toBeInTheDocument()
     })
   })
 
@@ -119,9 +117,7 @@ describe('CommentSection', () => {
     render(<CommentSection shareId="test-id" />)
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/まだコメントはありません/),
-      ).toBeInTheDocument()
+      expect(screen.getByText(/まだコメントはありません/)).toBeInTheDocument()
     })
 
     const bodyInput = screen.getByLabelText('コメントを入力...')

@@ -693,7 +693,11 @@ describe('shares route', () => {
       const res = await app.request(`/${id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: 'テスター', body: 'いいね！', clientId: 'c1' }),
+        body: JSON.stringify({
+          nickname: 'テスター',
+          body: 'いいね！',
+          clientId: 'c1',
+        }),
       })
       expect(res.status).toBe(201)
       const json = (await res.json()) as {
@@ -754,14 +758,22 @@ describe('shares route', () => {
         const res = await app.request(`/${id}/comments`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nickname: '', body: `msg${i}`, clientId: 'spammer' }),
+          body: JSON.stringify({
+            nickname: '',
+            body: `msg${i}`,
+            clientId: 'spammer',
+          }),
         })
         expect(res.status).toBe(201)
       }
       const res = await app.request(`/${id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: '', body: 'one more', clientId: 'spammer' }),
+        body: JSON.stringify({
+          nickname: '',
+          body: 'one more',
+          clientId: 'spammer',
+        }),
       })
       expect(res.status).toBe(429)
     })
@@ -839,20 +851,21 @@ describe('shares route', () => {
       const commentRes = await app.request(`/${id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: '', body: 'delete me', clientId: 'client-1' }),
+        body: JSON.stringify({
+          nickname: '',
+          body: 'delete me',
+          clientId: 'client-1',
+        }),
       })
       const { data: comment } = (await commentRes.json()) as {
         data: { id: number }
       }
 
-      const deleteRes = await app.request(
-        `/${id}/comments/${comment.id}`,
-        {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clientId: 'client-1' }),
-        },
-      )
+      const deleteRes = await app.request(`/${id}/comments/${comment.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1' }),
+      })
       expect(deleteRes.status).toBe(200)
       const json = (await deleteRes.json()) as { ok: boolean }
       expect(json.ok).toBe(true)
@@ -874,20 +887,21 @@ describe('shares route', () => {
       const commentRes = await app.request(`/${id}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nickname: '', body: 'keep me', clientId: 'client-1' }),
+        body: JSON.stringify({
+          nickname: '',
+          body: 'keep me',
+          clientId: 'client-1',
+        }),
       })
       const { data: comment } = (await commentRes.json()) as {
         data: { id: number }
       }
 
-      const deleteRes = await app.request(
-        `/${id}/comments/${comment.id}`,
-        {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clientId: 'wrong-client' }),
-        },
-      )
+      const deleteRes = await app.request(`/${id}/comments/${comment.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'wrong-client' }),
+      })
       expect(deleteRes.status).toBe(403)
     })
   })
