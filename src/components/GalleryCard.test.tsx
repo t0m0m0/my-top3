@@ -47,11 +47,11 @@ describe('GalleryCard', () => {
     expect(link).toHaveAttribute('href', '/s/abc123')
   })
 
-  it('renders thumbnail images (hero + small)', () => {
+  it('renders thumbnail images in hero area', () => {
     renderCard()
     const images = screen.getAllByRole('img')
-    // 3 hero images + 3 small thumbnails = 6
-    expect(images).toHaveLength(6)
+    // 3 hero images only
+    expect(images).toHaveLength(3)
   })
 
   it('renders fallback when theme is empty', () => {
@@ -74,8 +74,8 @@ describe('GalleryCard', () => {
   it('skips thumbnail for empty URL', () => {
     renderCard({ ...defaultProps, bookThumb: '' })
     const images = screen.getAllByRole('img')
-    // 2 hero + 2 small = 4
-    expect(images).toHaveLength(4)
+    // 2 hero images only
+    expect(images).toHaveLength(2)
   })
 
   it('renders reaction count', () => {
