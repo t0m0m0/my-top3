@@ -9,8 +9,14 @@ const SERVICE_PATTERNS: [RegExp, string][] = [
 
 /** Detect service name from external URL and return a localized label */
 export function getServiceLabel(url: string): string {
+  let hostname: string
+  try {
+    hostname = new URL(url).hostname
+  } catch {
+    return '詳しく見る'
+  }
   for (const [pattern, label] of SERVICE_PATTERNS) {
-    if (pattern.test(url)) return label
+    if (pattern.test(hostname)) return label
   }
   return '詳しく見る'
 }
