@@ -25,28 +25,27 @@ type GalleryState = {
 
 const PAGE_SIZE = 20
 
+const INITIAL_STATE: GalleryState = {
+  items: [],
+  total: 0,
+  loading: true,
+  loadingMore: false,
+  error: null,
+  hasMore: false,
+}
+
 export function useGallery(tag?: string) {
-  const [state, setState] = useState<GalleryState>({
-    items: [],
-    total: 0,
-    loading: true,
-    loadingMore: false,
-    error: null,
-    hasMore: false,
-  })
+  // Reset state whenever tag changes by using tag as the key for initial state
+  const [currentTag, setCurrentTag] = useState(tag)
+  const [state, setState] = useState<GalleryState>(INITIAL_STATE)
+
+  if (currentTag !== tag) {
+    setCurrentTag(tag)
+    setState(INITIAL_STATE)
+  }
 
   useEffect(() => {
     let cancelled = false
-
-    // Reset state when tag changes
-    setState({
-      items: [],
-      total: 0,
-      loading: true,
-      loadingMore: false,
-      error: null,
-      hasMore: false,
-    })
 
     const url = tag
       ? `/api/shares?limit=${PAGE_SIZE}&offset=0&tag=${encodeURIComponent(tag)}`
