@@ -494,7 +494,9 @@ describe('share-store', () => {
 
       // Verify tags are gone by checking the DB directly
       const db = new Database(dbPath)
-      const rows = db.prepare('SELECT * FROM share_tags WHERE share_id = ?').all(id)
+      const rows = db
+        .prepare('SELECT * FROM share_tags WHERE share_id = ?')
+        .all(id)
       db.close()
       expect(rows).toHaveLength(0)
       store.close()
@@ -535,7 +537,9 @@ describe('share-store', () => {
 
     it('allows exactly 5 tags of 20 chars each', () => {
       const store = createShareStore(dbPath)
-      const tags = Array.from({ length: 5 }, (_, i) => String(i).repeat(20).slice(0, 20))
+      const tags = Array.from({ length: 5 }, (_, i) =>
+        String(i).repeat(20).slice(0, 20),
+      )
       const id = store.save({ ...sampleParams, tags })
       const result = store.get(id)!
       expect(result.tags).toEqual(tags)

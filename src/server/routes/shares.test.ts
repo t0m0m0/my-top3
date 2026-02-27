@@ -671,5 +671,4 @@ describe('shares route', () => {
       expect(json.data.tags).toEqual([])
     })
   })
-
 })

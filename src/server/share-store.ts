@@ -54,7 +54,7 @@ type ShareRow = {
   movie_thumb: string
 }
 
-function mapRow(row: ShareRow): Required<ShareParams> {
+function mapRow(row: ShareRow): Required<Omit<ShareParams, 'tags'>> {
   return {
     theme: row.theme,
     bookId: row.book_id,
@@ -429,7 +429,9 @@ export function createShareStore(
       return saveTransaction(params)
     },
 
-    get(id: string): (Required<Omit<ShareParams, 'tags'>> & { tags: string[] }) | null {
+    get(
+      id: string,
+    ): (Required<Omit<ShareParams, 'tags'>> & { tags: string[] }) | null {
       if (!isValidShareId(id)) return null
       const row = selectByIdFullStmt.get(id) as
         | (ShareRow & { created_at: number })
@@ -454,7 +456,11 @@ export function createShareStore(
       if (options.tag) {
         const { cnt } = countByTagStmt.get(options.tag) as { cnt: number }
         total = cnt
-        rows = listByTagStmt.all(options.tag, options.limit, options.offset) as (ShareRow & {
+        rows = listByTagStmt.all(
+          options.tag,
+          options.limit,
+          options.offset,
+        ) as (ShareRow & {
           id: string
           created_at: number
           reaction_count: number
