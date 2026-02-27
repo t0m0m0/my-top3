@@ -3,6 +3,7 @@ import Button from '@mui/material/Button'
 import type { SearchResultItem } from '../types/common'
 import { SafeImage } from './SafeImage'
 import { DEFAULT_PLACEHOLDER } from '../constants/placeholders'
+import { getServiceLabel } from '../utils/external-link'
 
 /** Screen-2 style: gradient background + badge + card info */
 const CATEGORY_CONFIG: Record<
@@ -175,6 +176,26 @@ function WorkCard({ work, loading, error, label, onRetry }: WorkCardProps) {
             >
               {work.subtitle}
             </p>
+          )}
+
+          {/* External link button */}
+          {hasLink && (
+            <a
+              href={work.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--color-primary-a8, #f3e8ff)',
+                color: 'var(--color-primary-dark, #7c3aed)',
+                minHeight: 44,
+                lineHeight: '1',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span aria-hidden="true">🔗</span>
+              {getServiceLabel(work.externalUrl)}
+            </a>
           )}
         </div>
       </div>
