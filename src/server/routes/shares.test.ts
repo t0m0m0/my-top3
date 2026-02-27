@@ -777,6 +777,32 @@ describe('shares route', () => {
       })
       expect(res.status).toBe(429)
     })
+
+    it('rate limits comments even with empty clientId', async () => {
+      const id = await createShare()
+      for (let i = 0; i < 5; i++) {
+        const res = await app.request(`/${id}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nickname: '',
+            body: `anon${i}`,
+            clientId: '',
+          }),
+        })
+        expect(res.status).toBe(201)
+      }
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: '',
+          body: 'one more anon',
+          clientId: '',
+        }),
+      })
+      expect(res.status).toBe(429)
+    })
   })
 
   describe('GET /:id/comments', () => {

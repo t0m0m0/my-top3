@@ -160,17 +160,46 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
   const commentRateMap = new Map<string, number[]>()
   const RATE_LIMIT_WINDOW_MS = 60_000
   const RATE_LIMIT_MAX = 5
+  const RATE_LIMIT_MAX_KEYS = 10_000
+  const RATE_LIMIT_CLEANUP_INTERVAL_MS = 5 * 60_000
+  const ANONYMOUS_RATE_KEY = '__anonymous__'
+
+  // Periodic cleanup to prevent memory leaks
+  const rateLimitCleanupTimer = setInterval(() => {
+    const now = Date.now()
+    for (const [key, timestamps] of commentRateMap) {
+      const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
+      if (recent.length === 0) {
+        commentRateMap.delete(key)
+      } else {
+        commentRateMap.set(key, recent)
+      }
+    }
+  }, RATE_LIMIT_CLEANUP_INTERVAL_MS)
+  // Allow the process to exit without waiting for the timer
+  if (rateLimitCleanupTimer.unref) {
+    rateLimitCleanupTimer.unref()
+  }
 
   function isRateLimited(clientId: string): boolean {
+    const rateKey = clientId || ANONYMOUS_RATE_KEY
     const now = Date.now()
-    const timestamps = commentRateMap.get(clientId) ?? []
+    const timestamps = commentRateMap.get(rateKey) ?? []
     const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
     if (recent.length >= RATE_LIMIT_MAX) {
-      commentRateMap.set(clientId, recent)
+      commentRateMap.set(rateKey, recent)
       return true
     }
+    // Evict oldest entries if map grows too large
+    if (
+      !commentRateMap.has(rateKey) &&
+      commentRateMap.size >= RATE_LIMIT_MAX_KEYS
+    ) {
+      const firstKey = commentRateMap.keys().next().value
+      if (firstKey !== undefined) commentRateMap.delete(firstKey)
+    }
     recent.push(now)
-    commentRateMap.set(clientId, recent)
+    commentRateMap.set(rateKey, recent)
     return false
   }
 
@@ -241,8 +270,8 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
 
     const clientIdStr = typeof clientId === 'string' ? clientId : ''
 
-    // Rate limit check
-    if (clientIdStr && isRateLimited(clientIdStr)) {
+    // Rate limit check (applies even for anonymous/empty clientId)
+    if (isRateLimited(clientIdStr)) {
       return c.json(
         {
           ok: false,
