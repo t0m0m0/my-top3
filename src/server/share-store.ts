@@ -17,6 +17,7 @@ export type ShareParams = {
 export type ShareStoreOptions = {
   maxRecords?: number
   ttlSeconds?: number
+  onDelete?: (id: string) => void
 }
 
 const DEFAULT_MAX_RECORDS = 10_000
@@ -218,6 +219,7 @@ export type ShareStore = {
   list: (options: ShareListOptions) => ShareListResult
   delete: (id: string) => boolean
   purgeExpired: () => number
+  getAllIds: () => string[]
   addReaction: (shareId: string, clientId: string) => ReactionResult
   removeReaction: (shareId: string, clientId: string) => ReactionResult
   getReactionCount: (shareId: string) => number
@@ -238,6 +240,7 @@ export function createShareStore(
 ): ShareStore {
   const maxRecords = options?.maxRecords ?? DEFAULT_MAX_RECORDS
   const ttlSeconds = options?.ttlSeconds ?? 0 // 0 = no TTL
+  const onDelete = options?.onDelete
 
   // Ensure directory exists
   const dir = path.dirname(dbPath)
@@ -385,6 +388,10 @@ export function createShareStore(
     DELETE FROM comments WHERE share_id = ?
   `)
 
+  const selectOldestIdsStmt = db.prepare(`
+    SELECT id FROM shares ORDER BY created_at ASC LIMIT ?
+  `)
+
   const deleteOldestStmt = db.prepare(`
     DELETE FROM shares WHERE id IN (
       SELECT id FROM shares ORDER BY created_at ASC LIMIT ?
@@ -427,6 +434,12 @@ export function createShareStore(
     WHERE st.tag = ?
   `)
 
+  const selectAllIdsStmt = db.prepare(`SELECT id FROM shares`)
+
+  const selectExpiredIdsStmt = db.prepare(
+    `SELECT id FROM shares WHERE created_at < unixepoch() - ?`,
+  )
+
   const purgeExpiredStmt = db.prepare(
     `DELETE FROM shares WHERE created_at < unixepoch() - ?`,
   )
@@ -434,6 +447,27 @@ export function createShareStore(
   function isExpired(createdAt: number): boolean {
     if (ttlSeconds <= 0) return false
     return createdAt < Math.floor(Date.now() / 1000) - ttlSeconds
+  }
+
+  function deleteRelatedRecords(id: string): void {
+    deleteTagsByShareStmt.run(id)
+    deleteReactionsByShareStmt.run(id)
+    deleteCommentsByShareStmt.run(id)
+  }
+
+  function purgeExpiredInternal(): number {
+    if (ttlSeconds <= 0) return 0
+    const rows = selectExpiredIdsStmt.all(ttlSeconds) as { id: string }[]
+    for (const row of rows) {
+      deleteRelatedRecords(row.id)
+    }
+    const result = purgeExpiredStmt.run(ttlSeconds)
+    if (onDelete) {
+      for (const row of rows) {
+        onDelete(row.id)
+      }
+    }
+    return result.changes
   }
 
   function saveTags(shareId: string, tags: string[]): void {
@@ -499,7 +533,16 @@ export function createShareStore(
     const { cnt } = countStmt.get() as { cnt: number }
     if (cnt >= maxRecords) {
       const excess = cnt - maxRecords + 1
+      const rows = selectOldestIdsStmt.all(excess) as { id: string }[]
+      for (const row of rows) {
+        deleteRelatedRecords(row.id)
+      }
       deleteOldestStmt.run(excess)
+      if (onDelete) {
+        for (const row of rows) {
+          onDelete(row.id)
+        }
+      }
     }
 
     insertStmt.run(
@@ -540,9 +583,7 @@ export function createShareStore(
     },
 
     list(options: ShareListOptions): ShareListResult {
-      if (ttlSeconds > 0) {
-        purgeExpiredStmt.run(ttlSeconds)
-      }
+      purgeExpiredInternal()
 
       type ListRow = ShareRow & {
         id: string
@@ -583,17 +624,21 @@ export function createShareStore(
 
     delete(id: string): boolean {
       if (!isValidShareId(id)) return false
-      deleteTagsByShareStmt.run(id)
-      deleteReactionsByShareStmt.run(id)
-      deleteCommentsByShareStmt.run(id)
+      deleteRelatedRecords(id)
       const result = deleteByIdStmt.run(id)
-      return result.changes > 0
+      const deleted = result.changes > 0
+      if (deleted && onDelete) {
+        onDelete(id)
+      }
+      return deleted
     },
 
     purgeExpired(): number {
-      if (ttlSeconds <= 0) return 0
-      const result = purgeExpiredStmt.run(ttlSeconds)
-      return result.changes
+      return purgeExpiredInternal()
+    },
+
+    getAllIds(): string[] {
+      return (selectAllIdsStmt.all() as { id: string }[]).map((r) => r.id)
     },
 
     addReaction(shareId: string, clientId: string): ReactionResult {

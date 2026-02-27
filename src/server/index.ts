@@ -9,6 +9,7 @@ import { imageProxyApp } from './routes/image-proxy.ts'
 import { createSharesApp } from './routes/shares.ts'
 import { createShareImageApp } from './routes/share-image.ts'
 import { createShareStore } from './share-store.ts'
+import { deleteShareImage } from './share-image-cleanup.ts'
 
 if (!process.env['GOOGLE_BOOKS_API_KEY']) {
   console.warn(
@@ -54,6 +55,7 @@ const SHARE_TTL_SECONDS = 90 * 24 * 60 * 60 // 90 days
 
 const shareStore = createShareStore(sharesDataPath, {
   ttlSeconds: SHARE_TTL_SECONDS,
+  onDelete: (id) => deleteShareImage(imagesDir, id),
 })
 
 app.route('/api/books', booksApp)
