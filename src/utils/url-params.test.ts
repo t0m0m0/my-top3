@@ -67,6 +67,7 @@ describe('parseTop3Params', () => {
       bookId: 'b1',
       musicId: 'm1',
       movieId: 'v1',
+      tags: [],
     })
   })
 
@@ -77,7 +78,19 @@ describe('parseTop3Params', () => {
       bookId: '',
       musicId: '',
       movieId: '',
+      tags: [],
     })
+  })
+
+  it('parses tags from comma-separated string', () => {
+    const params = new URLSearchParams('tags=アニメ,推し活&book=b1')
+    const result = parseTop3Params(params)
+    expect(result.tags).toEqual(['アニメ', '推し活'])
+  })
+
+  it('returns empty tags when not provided', () => {
+    const params = new URLSearchParams('book=b1')
+    expect(parseTop3Params(params).tags).toEqual([])
   })
 
   it('truncates theme to MAX_THEME_LENGTH', () => {
@@ -110,6 +123,7 @@ describe('buildEditUrl', () => {
       bookId: 'b1',
       musicId: 'm1',
       movieId: 'v1',
+      tags: [],
     })
     expect(url).toBe('/?edit=1&theme=test&book=b1&music=m1&movie=v1')
   })
@@ -120,8 +134,22 @@ describe('buildEditUrl', () => {
       bookId: 'b1',
       musicId: '',
       movieId: '',
+      tags: [],
     })
     expect(url).toBe('/?edit=1&book=b1')
+  })
+
+  it('includes tags when present', () => {
+    const url = buildEditUrl({
+      theme: '',
+      bookId: 'b1',
+      musicId: '',
+      movieId: '',
+      tags: ['アニメ', '推し活'],
+    })
+    expect(url).toContain('tags=')
+    const sp = new URLSearchParams(url.split('?')[1])
+    expect(sp.get('tags')).toBe('アニメ,推し活')
   })
 
   it('includes theme when present', () => {
@@ -130,6 +158,7 @@ describe('buildEditUrl', () => {
       bookId: '',
       musicId: '',
       movieId: '',
+      tags: [],
     })
     const params = new URLSearchParams(url.split('?')[1])
     expect(params.get('theme')).toBe('夏の思い出')

@@ -66,7 +66,9 @@ export default function TagInput({ tags, onChange }: TagInputProps) {
           input: {
             startAdornment: (
               <InputAdornment position="start">
-                <span style={{ color: 'var(--color-primary)', fontSize: 14 }}>#</span>
+                <span style={{ color: 'var(--color-primary)', fontSize: 14 }}>
+                  #
+                </span>
               </InputAdornment>
             ),
           },

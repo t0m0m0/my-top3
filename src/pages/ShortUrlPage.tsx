@@ -10,6 +10,7 @@ type ShareData = {
   bookId: string
   musicId: string
   movieId: string
+  tags: string[]
   reactionCount: number
 }
 

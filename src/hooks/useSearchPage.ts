@@ -22,6 +22,7 @@ export function useSearchPage() {
   const [activeTab, setActiveTab] = useState<MediaCategory>('book')
   const [queries, setQueries] = useState<QueryState>(INITIAL_QUERIES)
   const { theme, setTheme } = useTheme()
+  const [tags, setTags] = useState<string[]>([])
   const { selectItem } = useSelection()
   const { addHistory: addThemeHistory } = useThemeHistory()
 
@@ -38,16 +39,26 @@ export function useSearchPage() {
     isEdit ? editMovieId : '',
   )
 
-  // Restore theme and clear edit params from URL
+  const editTags = searchParams.get('tags') ?? ''
+
+  // Restore theme, tags and clear edit params from URL
   const editProcessedRef = useRef(false)
   useEffect(() => {
     if (isEdit && !editProcessedRef.current) {
       editProcessedRef.current = true
       if (editTheme) setTheme(editTheme)
+      if (editTags) {
+        setTags(
+          editTags
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean),
+        )
+      }
       // Clean up edit params from URL
       setSearchParams(new URLSearchParams(), { replace: true })
     }
-  }, [isEdit, editTheme, setTheme, setSearchParams])
+  }, [isEdit, editTheme, editTags, setTheme, setSearchParams])
 
   const currentQuery = queries[activeTab]
   const debouncedQuery = useDebounce(currentQuery, 300)
@@ -94,6 +105,8 @@ export function useSearchPage() {
     debouncedQuery,
     theme,
     setTheme,
+    tags,
+    setTags,
     results,
     isLoading,
     error,

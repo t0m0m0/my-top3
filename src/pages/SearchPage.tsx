@@ -8,6 +8,7 @@ import ThemeHistory from '../components/ThemeHistory'
 import SelectionArea from '../components/selection/SelectionArea'
 import DataCredits from '../components/DataCredits'
 import { useSearchPage } from '../hooks/useSearchPage'
+import TagInput from '../components/TagInput'
 
 function SearchPage() {
   const {
@@ -17,6 +18,8 @@ function SearchPage() {
     debouncedQuery,
     theme,
     setTheme,
+    tags,
+    setTags,
     results,
     isLoading,
     error,
@@ -93,6 +96,9 @@ function SearchPage() {
         <div className="mb-3">
           <ThemeInput value={theme} onChange={setTheme} />
           <ThemeHistory onSelect={setTheme} />
+          <div className="mt-2">
+            <TagInput tags={tags} onChange={setTags} />
+          </div>
         </div>
       </div>
 
@@ -133,6 +139,7 @@ function SearchPage() {
         <div className="clay p-3 sm:p-4">
           <SelectionArea
             theme={theme}
+            tags={tags}
             onBeforeCreate={handleBeforeCreate}
             onCompleteChange={handleCompleteChange}
             onSlotClick={setActiveTab}

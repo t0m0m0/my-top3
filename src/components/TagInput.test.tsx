@@ -70,9 +70,7 @@ describe('TagInput', () => {
 
   it('enforces max 5 tags', () => {
     const onChange = vi.fn()
-    render(
-      <TagInput tags={['a', 'b', 'c', 'd', 'e']} onChange={onChange} />,
-    )
+    render(<TagInput tags={['a', 'b', 'c', 'd', 'e']} onChange={onChange} />)
     const input = screen.getByPlaceholderText('タグを追加')
     fireEvent.change(input, { target: { value: '6つ目' } })
     fireEvent.keyDown(input, { key: 'Enter' })

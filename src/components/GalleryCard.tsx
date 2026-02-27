@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useReaction } from '../hooks/useReaction'
 
 const PLACEHOLDER =
@@ -41,6 +41,7 @@ type Props = {
   movieThumb: string
   createdAt: number
   reactionCount: number
+  tags?: string[]
 }
 
 export default function GalleryCard({
@@ -50,7 +51,9 @@ export default function GalleryCard({
   musicThumb,
   movieThumb,
   reactionCount: initialReactionCount,
+  tags = [],
 }: Props) {
+  const navigate = useNavigate()
   const hasThumbs = bookThumb || musicThumb || movieThumb
   const { count, reacted, toggleReaction } = useReaction(
     id,
@@ -135,6 +138,30 @@ export default function GalleryCard({
         >
           {theme || 'No Theme'}
         </h3>
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="mb-1.5 flex flex-wrap gap-1">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  navigate(`/gallery?tag=${encodeURIComponent(tag)}`)
+                }}
+                className="rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors hover:opacity-80"
+                style={{
+                  backgroundColor: 'var(--color-primary-a8)',
+                  color: 'var(--color-primary-dark)',
+                }}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Reaction */}
         <div className="flex items-center">
