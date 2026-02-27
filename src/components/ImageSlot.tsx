@@ -1,10 +1,11 @@
 import type { SearchResultItem, MediaCategory } from '../types/common'
-import type { SlotPosition } from '../constants/image-layout'
+import type { AnySlotPosition } from '../constants/image-layout'
 import {
   CATEGORY_COLORS,
   CATEGORY_BORDER_COLORS,
   CATEGORY_LABELS,
   SLOT_STYLES,
+  VERTICAL_SLOT_STYLES,
 } from '../constants/image-layout'
 import {
   CANVAS_DARK,
@@ -16,12 +17,24 @@ import { proxyImageUrl } from '../utils/proxy-image-url'
 export type ImageSlotProps = {
   item: SearchResultItem | null
   category: MediaCategory
-  slot: SlotPosition
+  slot: AnySlotPosition
   theme?: string
 }
 
+function isTopSlot(slot: AnySlotPosition): boolean {
+  return slot === 'top' || slot === 'v-top'
+}
+
+function getSlotStyle(slot: AnySlotPosition) {
+  if (slot.startsWith('v-')) {
+    return VERTICAL_SLOT_STYLES[slot as keyof typeof VERTICAL_SLOT_STYLES]
+  }
+  return SLOT_STYLES[slot as keyof typeof SLOT_STYLES]
+}
+
 export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
-  const style = SLOT_STYLES[slot]
+  const style = getSlotStyle(slot)
+  const isTop = isTopSlot(slot)
   const color = CATEGORY_COLORS[category]
   const borderColor = CATEGORY_BORDER_COLORS[category]
 
@@ -83,7 +96,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          filter: slot === 'top' ? 'none' : 'brightness(0.7)',
+          filter: isTop ? 'none' : 'brightness(0.7)',
         }}
       />
 
@@ -112,7 +125,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
       >
         {/* Top: theme (only on top slot) or category badge */}
         <div>
-          {slot === 'top' && theme ? (
+          {isTop && theme ? (
             <div
               style={{
                 fontSize: 14,
@@ -128,12 +141,12 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
               style={{
                 display: 'inline-block',
                 alignSelf: 'flex-start',
-                fontSize: slot === 'top' ? 11 : 10,
+                fontSize: isTop ? 11 : 10,
                 fontWeight: 700,
                 color,
                 letterSpacing: 3,
                 textTransform: 'uppercase' as const,
-                padding: slot === 'top' ? '4px 12px' : '3px 10px',
+                padding: isTop ? '4px 12px' : '3px 10px',
                 background: 'rgba(0,0,0,0.4)',
                 border: `1px solid ${borderColor}`,
                 borderRadius: 4,
@@ -147,7 +160,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
         {/* Bottom: work info */}
         <div>
           {/* Category badge (show below theme on top slot) */}
-          {slot === 'top' && theme && (
+          {isTop && theme && (
             <div
               style={{
                 display: 'inline-block',
@@ -181,7 +194,7 @@ export function ImageSlot({ item, category, slot, theme }: ImageSlotProps) {
             style={{
               fontSize: style.subtitleSize,
               color: 'rgba(255,255,255,0.55)',
-              marginTop: slot === 'top' ? 8 : 6,
+              marginTop: isTop ? 8 : 6,
               letterSpacing: 1,
               textShadow: '0 1px 8px rgba(0,0,0,0.5)',
             }}

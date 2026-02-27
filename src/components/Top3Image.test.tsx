@@ -604,6 +604,137 @@ describe('Top3Image', () => {
     })
   })
 
+  describe('portrait mode (9:16)', () => {
+    it('renders 1080x1920 capture area when portrait is selected', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+
+      // Switch to portrait
+      fireEvent.click(screen.getByText('縦長 9:16'))
+
+      const captureArea = screen.getByTestId('top3-image-capture')
+      expect(captureArea.style.width).toBe('1080px')
+      expect(captureArea.style.height).toBe('1920px')
+    })
+
+    it('renders aspect ratio selector', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      expect(screen.getByTestId('aspect-ratio-selector')).toBeInTheDocument()
+    })
+
+    it('defaults to landscape (1:1)', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+      const captureArea = screen.getByTestId('top3-image-capture')
+      expect(captureArea.style.width).toBe('1080px')
+      expect(captureArea.style.height).toBe('1080px')
+    })
+
+    it('shows three vertical slots in portrait mode', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+
+      fireEvent.click(screen.getByText('縦長 9:16'))
+
+      expect(screen.getByTestId('slot-v-top')).toBeInTheDocument()
+      expect(screen.getByTestId('slot-v-middle')).toBeInTheDocument()
+      expect(screen.getByTestId('slot-v-bottom')).toBeInTheDocument()
+    })
+
+    it('displays all work titles in portrait mode', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+
+      fireEvent.click(screen.getByText('縦長 9:16'))
+
+      expect(screen.getByText('Test Album')).toBeInTheDocument()
+      expect(screen.getByText('Test Book')).toBeInTheDocument()
+      expect(screen.getByText('Test Movie')).toBeInTheDocument()
+    })
+
+    it('shows landscape slots when switching back from portrait', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+
+      // Switch to portrait
+      fireEvent.click(screen.getByText('縦長 9:16'))
+      expect(screen.getByTestId('slot-v-top')).toBeInTheDocument()
+
+      // Switch back to landscape
+      fireEvent.click(screen.getByText('横長 1:1'))
+      expect(screen.getByTestId('slot-top')).toBeInTheDocument()
+      expect(screen.getByTestId('slot-bottom-left')).toBeInTheDocument()
+      expect(screen.getByTestId('slot-bottom-right')).toBeInTheDocument()
+    })
+
+    it('shows theme text in portrait mode top slot', () => {
+      render(
+        <Top3Image
+          theme="雨の日に楽しむ"
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+        />,
+      )
+
+      fireEvent.click(screen.getByText('縦長 9:16'))
+
+      expect(screen.getByText('「 雨の日に楽しむ 」')).toBeInTheDocument()
+    })
+
+    it('hides aspect ratio selector in readOnly mode', () => {
+      render(
+        <Top3Image
+          theme=""
+          book={mockBook}
+          music={mockMusic}
+          movie={mockMovie}
+          readOnly
+        />,
+      )
+      expect(
+        screen.queryByTestId('aspect-ratio-selector'),
+      ).not.toBeInTheDocument()
+    })
+  })
+
   describe('readOnly mode', () => {
     it('hides layout selector when readOnly is true', () => {
       render(

@@ -3,15 +3,26 @@ import {
   IMAGE_SIZE,
   HALF,
   SEP,
+  PORTRAIT_WIDTH,
+  PORTRAIT_HEIGHT,
   CATEGORY_COLORS,
   CATEGORY_BORDER_COLORS,
   NO_IMAGE_SRC,
   DEFAULT_LAYOUT,
+  DEFAULT_VERTICAL_LAYOUT,
   SLOT_LABELS,
+  VERTICAL_SLOT_LABELS,
   CATEGORY_LABELS,
   SLOT_STYLES,
+  VERTICAL_SLOT_STYLES,
+  VERTICAL_SLOT_POSITIONS,
 } from './image-layout'
-import type { SlotPosition, LayoutConfig } from './image-layout'
+import type {
+  SlotPosition,
+  VerticalSlotPosition,
+  LayoutConfig,
+  VerticalLayoutConfig,
+} from './image-layout'
 
 describe('image-layout constants', () => {
   describe('dimensions', () => {
@@ -109,6 +120,61 @@ describe('image-layout constants', () => {
     it('exports SlotPosition type correctly', () => {
       const slot: SlotPosition = 'top'
       expect(SLOT_STYLES[slot]).toBeDefined()
+    })
+  })
+
+  describe('portrait dimensions', () => {
+    it('PORTRAIT_WIDTH is 1080', () => {
+      expect(PORTRAIT_WIDTH).toBe(1080)
+    })
+
+    it('PORTRAIT_HEIGHT is 1920', () => {
+      expect(PORTRAIT_HEIGHT).toBe(1920)
+    })
+  })
+
+  describe('DEFAULT_VERTICAL_LAYOUT', () => {
+    it('has music on v-top, book v-middle, movie v-bottom', () => {
+      expect(DEFAULT_VERTICAL_LAYOUT).toEqual({
+        'v-top': 'music',
+        'v-middle': 'book',
+        'v-bottom': 'movie',
+      } satisfies VerticalLayoutConfig)
+    })
+  })
+
+  describe('VERTICAL_SLOT_LABELS', () => {
+    it('has Japanese labels for vertical slot positions', () => {
+      expect(VERTICAL_SLOT_LABELS['v-top']).toBe('上')
+      expect(VERTICAL_SLOT_LABELS['v-middle']).toBe('中')
+      expect(VERTICAL_SLOT_LABELS['v-bottom']).toBe('下')
+    })
+  })
+
+  describe('VERTICAL_SLOT_STYLES', () => {
+    it('all vertical slots span full width', () => {
+      for (const slot of VERTICAL_SLOT_POSITIONS) {
+        expect(VERTICAL_SLOT_STYLES[slot].width).toBe(PORTRAIT_WIDTH)
+      }
+    })
+
+    it('v-top slot starts at 0', () => {
+      expect(VERTICAL_SLOT_STYLES['v-top'].top).toBe(0)
+    })
+
+    it('vertical slots cover the full portrait height', () => {
+      const totalHeight =
+        VERTICAL_SLOT_STYLES['v-top'].height +
+        SEP +
+        VERTICAL_SLOT_STYLES['v-middle'].height +
+        SEP +
+        VERTICAL_SLOT_STYLES['v-bottom'].height
+      expect(totalHeight).toBe(PORTRAIT_HEIGHT)
+    })
+
+    it('exports VerticalSlotPosition type correctly', () => {
+      const slot: VerticalSlotPosition = 'v-top'
+      expect(VERTICAL_SLOT_STYLES[slot]).toBeDefined()
     })
   })
 })
