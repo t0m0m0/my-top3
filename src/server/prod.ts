@@ -24,7 +24,35 @@ function publicUrl(c: {
 const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
   path.resolve(process.cwd(), 'data', 'shares.db')
-const shareStore = createShareStore(sharesDataPath)
+
+function deleteShareImage(id: string): void {
+  const filePath = path.join(imagesDir, `${id}.png`)
+  try {
+    fs.unlinkSync(filePath)
+  } catch {
+    // File may not exist — ignore
+  }
+}
+
+const shareStore = createShareStore(sharesDataPath, {
+  onDelete: deleteShareImage,
+})
+
+// Periodic orphan image cleanup (every 6 hours)
+const ORPHAN_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000
+const orphanCleanupTimer = setInterval(() => {
+  try {
+    const removed = shareStore.purgeOrphanImages(imagesDir)
+    if (removed > 0) {
+      console.log(`[cleanup] Removed ${removed} orphan image(s)`)
+    }
+  } catch (e) {
+    console.error('[cleanup] Failed to purge orphan images:', e)
+  }
+}, ORPHAN_CLEANUP_INTERVAL_MS)
+if (orphanCleanupTimer.unref) {
+  orphanCleanupTimer.unref()
+}
 
 const app = new Hono()
 
