@@ -43,22 +43,6 @@ type Props = {
   reactionCount: number
 }
 
-function Thumbnail({ src, alt }: { src: string; alt: string }) {
-  if (!src) return null
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className="h-12 w-12 rounded-lg object-cover shadow-sm"
-      loading="lazy"
-      onError={(e) => {
-        const img = e.target as HTMLImageElement
-        if (img.src !== PLACEHOLDER) img.src = PLACEHOLDER
-      }}
-    />
-  )
-}
-
 export default function GalleryCard({
   id,
   theme,
@@ -151,15 +135,6 @@ export default function GalleryCard({
         >
           {theme || 'No Theme'}
         </h3>
-
-        {/* Thumbnails row (small) */}
-        {hasThumbs && (
-          <div className="mb-2 flex gap-1.5">
-            <Thumbnail src={bookThumb} alt="Book" />
-            <Thumbnail src={musicThumb} alt="Music" />
-            <Thumbnail src={movieThumb} alt="Movie" />
-          </div>
-        )}
 
         {/* Reaction */}
         <div className="flex items-center">
