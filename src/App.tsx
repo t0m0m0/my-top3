@@ -5,6 +5,7 @@ import SearchPage from './pages/SearchPage'
 import Top3Page from './pages/Top3Page'
 import ShortUrlPage from './pages/ShortUrlPage'
 import GalleryPage from './pages/GalleryPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/my-no1s" element={<Top3Page />} />
           <Route path="/s/:id" element={<ShortUrlPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </SelectionProvider>
     </ErrorBoundary>
