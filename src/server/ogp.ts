@@ -39,18 +39,26 @@ export function buildMetaTags(options: {
   title: string
   description: string
   url: string
+  imageUrl?: string
 }): string {
-  const { title, description, url } = options
+  const { title, description, url, imageUrl } = options
+  const cardType = imageUrl ? 'summary_large_image' : 'summary'
   const tags = [
     `<meta property="og:title" content="${escapeHtml(title)}" />`,
     `<meta property="og:description" content="${escapeHtml(description)}" />`,
     `<meta property="og:type" content="website" />`,
     `<meta property="og:url" content="${escapeHtml(url)}" />`,
     `<meta property="og:site_name" content="${DEFAULT_SITE_NAME}" />`,
-    `<meta name="twitter:card" content="summary" />`,
+    `<meta name="twitter:card" content="${cardType}" />`,
     `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(description)}" />`,
   ]
+  if (imageUrl) {
+    tags.push(
+      `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`,
+      `<meta name="twitter:image" content="${escapeHtml(imageUrl)}" />`,
+    )
+  }
   return tags.join('\n    ')
 }
 
@@ -107,6 +115,7 @@ export async function injectOgpTags(
   html: string,
   url: string,
   searchParams: URLSearchParams,
+  imageUrl?: string,
 ): Promise<string> {
   const rawTheme = searchParams.get('theme') ?? ''
   const theme = rawTheme.slice(0, MAX_THEME_LENGTH)
@@ -134,7 +143,7 @@ export async function injectOgpTags(
 
   const title = buildOgTitle(theme)
   const description = buildOgDescription(works)
-  const metaTags = buildMetaTags({ title, description, url })
+  const metaTags = buildMetaTags({ title, description, url, imageUrl })
 
   return html.replace('</head>', `    ${metaTags}\n  </head>`)
 }

@@ -8,6 +8,8 @@ import api from './index.ts'
 import { injectOgpTags } from './ogp.ts'
 import { createShareStore } from './share-store.ts'
 
+const imagesDir = path.resolve(process.cwd(), 'data', 'images')
+
 const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
   path.resolve(process.cwd(), 'data', 'shares.db')
@@ -63,8 +65,15 @@ app.get('/s/:id', async (c) => {
     if (params.musicId) searchParams.set('music', params.musicId)
     if (params.movieId) searchParams.set('movie', params.movieId)
 
+    // Check if OGP image exists for this share
+    const imageFile = path.join(imagesDir, `${id}.png`)
+    const baseUrl = `${c.req.header('x-forwarded-proto') ?? 'http'}://${c.req.header('host') ?? 'localhost:8000'}`
+    const imageUrl = fs.existsSync(imageFile)
+      ? `${baseUrl}/api/shares/${id}/image`
+      : undefined
+
     try {
-      html = await injectOgpTags(html, c.req.url, searchParams)
+      html = await injectOgpTags(html, c.req.url, searchParams, imageUrl)
     } catch (e) {
       console.error('[ogp] Failed to inject OGP tags for short URL:', e)
     }

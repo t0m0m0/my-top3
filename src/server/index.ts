@@ -7,6 +7,8 @@ import { musicApp } from './routes/music.ts'
 import { moviesApp } from './routes/movies.ts'
 import { imageProxyApp } from './routes/image-proxy.ts'
 import { createSharesApp } from './routes/shares.ts'
+import { createShareImageApp } from './routes/share-image.ts'
+import { createShareStore } from './share-store.ts'
 
 if (!process.env['GOOGLE_BOOKS_API_KEY']) {
   console.warn(
@@ -46,11 +48,18 @@ const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
   path.resolve(process.cwd(), 'data', 'shares.db')
 
+const imagesDir = path.resolve(process.cwd(), 'data', 'images')
+
+const SHARE_TTL_SECONDS = 90 * 24 * 60 * 60 // 90 days
+
+const shareStore = createShareStore(sharesDataPath, {
+  ttlSeconds: SHARE_TTL_SECONDS,
+})
+
 app.route('/api/books', booksApp)
 app.route('/api/music', musicApp)
 app.route('/api/movies', moviesApp)
 app.route('/api/image', imageProxyApp)
-const SHARE_TTL_SECONDS = 90 * 24 * 60 * 60 // 90 days
 
 app.route(
   '/api/shares',
@@ -58,6 +67,12 @@ app.route(
     adminApiKey: process.env['ADMIN_API_KEY'],
     ttlSeconds: SHARE_TTL_SECONDS,
   }),
+)
+
+// Share OGP image upload/download
+app.route(
+  '/api/shares',
+  createShareImageApp(imagesDir, (id) => shareStore.get(id) !== null),
 )
 
 export default app
