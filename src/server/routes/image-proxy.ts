@@ -1,4 +1,8 @@
 import { Hono } from 'hono'
+import {
+  createImageProxyCache,
+  type ImageProxyCache,
+} from '../image-proxy-cache.ts'
 
 export const ALLOWED_HOSTS = [
   'books.google.com',
@@ -62,134 +66,162 @@ async function readWithSizeLimit(
   return result
 }
 
-export const imageProxyApp = new Hono()
+const defaultCache = createImageProxyCache()
 
-imageProxyApp.get('/proxy', async (c) => {
-  const urlParam = c.req.query('url')
+export function createImageProxyApp(
+  cache: ImageProxyCache = defaultCache,
+): Hono {
+  const app = new Hono()
 
-  if (!urlParam) {
-    return c.json(
-      {
-        ok: false,
-        error: { kind: 'unknown', message: 'urlパラメータが必要です' },
-      },
-      400,
-    )
-  }
+  app.get('/proxy', async (c) => {
+    const urlParam = c.req.query('url')
 
-  let parsed: URL
-  try {
-    parsed = new URL(urlParam)
-  } catch {
-    return c.json(
-      { ok: false, error: { kind: 'unknown', message: '無効なURLです' } },
-      400,
-    )
-  }
-
-  if (parsed.protocol !== 'https:') {
-    return c.json(
-      {
-        ok: false,
-        error: { kind: 'unknown', message: '許可されていないホストです' },
-      },
-      403,
-    )
-  }
-
-  if (!isAllowedHost(parsed.hostname)) {
-    return c.json(
-      {
-        ok: false,
-        error: { kind: 'unknown', message: '許可されていないホストです' },
-      },
-      403,
-    )
-  }
-
-  try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS)
-
-    const upstream = await fetch(urlParam, {
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeout)
-
-    if (!upstream.ok) {
+    if (!urlParam) {
       return c.json(
         {
           ok: false,
-          error: {
-            kind: 'unknown',
-            message: `上流サーバーがエラーを返しました (status: ${upstream.status})`,
-          },
-        },
-        502,
-      )
-    }
-
-    const contentType = upstream.headers.get('Content-Type')
-    if (!isImageContentType(contentType)) {
-      return c.json(
-        {
-          ok: false,
-          error: {
-            kind: 'unknown',
-            message: '画像以外のコンテンツタイプです',
-          },
+          error: { kind: 'unknown', message: 'urlパラメータが必要です' },
         },
         400,
       )
     }
 
-    // Content-Length が明示されていて上限超過なら即拒否
-    const contentLength = upstream.headers.get('Content-Length')
-    if (contentLength && Number(contentLength) > MAX_RESPONSE_SIZE) {
+    let parsed: URL
+    try {
+      parsed = new URL(urlParam)
+    } catch {
       return c.json(
-        {
-          ok: false,
-          error: {
-            kind: 'unknown',
-            message: `レスポンスサイズが上限（${MAX_RESPONSE_SIZE} bytes）を超えています`,
-          },
-        },
-        413,
+        { ok: false, error: { kind: 'unknown', message: '無効なURLです' } },
+        400,
       )
     }
 
-    // ストリーミング読み込みでサイズ制限を強制
-    const body = await readWithSizeLimit(upstream, MAX_RESPONSE_SIZE)
-    if (body === null) {
+    if (parsed.protocol !== 'https:') {
       return c.json(
         {
           ok: false,
-          error: {
-            kind: 'unknown',
-            message: `レスポンスサイズが上限（${MAX_RESPONSE_SIZE} bytes）を超えています`,
-          },
+          error: { kind: 'unknown', message: '許可されていないホストです' },
         },
-        413,
+        403,
       )
     }
 
-    return new Response(body, {
-      status: 200,
-      headers: {
-        'Content-Type': contentType!,
-        'Cache-Control': `public, max-age=${CACHE_MAX_AGE}, immutable`,
-        'Access-Control-Allow-Origin': '*',
-      },
-    })
-  } catch (err) {
-    console.error('[image-proxy] fetch error:', err)
-    return c.json(
-      {
-        ok: false,
-        error: { kind: 'unknown', message: '画像の取得に失敗しました' },
-      },
-      502,
-    )
-  }
-})
+    if (!isAllowedHost(parsed.hostname)) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'unknown', message: '許可されていないホストです' },
+        },
+        403,
+      )
+    }
+
+    // Check server-side cache
+    const cached = cache.get(urlParam)
+    if (cached) {
+      return new Response(cached.data, {
+        status: 200,
+        headers: {
+          'Content-Type': cached.contentType,
+          'Cache-Control': `public, max-age=${CACHE_MAX_AGE}, immutable`,
+          'Access-Control-Allow-Origin': '*',
+          'X-Cache': 'HIT',
+        },
+      })
+    }
+
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS)
+
+      const upstream = await fetch(urlParam, {
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeout)
+
+      if (!upstream.ok) {
+        return c.json(
+          {
+            ok: false,
+            error: {
+              kind: 'unknown',
+              message: `上流サーバーがエラーを返しました (status: ${upstream.status})`,
+            },
+          },
+          502,
+        )
+      }
+
+      const contentType = upstream.headers.get('Content-Type')
+      if (!isImageContentType(contentType)) {
+        return c.json(
+          {
+            ok: false,
+            error: {
+              kind: 'unknown',
+              message: '画像以外のコンテンツタイプです',
+            },
+          },
+          400,
+        )
+      }
+
+      // Content-Length が明示されていて上限超過なら即拒否
+      const contentLength = upstream.headers.get('Content-Length')
+      if (contentLength && Number(contentLength) > MAX_RESPONSE_SIZE) {
+        return c.json(
+          {
+            ok: false,
+            error: {
+              kind: 'unknown',
+              message: `レスポンスサイズが上限（${MAX_RESPONSE_SIZE} bytes）を超えています`,
+            },
+          },
+          413,
+        )
+      }
+
+      // ストリーミング読み込みでサイズ制限を強制
+      const body = await readWithSizeLimit(upstream, MAX_RESPONSE_SIZE)
+      if (body === null) {
+        return c.json(
+          {
+            ok: false,
+            error: {
+              kind: 'unknown',
+              message: `レスポンスサイズが上限（${MAX_RESPONSE_SIZE} bytes）を超えています`,
+            },
+          },
+          413,
+        )
+      }
+
+      // Store in server-side cache
+      cache.set(urlParam, body, contentType!)
+
+      return new Response(body, {
+        status: 200,
+        headers: {
+          'Content-Type': contentType!,
+          'Cache-Control': `public, max-age=${CACHE_MAX_AGE}, immutable`,
+          'Access-Control-Allow-Origin': '*',
+          'X-Cache': 'MISS',
+        },
+      })
+    } catch (err) {
+      console.error('[image-proxy] fetch error:', err)
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'unknown', message: '画像の取得に失敗しました' },
+        },
+        502,
+      )
+    }
+  })
+
+  return app
+}
+
+export const imageProxyApp = createImageProxyApp()
