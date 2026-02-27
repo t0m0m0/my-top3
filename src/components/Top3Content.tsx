@@ -12,7 +12,9 @@ import MobileCarousel from './MobileCarousel'
 import { useWorkFetch } from '../hooks/useWorkFetch'
 import { usePreGeneratedImage } from '../hooks/usePreGeneratedImage'
 import { useMergedRef } from '../hooks/useMergedRef'
+import { useReaction } from '../hooks/useReaction'
 import DataCredits from './DataCredits'
+import ReactionButton from './ReactionButton'
 
 type Top3Params = {
   theme: string
@@ -25,6 +27,7 @@ type Props = {
   params: Top3Params
   existingShareId?: string
   readOnly?: boolean
+  reactionCount?: number
 }
 
 /** Decorative washi tape above a work card */
@@ -55,8 +58,11 @@ export default function Top3Content({
   params,
   existingShareId,
   readOnly,
+  reactionCount: initialReactionCount = 0,
 }: Props) {
   const isMobile = useMediaQuery('(max-width:639px)')
+  const reaction = useReaction(existingShareId ?? '', initialReactionCount)
+  const showReaction = !!existingShareId
   const captureRef = useRef<HTMLDivElement>(null)
   const [captureElement, setCaptureElement] = useState<HTMLDivElement | null>(
     null,
@@ -124,6 +130,15 @@ export default function Top3Content({
           >
             3作品
           </p>
+          {showReaction && (
+            <div className="mt-3">
+              <ReactionButton
+                count={reaction.count}
+                reacted={reaction.reacted}
+                onToggle={reaction.toggleReaction}
+              />
+            </div>
+          )}
         </div>
 
         {/* Cork board area */}
