@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useCallback } from 'react'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import CircularProgress from '@mui/material/CircularProgress'
 import Button from '@mui/material/Button'
 import ErrorMessage from '../components/ErrorMessage'
@@ -9,9 +9,17 @@ import { useGallery } from '../hooks/useGallery'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 
 export default function GalleryPage() {
-  const { items, loading, loadingMore, error, hasMore, loadMore } = useGallery()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const tagFilter = searchParams.get('tag') || undefined
+  const { items, loading, loadingMore, error, hasMore, loadMore } =
+    useGallery(tagFilter)
   const sentinelRef = useIntersectionObserver(loadMore)
   const [searchQuery, setSearchQuery] = useState('')
+
+  const clearTagFilter = useCallback(() => {
+    navigate('/gallery', { replace: true })
+  }, [navigate])
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
@@ -57,6 +65,29 @@ export default function GalleryPage() {
               }}
             />
           </div>
+
+          {/* Active tag filter */}
+          {tagFilter && (
+            <div className="mx-auto mb-4 flex max-w-[700px] items-center justify-center gap-2">
+              <span
+                className="rounded-full px-3 py-1 text-sm font-semibold"
+                style={{
+                  backgroundColor: 'var(--color-primary-a8)',
+                  color: 'var(--color-primary-dark)',
+                }}
+              >
+                #{tagFilter}
+              </span>
+              <button
+                type="button"
+                onClick={clearTagFilter}
+                className="text-xs underline"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                × クリア
+              </button>
+            </div>
+          )}
 
           {/* Navigation pill */}
           <Link

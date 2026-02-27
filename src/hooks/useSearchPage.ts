@@ -22,6 +22,15 @@ export function useSearchPage() {
   const [activeTab, setActiveTab] = useState<MediaCategory>('book')
   const [queries, setQueries] = useState<QueryState>(INITIAL_QUERIES)
   const { theme, setTheme } = useTheme()
+  const editTagsRaw = searchParams.get('tags') ?? ''
+  const [tags, setTags] = useState<string[]>(() =>
+    editTagsRaw
+      ? editTagsRaw
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [],
+  )
   const { selectItem } = useSelection()
   const { addHistory: addThemeHistory } = useThemeHistory()
 
@@ -94,6 +103,8 @@ export function useSearchPage() {
     debouncedQuery,
     theme,
     setTheme,
+    tags,
+    setTags,
     results,
     isLoading,
     error,

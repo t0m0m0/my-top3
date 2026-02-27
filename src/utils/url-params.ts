@@ -18,9 +18,14 @@ type Top3Params = {
   bookId: string
   musicId: string
   movieId: string
+  tags: string[]
 }
 
-export function buildTop3Url(selection: Selection, theme: string): string {
+export function buildTop3Url(
+  selection: Selection,
+  theme: string,
+  tags?: string[],
+): string {
   const params = new URLSearchParams()
 
   if (theme.trim()) {
@@ -39,21 +44,36 @@ export function buildTop3Url(selection: Selection, theme: string): string {
     params.set('movie', selection.movie.id)
   }
 
+  if (tags && tags.length > 0) {
+    params.set('tags', tags.join(','))
+  }
+
   const queryString = params.toString()
   return queryString ? `/my-no1s?${queryString}` : '/my-no1s'
 }
 
 export function parseTop3Params(searchParams: URLSearchParams): Top3Params {
   const rawTheme = searchParams.get('theme') ?? ''
+  const rawTags = searchParams.get('tags') ?? ''
+  const tags = rawTags
+    ? rawTags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 5)
+    : []
   return {
     theme: rawTheme.slice(0, MAX_THEME_LENGTH),
     bookId: sanitizeId(searchParams.get('book') ?? ''),
     musicId: sanitizeId(searchParams.get('music') ?? ''),
     movieId: sanitizeId(searchParams.get('movie') ?? ''),
+    tags,
   }
 }
 
-export function buildEditUrl(params: Top3Params): string {
+export function buildEditUrl(
+  params: Omit<Top3Params, 'tags'> & { tags?: string[] },
+): string {
   const sp = new URLSearchParams()
   sp.set('edit', '1')
 
@@ -68,6 +88,9 @@ export function buildEditUrl(params: Top3Params): string {
   }
   if (params.movieId) {
     sp.set('movie', params.movieId)
+  }
+  if (params.tags && params.tags.length > 0) {
+    sp.set('tags', params.tags.join(','))
   }
 
   return `/?${sp.toString()}`

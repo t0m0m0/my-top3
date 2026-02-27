@@ -11,6 +11,7 @@ export type ShareParams = {
   bookThumb?: string
   musicThumb?: string
   movieThumb?: string
+  tags?: string[]
 }
 
 export type ShareStoreOptions = {
@@ -21,6 +22,8 @@ export type ShareStoreOptions = {
 const DEFAULT_MAX_RECORDS = 10_000
 const MAX_ID_LENGTH = 100
 const MAX_THEME_LENGTH = 50
+const MAX_TAG_LENGTH = 20
+const MAX_TAGS = 5
 
 // Allow printable characters only (no control chars)
 // eslint-disable-next-line no-control-regex
@@ -51,7 +54,7 @@ type ShareRow = {
   movie_thumb: string
 }
 
-function mapRow(row: ShareRow): Required<ShareParams> {
+function mapRow(row: ShareRow): Required<Omit<ShareParams, 'tags'>> {
   return {
     theme: row.theme,
     bookId: row.book_id,
@@ -110,12 +113,25 @@ function validateParams(params: ShareParams): void {
   validateField('bookId', params.bookId, MAX_ID_LENGTH)
   validateField('musicId', params.musicId, MAX_ID_LENGTH)
   validateField('movieId', params.movieId, MAX_ID_LENGTH)
+  if (params.tags) {
+    validateTags(params.tags)
+  }
 }
 
-export type ShareListItem = Required<ShareParams> & {
+function validateTags(tags: string[]): void {
+  if (tags.length > MAX_TAGS) {
+    throw new Error(`tags exceeds maximum count of ${MAX_TAGS}`)
+  }
+  for (const tag of tags) {
+    validateField('tag', tag, MAX_TAG_LENGTH)
+  }
+}
+
+export type ShareListItem = Required<Omit<ShareParams, 'tags'>> & {
   id: string
   createdAt: number
   reactionCount: number
+  tags: string[]
 }
 
 export type ReactionResult = {
@@ -131,6 +147,7 @@ export type ShareListResult = {
 export type ShareListOptions = {
   limit: number
   offset: number
+  tag?: string
 }
 
 const MAX_CLIENT_ID_LENGTH = 100
@@ -193,6 +210,16 @@ export function createShareStore(
   db.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS idx_shares_params_hash
       ON shares(params_hash) WHERE params_hash != '';
+  `)
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS share_tags (
+      share_id TEXT NOT NULL REFERENCES shares(id),
+      tag TEXT NOT NULL,
+      ord INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (share_id, tag)
+    );
+    CREATE INDEX IF NOT EXISTS idx_share_tags_tag ON share_tags(tag);
   `)
 
   db.exec(`
@@ -271,6 +298,37 @@ export function createShareStore(
 
   const deleteByIdStmt = db.prepare(`DELETE FROM shares WHERE id = ?`)
 
+  const insertTagStmt = db.prepare(`
+    INSERT OR IGNORE INTO share_tags (share_id, tag, ord) VALUES (?, ?, ?)
+  `)
+
+  const deleteTagsByShareStmt = db.prepare(`
+    DELETE FROM share_tags WHERE share_id = ?
+  `)
+
+  const selectTagsByShareStmt = db.prepare(`
+    SELECT tag FROM share_tags WHERE share_id = ? ORDER BY ord
+  `)
+
+  const listByTagStmt = db.prepare(`
+    SELECT s.id, s.theme, s.book_id, s.music_id, s.movie_id,
+           s.book_thumb, s.music_thumb, s.movie_thumb, s.created_at,
+           COALESCE(r.cnt, 0) as reaction_count
+    FROM shares s
+    INNER JOIN share_tags st ON s.id = st.share_id
+    LEFT JOIN (SELECT share_id, COUNT(*) as cnt FROM reactions GROUP BY share_id) r
+      ON s.id = r.share_id
+    WHERE st.tag = ?
+    ORDER BY s.created_at DESC
+    LIMIT ? OFFSET ?
+  `)
+
+  const countByTagStmt = db.prepare(`
+    SELECT COUNT(*) as cnt FROM shares s
+    INNER JOIN share_tags st ON s.id = st.share_id
+    WHERE st.tag = ?
+  `)
+
   const purgeExpiredStmt = db.prepare(
     `DELETE FROM shares WHERE created_at < unixepoch() - ?`,
   )
@@ -278,6 +336,20 @@ export function createShareStore(
   function isExpired(createdAt: number): boolean {
     if (ttlSeconds <= 0) return false
     return createdAt < Math.floor(Date.now() / 1000) - ttlSeconds
+  }
+
+  function saveTags(shareId: string, tags: string[]): void {
+    // Deduplicate while preserving order
+    const unique = [...new Set(tags)]
+    deleteTagsByShareStmt.run(shareId)
+    for (let i = 0; i < unique.length; i++) {
+      insertTagStmt.run(shareId, unique[i], i)
+    }
+  }
+
+  function getTagsForShare(shareId: string): string[] {
+    const rows = selectTagsByShareStmt.all(shareId) as { tag: string }[]
+    return rows.map((r) => r.tag)
   }
 
   const saveTransaction = db.transaction((params: ShareParams): string => {
@@ -309,6 +381,13 @@ export function createShareStore(
           id: existing.id,
         })
       }
+      // Update tags if provided
+      if (params.tags && params.tags.length > 0) {
+        saveTags(existing.id, params.tags)
+      } else if (params.tags) {
+        // Explicitly passed empty array — clear tags
+        deleteTagsByShareStmt.run(existing.id)
+      }
       return existing.id
     }
 
@@ -336,6 +415,11 @@ export function createShareStore(
       params.musicThumb ?? '',
       params.movieThumb ?? '',
     )
+
+    if (params.tags && params.tags.length > 0) {
+      saveTags(id, params.tags)
+    }
+
     return id
   })
 
@@ -345,39 +429,67 @@ export function createShareStore(
       return saveTransaction(params)
     },
 
-    get(id: string): ShareParams | null {
+    get(
+      id: string,
+    ): (Required<Omit<ShareParams, 'tags'>> & { tags: string[] }) | null {
       if (!isValidShareId(id)) return null
       const row = selectByIdFullStmt.get(id) as
         | (ShareRow & { created_at: number })
         | undefined
       if (!row) return null
       if (isExpired(row.created_at)) return null
-      return mapRow(row)
+      return { ...mapRow(row), tags: getTagsForShare(id) }
     },
 
     list(options: ShareListOptions): ShareListResult {
       if (ttlSeconds > 0) {
         purgeExpiredStmt.run(ttlSeconds)
       }
-      const { cnt } = countStmt.get() as { cnt: number }
-      const rows = listStmt.all(options.limit, options.offset) as (ShareRow & {
+
+      let rows: (ShareRow & {
         id: string
         created_at: number
         reaction_count: number
       })[]
+      let total: number
+
+      if (options.tag) {
+        const { cnt } = countByTagStmt.get(options.tag) as { cnt: number }
+        total = cnt
+        rows = listByTagStmt.all(
+          options.tag,
+          options.limit,
+          options.offset,
+        ) as (ShareRow & {
+          id: string
+          created_at: number
+          reaction_count: number
+        })[]
+      } else {
+        const { cnt } = countStmt.get() as { cnt: number }
+        total = cnt
+        rows = listStmt.all(options.limit, options.offset) as (ShareRow & {
+          id: string
+          created_at: number
+          reaction_count: number
+        })[]
+      }
+
       return {
         items: rows.map((row) => ({
           ...mapRow(row),
           id: row.id,
           createdAt: row.created_at,
           reactionCount: row.reaction_count,
+          tags: getTagsForShare(row.id),
         })),
-        total: cnt,
+        total,
       }
     },
 
     delete(id: string): boolean {
       if (!isValidShareId(id)) return false
+      deleteTagsByShareStmt.run(id)
       deleteReactionsByShareStmt.run(id)
       const result = deleteByIdStmt.run(id)
       return result.changes > 0

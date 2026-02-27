@@ -15,12 +15,14 @@ import { useMergedRef } from '../hooks/useMergedRef'
 import { useReaction } from '../hooks/useReaction'
 import DataCredits from './DataCredits'
 import ReactionButton from './ReactionButton'
+import TagList from './TagList'
 
 type Top3Params = {
   theme: string
   bookId: string
   musicId: string
   movieId: string
+  tags?: string[]
 }
 
 type Props = {
@@ -130,6 +132,11 @@ export default function Top3Content({
           >
             3作品
           </p>
+          {params.tags && params.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <TagList tags={params.tags} />
+            </div>
+          )}
           {showReaction && (
             <div className="mt-3">
               <ReactionButton
@@ -299,6 +306,7 @@ export default function Top3Content({
               bookThumb: book.data?.thumbnailUrl ?? '',
               musicThumb: music.data?.thumbnailUrl ?? '',
               movieThumb: movie.data?.thumbnailUrl ?? '',
+              tags: params.tags,
             }}
             existingShareId={existingShareId}
           />

@@ -9,6 +9,7 @@ function isValidBody(body: unknown): body is {
   bookThumb?: string
   musicThumb?: string
   movieThumb?: string
+  tags?: unknown
 } {
   return typeof body === 'object' && body !== null && !Array.isArray(body)
 }
@@ -38,7 +39,8 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
       MAX_LIMIT,
     )
     const offset = Math.max(Number.isFinite(offsetParam) ? offsetParam : 0, 0)
-    const result = store.list({ limit, offset })
+    const tag = c.req.query('tag') || undefined
+    const result = store.list({ limit, offset, tag })
     return c.json({ ok: true, data: result })
   })
 
@@ -60,6 +62,10 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
       )
     }
 
+    const tags = Array.isArray(body.tags)
+      ? body.tags.filter((t): t is string => typeof t === 'string')
+      : undefined
+
     const params: ShareParams = {
       theme: str(body.theme),
       bookId: str(body.bookId),
@@ -68,6 +74,7 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
       bookThumb: str(body.bookThumb),
       musicThumb: str(body.musicThumb),
       movieThumb: str(body.movieThumb),
+      tags,
     }
 
     if (!params.bookId && !params.musicId && !params.movieId) {

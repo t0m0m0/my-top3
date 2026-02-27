@@ -6,6 +6,7 @@ type ShareParams = {
   bookThumb?: string
   musicThumb?: string
   movieThumb?: string
+  tags?: string[]
 }
 
 export async function createShortUrl(params: ShareParams): Promise<string> {

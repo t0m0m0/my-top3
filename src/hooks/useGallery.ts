@@ -11,6 +11,7 @@ export type GalleryItem = {
   movieThumb: string
   createdAt: number
   reactionCount: number
+  tags: string[]
 }
 
 type GalleryState = {
@@ -24,20 +25,33 @@ type GalleryState = {
 
 const PAGE_SIZE = 20
 
-export function useGallery() {
-  const [state, setState] = useState<GalleryState>({
-    items: [],
-    total: 0,
-    loading: true,
-    loadingMore: false,
-    error: null,
-    hasMore: false,
-  })
+const INITIAL_STATE: GalleryState = {
+  items: [],
+  total: 0,
+  loading: true,
+  loadingMore: false,
+  error: null,
+  hasMore: false,
+}
+
+export function useGallery(tag?: string) {
+  // Reset state whenever tag changes by using tag as the key for initial state
+  const [currentTag, setCurrentTag] = useState(tag)
+  const [state, setState] = useState<GalleryState>(INITIAL_STATE)
+
+  if (currentTag !== tag) {
+    setCurrentTag(tag)
+    setState(INITIAL_STATE)
+  }
 
   useEffect(() => {
     let cancelled = false
 
-    fetch(`/api/shares?limit=${PAGE_SIZE}&offset=0`)
+    const url = tag
+      ? `/api/shares?limit=${PAGE_SIZE}&offset=0&tag=${encodeURIComponent(tag)}`
+      : `/api/shares?limit=${PAGE_SIZE}&offset=0`
+
+    fetch(url)
       .then(async (res) => {
         if (!res.ok) throw new Error('ギャラリーの読み込みに失敗しました')
         const json = await res.json()
@@ -73,7 +87,7 @@ export function useGallery() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [tag])
 
   const loadMore = useCallback(() => {
     setState((prev) => {
@@ -83,7 +97,10 @@ export function useGallery() {
 
     setState((prev) => {
       const offset = prev.items.length
-      fetch(`/api/shares?limit=${PAGE_SIZE}&offset=${offset}`)
+      const url = tag
+        ? `/api/shares?limit=${PAGE_SIZE}&offset=${offset}&tag=${encodeURIComponent(tag)}`
+        : `/api/shares?limit=${PAGE_SIZE}&offset=${offset}`
+      fetch(url)
         .then(async (res) => {
           if (!res.ok) throw new Error('読み込みに失敗しました')
           const json = await res.json()
@@ -108,7 +125,7 @@ export function useGallery() {
         })
       return prev
     })
-  }, [])
+  }, [tag])
 
   return { ...state, loadMore }
 }

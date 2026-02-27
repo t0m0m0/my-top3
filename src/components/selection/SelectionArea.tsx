@@ -13,6 +13,7 @@ import type { MediaCategory } from '../../types/common'
 
 type SelectionAreaProps = {
   theme: string
+  tags?: string[]
   onBeforeCreate?: () => void
   onCompleteChange?: (isComplete: boolean) => void
   onSlotClick?: (category: MediaCategory) => void
@@ -20,6 +21,7 @@ type SelectionAreaProps = {
 
 function SelectionArea({
   theme,
+  tags,
   onBeforeCreate,
   onCompleteChange,
   onSlotClick,
@@ -37,7 +39,7 @@ function SelectionArea({
 
   const handleCreate = () => {
     onBeforeCreate?.()
-    const url = buildTop3Url(selection, theme)
+    const url = buildTop3Url(selection, theme, tags)
     navigate(url)
   }
 
