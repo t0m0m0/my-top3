@@ -42,9 +42,9 @@ describe('ThemeInput', () => {
     const longText = 'あ'.repeat(60)
     await userEvent.setup().type(input, longText)
     // All calls should have values of length <= 50
-    onChange.mock.calls.forEach(([val]: [string]) => {
-      expect(val.length).toBeLessThanOrEqual(50)
-    })
+    for (const call of onChange.mock.calls) {
+      expect((call[0] as string).length).toBeLessThanOrEqual(50)
+    }
   })
 })
 
