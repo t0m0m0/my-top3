@@ -30,6 +30,7 @@ describe('share-store', () => {
     bookThumb: '',
     musicThumb: '',
     movieThumb: '',
+    tags: [] as string[],
   }
 
   it('save returns a short id string', () => {
@@ -143,7 +144,7 @@ describe('share-store', () => {
       }
       const id = store.save(params)
       const result = store.get(id)
-      expect(result).toEqual(params)
+      expect(result).toEqual({ ...params, tags: [] })
       store.close()
     })
 
@@ -416,6 +417,169 @@ describe('share-store', () => {
       expect(() =>
         store.save({ ...sampleParams, bookId: 'abc\x00def' }),
       ).toThrowError(/bookId/)
+      store.close()
+    })
+  })
+
+  describe('tags', () => {
+    it('save stores tags and get returns them', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save({ ...sampleParams, tags: ['summer', 'nostalgia'] })
+      const result = store.get(id)!
+      expect(result.tags).toEqual(['summer', 'nostalgia'])
+      store.close()
+    })
+
+    it('get returns empty array when no tags', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const result = store.get(id)!
+      expect(result.tags).toEqual([])
+      store.close()
+    })
+
+    it('list returns tags for each item', () => {
+      const store = createShareStore(dbPath)
+      store.save({ ...sampleParams, theme: 'tagged', tags: ['rock', 'jazz'] })
+      store.save({ ...sampleParams, theme: 'untagged' })
+      const result = store.list({ limit: 10, offset: 0 })
+      const tagged = result.items.find((i) => i.theme === 'tagged')!
+      const untagged = result.items.find((i) => i.theme === 'untagged')!
+      expect(tagged.tags).toEqual(['rock', 'jazz'])
+      expect(untagged.tags).toEqual([])
+      store.close()
+    })
+
+    it('list filters by tag when tag option is provided', () => {
+      const store = createShareStore(dbPath)
+      store.save({ ...sampleParams, theme: 'a', tags: ['rock', 'jazz'] })
+      store.save({ ...sampleParams, theme: 'b', tags: ['pop'] })
+      store.save({ ...sampleParams, theme: 'c', tags: ['rock'] })
+
+      const result = store.list({ limit: 10, offset: 0, tag: 'rock' })
+      expect(result.items).toHaveLength(2)
+      expect(result.total).toBe(2)
+      const themes = result.items.map((i) => i.theme)
+      expect(themes).toContain('a')
+      expect(themes).toContain('c')
+      store.close()
+    })
+
+    it('list with tag filter returns correct total for pagination', () => {
+      const store = createShareStore(dbPath)
+      store.save({ ...sampleParams, theme: 'a', tags: ['rock'] })
+      store.save({ ...sampleParams, theme: 'b', tags: ['rock'] })
+      store.save({ ...sampleParams, theme: 'c', tags: ['rock'] })
+      store.save({ ...sampleParams, theme: 'd', tags: ['pop'] })
+
+      const page = store.list({ limit: 2, offset: 0, tag: 'rock' })
+      expect(page.items).toHaveLength(2)
+      expect(page.total).toBe(3)
+      store.close()
+    })
+
+    it('list with tag filter that matches nothing returns empty', () => {
+      const store = createShareStore(dbPath)
+      store.save({ ...sampleParams, tags: ['rock'] })
+      const result = store.list({ limit: 10, offset: 0, tag: 'classical' })
+      expect(result.items).toHaveLength(0)
+      expect(result.total).toBe(0)
+      store.close()
+    })
+
+    it('delete removes associated tags', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save({ ...sampleParams, tags: ['rock', 'jazz'] })
+      store.delete(id)
+
+      // Verify tags are gone by checking the DB directly
+      const db = new Database(dbPath)
+      const rows = db.prepare('SELECT * FROM share_tags WHERE share_id = ?').all(id)
+      db.close()
+      expect(rows).toHaveLength(0)
+      store.close()
+    })
+
+    it('rejects more than 5 tags', () => {
+      const store = createShareStore(dbPath)
+      expect(() =>
+        store.save({
+          ...sampleParams,
+          tags: ['a', 'b', 'c', 'd', 'e', 'f'],
+        }),
+      ).toThrowError(/tags/)
+      store.close()
+    })
+
+    it('rejects tags exceeding 20 characters', () => {
+      const store = createShareStore(dbPath)
+      expect(() =>
+        store.save({
+          ...sampleParams,
+          tags: ['a'.repeat(21)],
+        }),
+      ).toThrowError(/tag/)
+      store.close()
+    })
+
+    it('rejects tags containing control characters', () => {
+      const store = createShareStore(dbPath)
+      expect(() =>
+        store.save({
+          ...sampleParams,
+          tags: ['bad\x00tag'],
+        }),
+      ).toThrowError(/tag/)
+      store.close()
+    })
+
+    it('allows exactly 5 tags of 20 chars each', () => {
+      const store = createShareStore(dbPath)
+      const tags = Array.from({ length: 5 }, (_, i) => String(i).repeat(20).slice(0, 20))
+      const id = store.save({ ...sampleParams, tags })
+      const result = store.get(id)!
+      expect(result.tags).toEqual(tags)
+      store.close()
+    })
+
+    it('same content with different tags returns same id but updates tags', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save({ ...sampleParams, tags: ['old'] })
+      const id2 = store.save({ ...sampleParams, tags: ['new'] })
+      expect(id1).toBe(id2)
+      // Tags should be updated to the new set
+      const result = store.get(id1)!
+      expect(result.tags).toEqual(['new'])
+      store.close()
+    })
+
+    it('deduplicates tags', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save({ ...sampleParams, tags: ['rock', 'rock', 'jazz'] })
+      const result = store.get(id)!
+      expect(result.tags).toEqual(['rock', 'jazz'])
+      store.close()
+    })
+
+    it('tags work with existing data without tags (migration)', () => {
+      // Create a store and save without tags
+      const store1 = createShareStore(dbPath)
+      const id = store1.save(sampleParams)
+      store1.close()
+
+      // Reopen — migration should add share_tags table
+      const store2 = createShareStore(dbPath)
+      const result = store2.get(id)!
+      expect(result.tags).toEqual([])
+      store2.close()
+    })
+
+    it('computeParamsHash does not include tags — same content = same share', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save({ ...sampleParams, tags: ['a'] })
+      const id2 = store.save({ ...sampleParams, tags: ['b'] })
+      // Same params (sans tags) → same id
+      expect(id1).toBe(id2)
       store.close()
     })
   })
