@@ -31,9 +31,13 @@ if (!process.env['TMDB_API_KEY']) {
 
 const app = new Hono()
 
-const corsOrigins = process.env['CORS_ORIGIN']
-  ? process.env['CORS_ORIGIN'].split(',')
-  : ['https://myno1s.exe.xyz:8000']
+if (!process.env['CORS_ORIGIN']) {
+  throw new Error(
+    'CORS_ORIGIN environment variable is required. Set it to comma-separated allowed origins (e.g. CORS_ORIGIN=https://example.com)',
+  )
+}
+
+const corsOrigins = process.env['CORS_ORIGIN'].split(',')
 
 app.use(
   '/api/*',

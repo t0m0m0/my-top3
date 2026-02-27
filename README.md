@@ -84,6 +84,18 @@ export default defineConfig([
 - `npm install` で依存パッケージがインストール済みであること
 - `.env` ファイルに API キーが設定されていること
 
+#### 環境変数
+
+| 変数名 | 必須 | 説明 |
+|---|---|---|
+| `CORS_ORIGIN` | **必須** | CORS 許可オリジン（カンマ区切りで複数指定可）。未設定の場合サーバーは起動しません。例: `https://myapp.example.com` |
+| `GOOGLE_BOOKS_API_KEY` | 推奨 | Google Books API キー |
+| `LASTFM_API_KEY` | 推奨 | Last.fm API キー |
+| `TMDB_API_KEY` | 推奨 | TMDb API キー |
+| `ADMIN_API_KEY` | 任意 | 管理用 API キー |
+| `SHARES_DATA_PATH` | 任意 | SQLite DB ファイルパス（デフォルト: `data/shares.db`） |
+| `PORT` | 任意 | サーバーポート（デフォルト: `8000`） |
+
 #### セットアップ手順
 
 1. セットアップスクリプトを実行します:

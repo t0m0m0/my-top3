@@ -31,30 +31,39 @@ describe('CORS middleware', () => {
     return mod.default
   }
 
-  it('returns CORS headers for /api/* with default origin (https://myno1s.exe.xyz:8000)', async () => {
-    const app = await getApp()
-    const req = new Request('http://localhost/api/books/search?q=test', {
-      headers: { Origin: 'https://myno1s.exe.xyz:8000' },
-    })
-    const res = await app.request(req)
-    expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
-      'https://myno1s.exe.xyz:8000',
+  it('throws error when CORS_ORIGIN is not set', async () => {
+    delete process.env['CORS_ORIGIN']
+    await expect(getApp()).rejects.toThrow(
+      'CORS_ORIGIN environment variable is required',
     )
   })
 
-  it('handles preflight OPTIONS request with default origin', async () => {
+  it('returns CORS headers when CORS_ORIGIN is set', async () => {
+    process.env['CORS_ORIGIN'] = 'https://custom.example.com'
+    const app = await getApp()
+    const req = new Request('http://localhost/api/books/search?q=test', {
+      headers: { Origin: 'https://custom.example.com' },
+    })
+    const res = await app.request(req)
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
+      'https://custom.example.com',
+    )
+  })
+
+  it('handles preflight OPTIONS request', async () => {
+    process.env['CORS_ORIGIN'] = 'https://custom.example.com'
     const app = await getApp()
     const req = new Request('http://localhost/api/books/search', {
       method: 'OPTIONS',
       headers: {
-        Origin: 'https://myno1s.exe.xyz:8000',
+        Origin: 'https://custom.example.com',
         'Access-Control-Request-Method': 'GET',
       },
     })
     const res = await app.request(req)
     expect(res.status).toBe(204)
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
-      'https://myno1s.exe.xyz:8000',
+      'https://custom.example.com',
     )
     expect(res.headers.get('Access-Control-Allow-Methods')).toBe(
       'GET,POST,DELETE',
@@ -62,11 +71,12 @@ describe('CORS middleware', () => {
   })
 
   it('allows POST in preflight for /api/shares', async () => {
+    process.env['CORS_ORIGIN'] = 'https://custom.example.com'
     const app = await getApp()
     const req = new Request('http://localhost/api/shares', {
       method: 'OPTIONS',
       headers: {
-        Origin: 'https://myno1s.exe.xyz:8000',
+        Origin: 'https://custom.example.com',
         'Access-Control-Request-Method': 'POST',
         'Access-Control-Request-Headers': 'content-type',
       },
@@ -77,24 +87,13 @@ describe('CORS middleware', () => {
   })
 
   it('does not return CORS headers for disallowed origin', async () => {
+    process.env['CORS_ORIGIN'] = 'https://allowed.example.com'
     const app = await getApp()
     const req = new Request('http://localhost/api/books/search?q=test', {
       headers: { Origin: 'https://evil.example.com' },
     })
     const res = await app.request(req)
     expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull()
-  })
-
-  it('uses CORS_ORIGIN env var when set', async () => {
-    process.env['CORS_ORIGIN'] = 'https://custom.example.com'
-    const app = await getApp()
-    const req = new Request('http://localhost/api/books/search?q=test', {
-      headers: { Origin: 'https://custom.example.com' },
-    })
-    const res = await app.request(req)
-    expect(res.headers.get('Access-Control-Allow-Origin')).toBe(
-      'https://custom.example.com',
-    )
   })
 
   it('supports multiple origins via comma-separated CORS_ORIGIN', async () => {
