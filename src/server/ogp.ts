@@ -130,12 +130,15 @@ async function fetchWorkTitle(
       cache.set(category, id, info)
       return info
     }
+    // API responded but no data (e.g. not-found) — negative cache with full TTL
+    cache.set(category, id, null)
+    return null
   } catch (e) {
     console.error(`[ogp] Failed to fetch ${category} (id: ${id}):`, e)
+    // Network / transient error — short TTL (5 min) to allow retry soon
+    cache.setWithTtl(category, id, null, 5 * 60 * 1000)
+    return null
   }
-  // Cache the null result to avoid repeated failed lookups
-  cache.set(category, id, null)
-  return null
 }
 
 export async function injectOgpTags(

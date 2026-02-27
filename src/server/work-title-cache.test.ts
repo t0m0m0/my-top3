@@ -85,4 +85,20 @@ describe('WorkTitleCache', () => {
     expect(cache.size()).toBe(0)
     expect(cache.get('book', 'id1')).toBeUndefined()
   })
+
+  it('setWithTtl uses custom TTL instead of default', () => {
+    // Default TTL is 60_000, set with custom 10_000
+    cache.setWithTtl(
+      'book',
+      'id1',
+      { title: 'Short', category: '📚 本' },
+      10_000,
+    )
+
+    vi.advanceTimersByTime(9_999)
+    expect(cache.get('book', 'id1')?.title).toBe('Short')
+
+    vi.advanceTimersByTime(2)
+    expect(cache.get('book', 'id1')).toBeUndefined()
+  })
 })

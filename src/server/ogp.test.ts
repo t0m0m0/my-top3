@@ -435,4 +435,51 @@ describe('injectOgpTags', () => {
     await injectOgpTags(SAMPLE_HTML, 'https://example.com/my-no1s', params)
     expect(getBookById).toHaveBeenCalledTimes(1)
   })
+
+  it('uses short TTL cache for network errors and retries after expiry', async () => {
+    vi.useFakeTimers()
+    process.env['GOOGLE_BOOKS_API_KEY'] = 'test-key'
+
+    const { getBookById } = await import('../services/google-books.ts')
+    vi.mocked(getBookById).mockRejectedValue(new Error('Network error'))
+
+    const params = new URLSearchParams({
+      theme: 'テスト',
+      book: 'err-id',
+    })
+
+    // First call — network error, cached with short TTL
+    await injectOgpTags(SAMPLE_HTML, 'https://example.com/my-no1s', params)
+    expect(getBookById).toHaveBeenCalledTimes(1)
+
+    // Immediate second call — still cached
+    await injectOgpTags(SAMPLE_HTML, 'https://example.com/my-no1s', params)
+    expect(getBookById).toHaveBeenCalledTimes(1)
+
+    // Advance past 5 minute short TTL
+    vi.advanceTimersByTime(5 * 60 * 1000 + 1)
+
+    // Now the cache entry expired, API should be called again
+    vi.mocked(getBookById).mockResolvedValue({
+      ok: true,
+      data: {
+        id: 'err-id',
+        category: 'book',
+        title: 'Recovered Book',
+        subtitle: '',
+        thumbnailUrl: '',
+        externalUrl: '',
+      },
+    })
+
+    const result = await injectOgpTags(
+      SAMPLE_HTML,
+      'https://example.com/my-no1s',
+      params,
+    )
+    expect(getBookById).toHaveBeenCalledTimes(2)
+    expect(result).toContain('📚 本: Recovered Book')
+
+    vi.useRealTimers()
+  })
 })
