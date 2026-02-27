@@ -6,7 +6,9 @@ import {
   buildOgDescription,
   buildMetaTags,
   injectOgpTags,
+  setWorkTitleCache,
 } from './ogp.ts'
+import { createWorkTitleCache } from './work-title-cache.ts'
 
 vi.mock('../services/google-books.ts', () => ({
   getBookById: vi.fn(),
@@ -162,12 +164,15 @@ describe('buildMetaTags', () => {
 describe('injectOgpTags', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    // Use a fresh cache for each test
+    setWorkTitleCache(createWorkTitleCache({ ttlMs: 60_000 }))
   })
 
   afterEach(() => {
     delete process.env['GOOGLE_BOOKS_API_KEY']
     delete process.env['LASTFM_API_KEY']
     delete process.env['TMDB_API_KEY']
+    setWorkTitleCache(null)
   })
 
   it('injects OGP meta tags before </head>', async () => {
@@ -371,5 +376,63 @@ describe('injectOgpTags', () => {
     // Should not throw, should still return valid HTML with OGP tags
     expect(result).toContain('og:title')
     expect(result).toContain('</head>')
+  })
+
+  it('uses cached result on second call and does not call API again', async () => {
+    process.env['GOOGLE_BOOKS_API_KEY'] = 'test-key'
+
+    const { getBookById } = await import('../services/google-books.ts')
+    vi.mocked(getBookById).mockResolvedValue({
+      ok: true,
+      data: {
+        id: 'book1',
+        category: 'book',
+        title: '1Q84',
+        subtitle: '村上春樹',
+        thumbnailUrl: '',
+        externalUrl: '',
+      },
+    })
+
+    const params = new URLSearchParams({
+      theme: 'おすすめ',
+      book: 'book1',
+    })
+
+    // First call — should hit API
+    await injectOgpTags(SAMPLE_HTML, 'https://example.com/my-no1s', params)
+    expect(getBookById).toHaveBeenCalledTimes(1)
+
+    // Second call — should use cache
+    const result = await injectOgpTags(
+      SAMPLE_HTML,
+      'https://example.com/my-no1s',
+      params,
+    )
+    expect(getBookById).toHaveBeenCalledTimes(1) // Not called again
+    expect(result).toContain('📚 本: 1Q84')
+  })
+
+  it('caches failed lookups (negative cache)', async () => {
+    process.env['GOOGLE_BOOKS_API_KEY'] = 'test-key'
+
+    const { getBookById } = await import('../services/google-books.ts')
+    vi.mocked(getBookById).mockResolvedValue({
+      ok: false,
+      error: { kind: 'not-found', message: 'Not found' },
+    })
+
+    const params = new URLSearchParams({
+      theme: 'テスト',
+      book: 'bad-id',
+    })
+
+    // First call
+    await injectOgpTags(SAMPLE_HTML, 'https://example.com/my-no1s', params)
+    expect(getBookById).toHaveBeenCalledTimes(1)
+
+    // Second call — negative result cached, no API call
+    await injectOgpTags(SAMPLE_HTML, 'https://example.com/my-no1s', params)
+    expect(getBookById).toHaveBeenCalledTimes(1)
   })
 })
