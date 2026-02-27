@@ -1,14 +1,29 @@
 import { getBookById } from '../services/google-books.ts'
 import { CATEGORY_LABELS_DISPLAY, CATEGORIES } from '../constants/category.ts'
 import type { MediaCategory, SearchResultItem } from '../types/common.ts'
+import {
+  createWorkTitleCache,
+  type WorkInfo,
+  type WorkTitleCache,
+} from './work-title-cache.ts'
 
 const MAX_THEME_LENGTH = 50
 const DEFAULT_SITE_NAME = 'すきコレ'
 const DEFAULT_DESCRIPTION = '好きな作品を3つ選んで、みんなにシェアしよう！'
 
-type WorkInfo = {
-  title: string
-  category: string
+// Module-level cache instance (6-hour TTL, up to 10k entries)
+let workTitleCacheInstance: WorkTitleCache | null = null
+
+function getCache(): WorkTitleCache {
+  if (!workTitleCacheInstance) {
+    workTitleCacheInstance = createWorkTitleCache()
+  }
+  return workTitleCacheInstance
+}
+
+/** Replace the cache instance (for testing) */
+export function setWorkTitleCache(cache: WorkTitleCache | null): void {
+  workTitleCacheInstance = cache
 }
 
 export function escapeHtml(text: string): string {
@@ -93,6 +108,14 @@ async function fetchWorkTitle(
   category: MediaCategory,
   id: string,
 ): Promise<WorkInfo | null> {
+  const cache = getCache()
+
+  // Check cache first
+  const cached = cache.get(category, id)
+  if (cached !== undefined) {
+    return cached
+  }
+
   try {
     const { envKey, getById } = await CATEGORY_CONFIG[category]()
     const apiKey = process.env[envKey] ?? ''
@@ -100,15 +123,22 @@ async function fetchWorkTitle(
 
     const result = await getById(apiKey, id)
     if (result.ok && result.data) {
-      return {
+      const info: WorkInfo = {
         title: result.data.title,
         category: buildCategoryLabel(category),
       }
+      cache.set(category, id, info)
+      return info
     }
+    // API responded but no data (e.g. not-found) — negative cache with full TTL
+    cache.set(category, id, null)
+    return null
   } catch (e) {
     console.error(`[ogp] Failed to fetch ${category} (id: ${id}):`, e)
+    // Network / transient error — short TTL (5 min) to allow retry soon
+    cache.setWithTtl(category, id, null, 5 * 60 * 1000)
+    return null
   }
-  return null
 }
 
 export async function injectOgpTags(
