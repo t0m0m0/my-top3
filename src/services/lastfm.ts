@@ -141,11 +141,25 @@ export async function searchMusic(
     .map(mapSearchAlbumToResult)
     .filter((item) => item.thumbnailUrl !== '')
 
+  // Adjust totalItems to prevent infinite pagination loops:
+  // If filtering reduced the item count and the raw results were fewer
+  // than a full page, we've reached the end of meaningful results.
+  let adjustedTotal = total
+  if (mapped.length < albums.length) {
+    if (albums.length < maxResults) {
+      // Last page: cap totalItems to actual items returned
+      adjustedTotal = startIndex + mapped.length
+    } else if (mapped.length === 0) {
+      // Full page but all filtered out: signal end to prevent loop
+      adjustedTotal = startIndex
+    }
+  }
+
   const response: Result<PaginatedResponse<SearchResultItem>> = {
     ok: true,
     data: {
       items: mapped,
-      totalItems: total,
+      totalItems: adjustedTotal,
       startIndex,
     },
   }

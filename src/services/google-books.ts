@@ -156,7 +156,13 @@ export async function searchBooks(
   // Use the larger totalItems as an approximation
   const titleTotal = titleResult.ok ? titleResult.data.totalItems : 0
   const authorTotal = authorResult.ok ? authorResult.data.totalItems : 0
-  const totalItems = Math.max(titleTotal, authorTotal)
+  let totalItems = Math.max(titleTotal, authorTotal)
+
+  // If merged results are fewer than maxResults, we've reached the end;
+  // cap totalItems to prevent infinite pagination loops.
+  if (mapped.length < maxResults) {
+    totalItems = startIndex + mapped.length
+  }
 
   const response: Result<PaginatedResponse<SearchResultItem>> = {
     ok: true,

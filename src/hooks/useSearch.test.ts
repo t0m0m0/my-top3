@@ -182,6 +182,63 @@ describe('useSearch', () => {
     expect(result.current.results[0].category).toBe('music')
   })
 
+  it('stops pagination when loadMore returns only duplicate items', async () => {
+    let callCount = 0
+    server.use(
+      http.get('/api/books/search', () => {
+        callCount++
+        // Every call returns the same 2 items
+        return HttpResponse.json({
+          ok: true,
+          data: {
+            items: [
+              {
+                id: 'b1',
+                category: 'book',
+                title: 'Book 1',
+                subtitle: 'A1',
+                thumbnailUrl: '',
+                externalUrl: '',
+              },
+              {
+                id: 'b2',
+                category: 'book',
+                title: 'Book 2',
+                subtitle: 'A2',
+                thumbnailUrl: '',
+                externalUrl: '',
+              },
+            ],
+            totalItems: 100,
+            startIndex: 0,
+          },
+        })
+      }),
+    )
+
+    const { result } = renderHook(() => useSearch('book', 'test'))
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(result.current.results).toHaveLength(2)
+    expect(result.current.hasMore).toBe(true)
+
+    // loadMore returns the same items → all duplicates → should stop
+    const countBefore = callCount
+    result.current.loadMore()
+    await waitFor(() => {
+      // Wait for loadMore to actually fire (callCount increases)
+      expect(callCount).toBeGreaterThan(countBefore)
+    })
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+    expect(result.current.hasMore).toBe(false)
+    expect(result.current.results).toHaveLength(2)
+    // Should have only made 2 calls total (initial + 1 loadMore), not an infinite loop
+    expect(callCount).toBeLessThanOrEqual(3)
+  })
+
   it('uses API_ENDPOINTS for movie category', async () => {
     let requestedUrl = ''
     server.use(

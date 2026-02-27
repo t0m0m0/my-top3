@@ -189,6 +189,78 @@ describe('searchMusic', () => {
     }
   })
 
+  it('adjusts totalItems when thumbnail filtering removes all items', async () => {
+    server.use(
+      http.get(LASTFM_BASE, () =>
+        HttpResponse.json(
+          mockAlbumSearchResponse(
+            [
+              mockAlbum({
+                name: 'No Image 1',
+                image: [
+                  { '#text': '', size: 'small' },
+                  { '#text': '', size: 'extralarge' },
+                ],
+              }),
+              mockAlbum({
+                name: 'No Image 2',
+                image: [
+                  { '#text': '', size: 'small' },
+                  { '#text': '', size: 'extralarge' },
+                ],
+              }),
+            ],
+            '100',
+          ),
+        ),
+      ),
+    )
+    const { searchMusic } = await import('./lastfm')
+    const result = await searchMusic('api-key', 'test')
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.items).toHaveLength(0)
+      // totalItems should be adjusted so hasMore = false
+      expect(result.data.totalItems).toBe(0)
+    }
+  })
+
+  it('adjusts totalItems when thumbnail filtering reduces items', async () => {
+    server.use(
+      http.get(LASTFM_BASE, () =>
+        HttpResponse.json(
+          mockAlbumSearchResponse(
+            [
+              mockAlbum({ name: 'Good Album' }),
+              mockAlbum({
+                name: 'No Image',
+                image: [
+                  { '#text': '', size: 'small' },
+                  { '#text': '', size: 'extralarge' },
+                ],
+              }),
+            ],
+            '100',
+          ),
+        ),
+      ),
+    )
+    const { searchMusic } = await import('./lastfm')
+    const result = await searchMusic('api-key', 'test', {
+      startIndex: 0,
+      maxResults: 20,
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.items).toHaveLength(1)
+      // When fewer items returned than raw (due to filtering) and raw < maxResults,
+      // totalItems should be capped
+      expect(result.data.totalItems).toBeLessThanOrEqual(
+        result.data.startIndex + result.data.items.length,
+      )
+    }
+  })
+
   it('filters out albums with no images', async () => {
     server.use(
       http.get(LASTFM_BASE, () =>
