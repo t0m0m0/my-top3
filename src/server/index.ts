@@ -72,6 +72,7 @@ app.route(
   createSharesApp(sharesDataPath, {
     adminApiKey: process.env['ADMIN_API_KEY'],
     ttlSeconds: SHARE_TTL_SECONDS,
+    reactionRateLimit: { windowMs: 60_000, max: 30 },
   }),
 )
 

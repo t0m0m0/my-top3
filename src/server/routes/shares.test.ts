@@ -423,8 +423,9 @@ describe('shares route', () => {
   })
 
   describe('POST /:id/reactions', () => {
-    async function createShare() {
-      const res = await app.request('/', {
+    async function createShare(a?: ReturnType<typeof createSharesApp>) {
+      const target = a ?? app
+      const res = await target.request('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -495,6 +496,86 @@ describe('shares route', () => {
         body: JSON.stringify({ clientId: 'client-1' }),
       })
       expect(res.status).toBe(404)
+    })
+
+    it('rate limits reactions per IP (30 req/min)', async () => {
+      const rateLimitedApp = createSharesApp(
+        path.join(tmpDir, 'shares-rl.db'),
+        { reactionRateLimit: { windowMs: 60_000, max: 30 } },
+      )
+      const id = await createShare(rateLimitedApp)
+
+      // Send 30 requests from the same IP – all should succeed
+      for (let i = 0; i < 30; i++) {
+        const res = await rateLimitedApp.request(`/${id}/reactions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-forwarded-for': '1.2.3.4',
+          },
+          body: JSON.stringify({ clientId: `spammer-${i}` }),
+        })
+        expect(res.status).toBe(200)
+      }
+
+      // 31st request should be rate limited
+      const res = await rateLimitedApp.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': '1.2.3.4',
+        },
+        body: JSON.stringify({ clientId: 'spammer-31' }),
+      })
+      expect(res.status).toBe(429)
+      const json = (await res.json()) as {
+        ok: boolean
+        error: { kind: string }
+      }
+      expect(json.ok).toBe(false)
+      expect(json.error.kind).toBe('rate_limit')
+    })
+
+    it('rate limits reactions independently per IP', async () => {
+      const rateLimitedApp = createSharesApp(
+        path.join(tmpDir, 'shares-rl2.db'),
+        { reactionRateLimit: { windowMs: 60_000, max: 2 } },
+      )
+      const id = await createShare(rateLimitedApp)
+
+      // IP A: 2 requests (at limit)
+      for (let i = 0; i < 2; i++) {
+        await rateLimitedApp.request(`/${id}/reactions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-forwarded-for': '10.0.0.1',
+          },
+          body: JSON.stringify({ clientId: `a-${i}` }),
+        })
+      }
+
+      // IP B should still be allowed
+      const res = await rateLimitedApp.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': '10.0.0.2',
+        },
+        body: JSON.stringify({ clientId: 'b-0' }),
+      })
+      expect(res.status).toBe(200)
+
+      // IP A should be blocked
+      const blocked = await rateLimitedApp.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': '10.0.0.1',
+        },
+        body: JSON.stringify({ clientId: 'a-extra' }),
+      })
+      expect(blocked.status).toBe(429)
     })
 
     it('includes reactionCount in list response', async () => {
