@@ -28,6 +28,24 @@ describe('ThemeInput', () => {
     render(<ThemeInput value={longText} onChange={vi.fn()} />)
     expect(screen.getByText(/50文字以内/)).toBeInTheDocument()
   })
+
+  it('sets maxLength to MAX_THEME_LENGTH to prevent over-limit input', () => {
+    render(<ThemeInput value="" onChange={vi.fn()} />)
+    const input = screen.getByRole('textbox', { name: 'お題' })
+    expect(input).toHaveAttribute('maxLength', '50')
+  })
+
+  it('truncates onChange value to MAX_THEME_LENGTH', async () => {
+    const onChange = vi.fn()
+    render(<ThemeInput value="" onChange={onChange} />)
+    const input = screen.getByRole('textbox', { name: 'お題' })
+    const longText = 'あ'.repeat(60)
+    await userEvent.setup().type(input, longText)
+    // All calls should have values of length <= 50
+    onChange.mock.calls.forEach(([val]: [string]) => {
+      expect(val.length).toBeLessThanOrEqual(50)
+    })
+  })
 })
 
 it('renders suggestion chips', () => {

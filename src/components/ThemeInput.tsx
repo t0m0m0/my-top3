@@ -18,14 +18,14 @@ function ThemeInput({ value, onChange }: ThemeInputProps) {
     <div className="flex flex-wrap items-center gap-2">
       <TextField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value.slice(0, MAX_THEME_LENGTH))}
         placeholder="お題を入力（任意）"
         error={isOverLimit}
         variant="outlined"
         size="small"
         slotProps={{
           htmlInput: {
-            maxLength: MAX_THEME_LENGTH + 10,
+            maxLength: MAX_THEME_LENGTH,
             'aria-label': 'お題',
           },
           input: {
