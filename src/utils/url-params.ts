@@ -71,7 +71,9 @@ export function parseTop3Params(searchParams: URLSearchParams): Top3Params {
   }
 }
 
-export function buildEditUrl(params: Top3Params): string {
+export function buildEditUrl(
+  params: Omit<Top3Params, 'tags'> & { tags?: string[] },
+): string {
   const sp = new URLSearchParams()
   sp.set('edit', '1')
 
