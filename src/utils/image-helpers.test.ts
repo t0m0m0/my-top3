@@ -65,6 +65,46 @@ describe('generateImageBlob', () => {
     await expect(generateImageBlob(el)).rejects.toThrow('canvas error')
   })
 
+  it('passes custom size to html2canvas', async () => {
+    const fakeBlob = new Blob(['fake'], { type: 'image/png' })
+    const fakeCanvas = document.createElement('canvas')
+    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb: BlobCallback) => {
+      cb(fakeBlob)
+    })
+    vi.mocked(html2canvas).mockResolvedValue(fakeCanvas)
+
+    const el = document.createElement('div')
+    await generateImageBlob(el, { width: 1080, height: 1920 })
+
+    expect(html2canvas).toHaveBeenCalledWith(
+      el,
+      expect.objectContaining({
+        width: 1080,
+        height: 1920,
+      }),
+    )
+  })
+
+  it('defaults to 1080x1080 when no size given', async () => {
+    const fakeBlob = new Blob(['fake'], { type: 'image/png' })
+    const fakeCanvas = document.createElement('canvas')
+    vi.spyOn(fakeCanvas, 'toBlob').mockImplementation((cb: BlobCallback) => {
+      cb(fakeBlob)
+    })
+    vi.mocked(html2canvas).mockResolvedValue(fakeCanvas)
+
+    const el = document.createElement('div')
+    await generateImageBlob(el)
+
+    expect(html2canvas).toHaveBeenCalledWith(
+      el,
+      expect.objectContaining({
+        width: 1080,
+        height: 1080,
+      }),
+    )
+  })
+
   it('throws when canvas produces empty data', async () => {
     const fakeCanvas = document.createElement('canvas')
     fakeCanvas.width = 0

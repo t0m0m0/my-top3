@@ -6,15 +6,23 @@ import {
   formatDate,
 } from '../utils/image-helpers'
 
-const IMAGE_SIZE = 1080
+export type ImageDimensions = {
+  width: number
+  height: number
+}
 
-export function useImageCapture(theme: string) {
+export function useImageCapture(
+  theme: string,
+  dimensions: ImageDimensions = { width: 1080, height: 1080 },
+) {
   const captureRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successOpen, setSuccessOpen] = useState(false)
   const [scale, setScale] = useState(0.5)
+
+  const { width, height } = dimensions
 
   useEffect(() => {
     const container = containerRef.current
@@ -23,7 +31,7 @@ export function useImageCapture(theme: string) {
     const updateScale = () => {
       const containerWidth = container.clientWidth
       const newScale =
-        Math.round(Math.min(containerWidth / IMAGE_SIZE, 0.5) * 1000) / 1000
+        Math.round(Math.min(containerWidth / width, 0.5) * 1000) / 1000
       setScale(newScale)
     }
 
@@ -32,7 +40,7 @@ export function useImageCapture(theme: string) {
     const observer = new ResizeObserver(updateScale)
     observer.observe(container)
     return () => observer.disconnect()
-  }, [])
+  }, [width])
 
   const handleDownload = useCallback(async () => {
     if (!captureRef.current) return
@@ -40,7 +48,10 @@ export function useImageCapture(theme: string) {
     setIsGenerating(true)
     setError(null)
     try {
-      const blob = await generateImageBlob(captureRef.current)
+      const blob = await generateImageBlob(captureRef.current, {
+        width,
+        height,
+      })
       const dataUrl = URL.createObjectURL(blob)
 
       const date = formatDate()
@@ -57,7 +68,7 @@ export function useImageCapture(theme: string) {
     } finally {
       setIsGenerating(false)
     }
-  }, [theme])
+  }, [theme, width, height])
 
   return {
     captureRef,
@@ -69,6 +80,7 @@ export function useImageCapture(theme: string) {
     setSuccessOpen,
     scale,
     handleDownload,
-    IMAGE_SIZE,
+    width,
+    height,
   }
 }

@@ -1,16 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import DownloadIcon from '@mui/icons-material/Download'
 import type { SearchResultItem, MediaCategory } from '../types/common'
-import { IMAGE_SIZE, HALF, SEP } from '../constants/image-layout'
+import {
+  IMAGE_SIZE,
+  HALF,
+  SEP,
+  PORTRAIT_WIDTH,
+  PORTRAIT_HEIGHT,
+  VERTICAL_SLOT_POSITIONS,
+  VERTICAL_SLOT_STYLES,
+} from '../constants/image-layout'
+import type { AspectRatio } from '../constants/image-layout'
 import { CANVAS_DARK } from '../constants/image-colors'
 import { useImageCapture } from '../hooks/useImageCapture'
-import { useLayoutSwap } from '../hooks/useLayoutSwap'
+import { useLayoutSwap, useVerticalLayoutSwap } from '../hooks/useLayoutSwap'
 import { useMergedRef } from '../hooks/useMergedRef'
 import { ImageSlot } from './ImageSlot'
 import { StatusSnackbar } from './StatusSnackbar'
-import { LayoutSelector } from './LayoutSelector'
+import { LayoutSelector, VerticalLayoutSelector } from './LayoutSelector'
+import { AspectRatioSelector } from './AspectRatioSelector'
 
 type Top3ImageProps = {
   theme: string
@@ -29,6 +39,12 @@ function Top3Image({
   captureRef: externalCaptureRef,
   readOnly,
 }: Top3ImageProps) {
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('landscape')
+
+  const isPortrait = aspectRatio === 'portrait'
+  const canvasWidth = isPortrait ? PORTRAIT_WIDTH : IMAGE_SIZE
+  const canvasHeight = isPortrait ? PORTRAIT_HEIGHT : IMAGE_SIZE
+
   const {
     captureRef: internalCaptureRef,
     containerRef,
@@ -39,14 +55,17 @@ function Top3Image({
     setSuccessOpen,
     scale,
     handleDownload,
-  } = useImageCapture(theme)
+  } = useImageCapture(theme, { width: canvasWidth, height: canvasHeight })
 
   const captureRefCallback = useMergedRef(
     internalCaptureRef,
     externalCaptureRef,
   )
 
-  const { layout, handleLayoutChange } = useLayoutSwap()
+  const { layout: landscapeLayout, handleLayoutChange: handleLandscapeChange } =
+    useLayoutSwap()
+  const { layout: verticalLayout, handleLayoutChange: handleVerticalChange } =
+    useVerticalLayoutSwap()
 
   const items: Record<MediaCategory, SearchResultItem | null> = {
     book,
@@ -57,15 +76,28 @@ function Top3Image({
   return (
     <div>
       {!readOnly && (
-        <LayoutSelector layout={layout} onLayoutChange={handleLayoutChange} />
+        <>
+          <AspectRatioSelector value={aspectRatio} onChange={setAspectRatio} />
+          {isPortrait ? (
+            <VerticalLayoutSelector
+              layout={verticalLayout}
+              onLayoutChange={handleVerticalChange}
+            />
+          ) : (
+            <LayoutSelector
+              layout={landscapeLayout}
+              onLayoutChange={handleLandscapeChange}
+            />
+          )}
+        </>
       )}
 
       {/* Capture target */}
       <div ref={containerRef} style={{ overflow: 'hidden', maxWidth: '100%' }}>
         <div
           style={{
-            width: IMAGE_SIZE * scale,
-            height: IMAGE_SIZE * scale,
+            width: canvasWidth * scale,
+            height: canvasHeight * scale,
             margin: '0 auto',
             overflow: 'hidden',
           }}
@@ -74,8 +106,8 @@ function Top3Image({
             ref={captureRefCallback}
             data-testid="top3-image-capture"
             style={{
-              width: IMAGE_SIZE,
-              height: IMAGE_SIZE,
+              width: canvasWidth,
+              height: canvasHeight,
               background: CANVAS_DARK,
               position: 'relative',
               overflow: 'hidden',
@@ -85,53 +117,87 @@ function Top3Image({
               transform: `scale(${scale})`,
             }}
           >
-            {/* Top slot */}
-            <ImageSlot
-              item={items[layout.top]}
-              category={layout.top}
-              slot="top"
-              theme={theme}
-            />
+            {isPortrait ? (
+              /* Portrait (9:16) layout: 3 stacked vertically */
+              <>
+                {VERTICAL_SLOT_POSITIONS.map((slot, idx) => (
+                  <React.Fragment key={slot}>
+                    <ImageSlot
+                      item={items[verticalLayout[slot]]}
+                      category={verticalLayout[slot]}
+                      slot={slot}
+                      theme={idx === 0 ? theme : undefined}
+                    />
+                    {idx < 2 && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top:
+                            VERTICAL_SLOT_STYLES[slot].top +
+                            VERTICAL_SLOT_STYLES[slot].height,
+                          left: 0,
+                          right: 0,
+                          height: SEP,
+                          background: 'rgba(255,255,255,0.06)',
+                          zIndex: 10,
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </>
+            ) : (
+              /* Landscape (1:1) layout */
+              <>
+                {/* Top slot */}
+                <ImageSlot
+                  item={items[landscapeLayout.top]}
+                  category={landscapeLayout.top}
+                  slot="top"
+                  theme={theme}
+                />
 
-            {/* Horizontal separator */}
-            <div
-              style={{
-                position: 'absolute',
-                top: HALF,
-                left: 0,
-                right: 0,
-                height: SEP,
-                background: 'rgba(255,255,255,0.06)',
-                zIndex: 10,
-              }}
-            />
+                {/* Horizontal separator */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: HALF,
+                    left: 0,
+                    right: 0,
+                    height: SEP,
+                    background: 'rgba(255,255,255,0.06)',
+                    zIndex: 10,
+                  }}
+                />
 
-            {/* Bottom-left slot */}
-            <ImageSlot
-              item={items[layout['bottom-left']]}
-              category={layout['bottom-left']}
-              slot="bottom-left"
-            />
+                {/* Bottom-left slot */}
+                <ImageSlot
+                  item={items[landscapeLayout['bottom-left']]}
+                  category={landscapeLayout['bottom-left']}
+                  slot="bottom-left"
+                />
 
-            {/* Vertical separator */}
-            <div
-              style={{
-                position: 'absolute',
-                top: HALF + SEP,
-                left: HALF - SEP / 2,
-                width: SEP,
-                height: HALF - SEP,
-                background: 'rgba(255,255,255,0.06)',
-                zIndex: 10,
-              }}
-            />
+                {/* Vertical separator */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: HALF + SEP,
+                    left: HALF - SEP / 2,
+                    width: SEP,
+                    height: HALF - SEP,
+                    background: 'rgba(255,255,255,0.06)',
+                    zIndex: 10,
+                  }}
+                />
 
-            {/* Bottom-right slot */}
-            <ImageSlot
-              item={items[layout['bottom-right']]}
-              category={layout['bottom-right']}
-              slot="bottom-right"
-            />
+                {/* Bottom-right slot */}
+                <ImageSlot
+                  item={items[landscapeLayout['bottom-right']]}
+                  category={landscapeLayout['bottom-right']}
+                  slot="bottom-right"
+                />
+              </>
+            )}
 
             {/* Branding & Data Credits */}
             <div
