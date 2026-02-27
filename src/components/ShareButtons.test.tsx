@@ -40,9 +40,84 @@ describe('ShareButtons', () => {
     expect(screen.getByLabelText('URLをコピー')).toBeInTheDocument()
   })
 
-  it('does not render X share button', () => {
-    render(<ShareButtons />)
-    expect(screen.queryByLabelText('Xでシェア')).not.toBeInTheDocument()
+  describe('X (Twitter) share button', () => {
+    it('renders X share button', () => {
+      render(<ShareButtons />)
+      expect(screen.getByLabelText('Xでシェア')).toBeInTheDocument()
+    })
+
+    it('opens X intent URL with theme and hashtag in new tab', async () => {
+      const openMock = vi.fn()
+      vi.stubGlobal('open', openMock)
+
+      render(<ShareButtons theme="雨の日に" />)
+      fireEvent.click(screen.getByLabelText('Xでシェア'))
+
+      await waitFor(() => {
+        expect(openMock).toHaveBeenCalledTimes(1)
+        const url = new URL(openMock.mock.calls[0][0])
+        expect(url.origin + url.pathname).toBe(
+          'https://twitter.com/intent/tweet',
+        )
+        expect(url.searchParams.get('text')).toContain('「雨の日に」')
+        expect(url.searchParams.get('hashtags')).toBe('すきコレ')
+        expect(url.searchParams.get('url')).toBe(window.location.href)
+        expect(openMock.mock.calls[0][1]).toBe('_blank')
+      })
+
+      vi.unstubAllGlobals()
+    })
+
+    it('opens X intent URL without theme when theme is empty', async () => {
+      const openMock = vi.fn()
+      vi.stubGlobal('open', openMock)
+
+      render(<ShareButtons theme="" />)
+      fireEvent.click(screen.getByLabelText('Xでシェア'))
+
+      await waitFor(() => {
+        expect(openMock).toHaveBeenCalledTimes(1)
+        const url = new URL(openMock.mock.calls[0][0])
+        expect(url.searchParams.get('text')).not.toContain('「」')
+        expect(url.searchParams.get('hashtags')).toBe('すきコレ')
+      })
+
+      vi.unstubAllGlobals()
+    })
+
+    it('uses pre-resolved short URL in X intent', async () => {
+      vi.mocked(createShortUrl).mockResolvedValue('/s/xyz789')
+      const openMock = vi.fn()
+      vi.stubGlobal('open', openMock)
+
+      const shareParams = {
+        theme: 'テスト',
+        bookId: 'b1',
+        musicId: 'm1',
+        movieId: 'mv1',
+        bookThumb: 'https://example.com/book.jpg',
+        musicThumb: 'https://example.com/music.jpg',
+        movieThumb: 'https://example.com/movie.jpg',
+      }
+
+      render(<ShareButtons theme="テスト" shareParams={shareParams} />)
+
+      // Wait for pre-resolution
+      await waitFor(() => {
+        expect(createShortUrl).toHaveBeenCalled()
+      })
+
+      fireEvent.click(screen.getByLabelText('Xでシェア'))
+
+      await waitFor(() => {
+        const url = new URL(openMock.mock.calls[0][0])
+        expect(url.searchParams.get('url')).toBe(
+          `${window.location.origin}/s/xyz789`,
+        )
+      })
+
+      vi.unstubAllGlobals()
+    })
   })
 
   it('copies URL to clipboard on click', async () => {
@@ -209,6 +284,49 @@ describe('ShareButtons', () => {
             'シェアに失敗しました。URLをコピーして手動でシェアしてください。',
           ),
         ).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('Instagram button', () => {
+    it('renders Instagram button', () => {
+      render(<ShareButtons />)
+      expect(screen.getByLabelText('Instagramへ投稿')).toBeInTheDocument()
+    })
+
+    it('opens Instagram guidance dialog on click', async () => {
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByLabelText('Instagramへ投稿'))
+
+      await waitFor(() => {
+        expect(screen.getByText('Instagramへの投稿手順')).toBeInTheDocument()
+      })
+    })
+
+    it('shows step-by-step guidance in dialog', async () => {
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByLabelText('Instagramへ投稿'))
+
+      await waitFor(() => {
+        expect(screen.getByText(/画像を保存/)).toBeInTheDocument()
+        expect(screen.getByText(/Instagramアプリ/)).toBeInTheDocument()
+      })
+    })
+
+    it('closes dialog when close button is clicked', async () => {
+      render(<ShareButtons />)
+      fireEvent.click(screen.getByLabelText('Instagramへ投稿'))
+
+      await waitFor(() => {
+        expect(screen.getByText('Instagramへの投稿手順')).toBeInTheDocument()
+      })
+
+      fireEvent.click(screen.getByLabelText('閉じる'))
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Instagramへの投稿手順'),
+        ).not.toBeInTheDocument()
       })
     })
   })

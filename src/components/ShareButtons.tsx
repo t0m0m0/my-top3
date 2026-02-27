@@ -4,6 +4,15 @@ import Tooltip from '@mui/material/Tooltip'
 import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import ShareIcon from '@mui/icons-material/Share'
+import XIcon from '@mui/icons-material/X'
+import InstagramIcon from '@mui/icons-material/Instagram'
+import CloseIcon from '@mui/icons-material/Close'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import { StatusSnackbar } from './StatusSnackbar'
 import { createShortUrl, uploadShareImage } from '../utils/share-url'
 
@@ -39,11 +48,20 @@ export default function ShareButtons({
   const [copyFailed, setCopyFailed] = useState(false)
   const [shareFailed, setShareFailed] = useState(false)
   const [shareGenerating, setShareGenerating] = useState(false)
+  const [instagramDialogOpen, setInstagramDialogOpen] = useState(false)
   const resolvedUrlRef = useRef<string | null>(null)
 
   const handleCloseSuccess = useCallback(() => setCopied(false), [])
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
+  const handleOpenInstagramDialog = useCallback(
+    () => setInstagramDialogOpen(true),
+    [],
+  )
+  const handleCloseInstagramDialog = useCallback(
+    () => setInstagramDialogOpen(false),
+    [],
+  )
 
   // Pre-resolve short URL on mount so it's ready when user taps share.
   // Wait until thumbnails are loaded for categories that have an ID,
@@ -148,6 +166,19 @@ export default function ShareButtons({
     }
   }, [theme, getShareUrl])
 
+  const handleXShare = useCallback(() => {
+    const shareUrl = getShareUrl()
+    const textParts: string[] = []
+    if (theme) {
+      textParts.push(`「${theme}」`)
+    }
+    const intentUrl = new URL('https://twitter.com/intent/tweet')
+    intentUrl.searchParams.set('text', textParts.join(''))
+    intentUrl.searchParams.set('url', shareUrl)
+    intentUrl.searchParams.set('hashtags', 'すきコレ')
+    window.open(intentUrl.toString(), '_blank', 'noopener,noreferrer')
+  }, [theme, getShareUrl])
+
   const canWebShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
@@ -171,8 +202,48 @@ export default function ShareButtons({
           <ContentCopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
+      <Tooltip title="Xでシェア" arrow>
+        <IconButton
+          onClick={handleXShare}
+          aria-label="Xでシェア"
+          sx={{
+            width: 44,
+            height: 44,
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#000000',
+              filter: 'brightness(0.8)',
+            },
+          }}
+        >
+          <XIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title="Instagramへ投稿" arrow>
+        <IconButton
+          onClick={handleOpenInstagramDialog}
+          aria-label="Instagramへ投稿"
+          sx={{
+            width: 44,
+            height: 44,
+            background:
+              'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+            color: '#ffffff',
+            '&:hover': {
+              background:
+                'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+              filter: 'brightness(0.85)',
+            },
+          }}
+        >
+          <InstagramIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
       {canWebShare && (
-        <Tooltip title="シェア" arrow>
+        <Tooltip title="その他" arrow>
           <IconButton
             onClick={handleWebShare}
             aria-label="シェア"
@@ -202,6 +273,42 @@ export default function ShareButtons({
           </IconButton>
         </Tooltip>
       )}
+
+      <Dialog
+        open={instagramDialogOpen}
+        onClose={handleCloseInstagramDialog}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          Instagramへの投稿手順
+          <IconButton
+            onClick={handleCloseInstagramDialog}
+            aria-label="閉じる"
+            size="small"
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            1. 上の「ダウンロード」ボタンで画像を保存
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            2. Instagramアプリを開いて新規投稿
+          </Typography>
+          <Typography variant="body2">3. 保存した画像を選択して投稿</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseInstagramDialog}>閉じる</Button>
+        </DialogActions>
+      </Dialog>
 
       <StatusSnackbar
         open={copied}
