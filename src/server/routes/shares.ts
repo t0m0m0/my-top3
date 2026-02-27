@@ -154,6 +154,199 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
     }
   })
 
+  // --- Comments ---
+
+  // Simple in-memory rate limiter for comments
+  const commentRateMap = new Map<string, number[]>()
+  const RATE_LIMIT_WINDOW_MS = 60_000
+  const RATE_LIMIT_MAX = 5
+  const RATE_LIMIT_MAX_KEYS = 10_000
+  const RATE_LIMIT_CLEANUP_INTERVAL_MS = 5 * 60_000
+  const ANONYMOUS_RATE_KEY = '__anonymous__'
+
+  // Periodic cleanup to prevent memory leaks
+  const rateLimitCleanupTimer = setInterval(() => {
+    const now = Date.now()
+    for (const [key, timestamps] of commentRateMap) {
+      const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
+      if (recent.length === 0) {
+        commentRateMap.delete(key)
+      } else {
+        commentRateMap.set(key, recent)
+      }
+    }
+  }, RATE_LIMIT_CLEANUP_INTERVAL_MS)
+  // Allow the process to exit without waiting for the timer
+  if (rateLimitCleanupTimer.unref) {
+    rateLimitCleanupTimer.unref()
+  }
+
+  function isRateLimited(clientId: string): boolean {
+    const rateKey = clientId || ANONYMOUS_RATE_KEY
+    const now = Date.now()
+    const timestamps = commentRateMap.get(rateKey) ?? []
+    const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
+    if (recent.length >= RATE_LIMIT_MAX) {
+      commentRateMap.set(rateKey, recent)
+      return true
+    }
+    // Evict oldest entries if map grows too large
+    if (
+      !commentRateMap.has(rateKey) &&
+      commentRateMap.size >= RATE_LIMIT_MAX_KEYS
+    ) {
+      const firstKey = commentRateMap.keys().next().value
+      if (firstKey !== undefined) commentRateMap.delete(firstKey)
+    }
+    recent.push(now)
+    commentRateMap.set(rateKey, recent)
+    return false
+  }
+
+  const COMMENT_MAX_LIMIT = 50
+  const COMMENT_DEFAULT_LIMIT = 20
+
+  app.get('/:id/comments', (c) => {
+    const id = c.req.param('id')
+    const share = store.get(id)
+    if (!share) {
+      return c.json(
+        { ok: false, error: { kind: 'not_found', message: 'Share not found' } },
+        404,
+      )
+    }
+
+    const limitParam = parseInt(c.req.query('limit') ?? '', 10)
+    const offsetParam = parseInt(c.req.query('offset') ?? '', 10)
+    const limit = Math.min(
+      Math.max(
+        Number.isFinite(limitParam) ? limitParam : COMMENT_DEFAULT_LIMIT,
+        1,
+      ),
+      COMMENT_MAX_LIMIT,
+    )
+    const offset = Math.max(Number.isFinite(offsetParam) ? offsetParam : 0, 0)
+
+    const result = store.listComments(id, { limit, offset })
+    return c.json({ ok: true, data: result })
+  })
+
+  app.post('/:id/comments', async (c) => {
+    const id = c.req.param('id')
+    const share = store.get(id)
+    if (!share) {
+      return c.json(
+        { ok: false, error: { kind: 'not_found', message: 'Share not found' } },
+        404,
+      )
+    }
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid JSON' } },
+        400,
+      )
+    }
+
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid body' } },
+        400,
+      )
+    }
+
+    const {
+      nickname,
+      body: commentBody,
+      clientId,
+    } = body as {
+      nickname?: unknown
+      body?: unknown
+      clientId?: unknown
+    }
+
+    const clientIdStr = typeof clientId === 'string' ? clientId : ''
+
+    // Rate limit check (applies even for anonymous/empty clientId)
+    if (isRateLimited(clientIdStr)) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'rate_limit',
+            message: 'Too many comments. Please try again later.',
+          },
+        },
+        429,
+      )
+    }
+
+    try {
+      const comment = store.addComment(id, {
+        nickname: typeof nickname === 'string' ? nickname : '',
+        body: typeof commentBody === 'string' ? commentBody : '',
+        clientId: clientIdStr,
+      })
+      return c.json({ ok: true, data: comment }, 201)
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Validation failed'
+      return c.json({ ok: false, error: { kind: 'validation', message } }, 400)
+    }
+  })
+
+  app.delete('/:id/comments/:commentId', async (c) => {
+    const commentId = parseInt(c.req.param('commentId'), 10)
+    if (!Number.isFinite(commentId)) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'validation', message: 'Invalid comment ID' },
+        },
+        400,
+      )
+    }
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid JSON' } },
+        400,
+      )
+    }
+
+    const { clientId } = (body as { clientId?: unknown }) ?? {}
+    if (typeof clientId !== 'string' || !clientId) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'validation', message: 'clientId is required' },
+        },
+        400,
+      )
+    }
+
+    const deleted = store.deleteComment(commentId, clientId)
+    if (!deleted) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'forbidden',
+            message: 'Cannot delete this comment',
+          },
+        },
+        403,
+      )
+    }
+
+    return c.json({ ok: true })
+  })
+
   app.get('/:id', (c) => {
     const id = c.req.param('id')
     const params = store.get(id)

@@ -11,6 +11,7 @@ export type GalleryItem = {
   movieThumb: string
   createdAt: number
   reactionCount: number
+  commentCount: number
   tags: string[]
 }
 

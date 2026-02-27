@@ -671,4 +671,264 @@ describe('shares route', () => {
       expect(json.data.tags).toEqual([])
     })
   })
+
+  describe('POST /:id/comments', () => {
+    async function createShare() {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+        }),
+      })
+      const json = (await res.json()) as { id: string }
+      return json.id
+    }
+
+    it('adds a comment and returns it', async () => {
+      const id = await createShare()
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: 'テスター',
+          body: 'いいね！',
+          clientId: 'c1',
+        }),
+      })
+      expect(res.status).toBe(201)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { id: number; nickname: string; body: string }
+      }
+      expect(json.ok).toBe(true)
+      expect(json.data.nickname).toBe('テスター')
+      expect(json.data.body).toBe('いいね！')
+    })
+
+    it('returns 404 for non-existent share', async () => {
+      const res = await app.request('/nonexist/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: '', body: 'hello', clientId: 'c1' }),
+      })
+      expect(res.status).toBe(404)
+    })
+
+    it('returns 400 for empty body', async () => {
+      const id = await createShare()
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: '', body: '', clientId: 'c1' }),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('returns 400 for body exceeding 140 chars', async () => {
+      const id = await createShare()
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: '',
+          body: 'あ'.repeat(141),
+          clientId: 'c1',
+        }),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('returns 400 for invalid JSON', async () => {
+      const id = await createShare()
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: 'not-json',
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('rate limits comments (max 5 per minute per clientId)', async () => {
+      const id = await createShare()
+      for (let i = 0; i < 5; i++) {
+        const res = await app.request(`/${id}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nickname: '',
+            body: `msg${i}`,
+            clientId: 'spammer',
+          }),
+        })
+        expect(res.status).toBe(201)
+      }
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: '',
+          body: 'one more',
+          clientId: 'spammer',
+        }),
+      })
+      expect(res.status).toBe(429)
+    })
+
+    it('rate limits comments even with empty clientId', async () => {
+      const id = await createShare()
+      for (let i = 0; i < 5; i++) {
+        const res = await app.request(`/${id}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nickname: '',
+            body: `anon${i}`,
+            clientId: '',
+          }),
+        })
+        expect(res.status).toBe(201)
+      }
+      const res = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: '',
+          body: 'one more anon',
+          clientId: '',
+        }),
+      })
+      expect(res.status).toBe(429)
+    })
+  })
+
+  describe('GET /:id/comments', () => {
+    async function createShareWithComments() {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+      for (const body of ['first', 'second', 'third']) {
+        await app.request(`/${id}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname: '', body, clientId: `c-${body}` }),
+        })
+      }
+      return id
+    }
+
+    it('returns comments newest first', async () => {
+      const id = await createShareWithComments()
+      const res = await app.request(`/${id}/comments`)
+      expect(res.status).toBe(200)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: { body: string }[]; total: number }
+      }
+      expect(json.ok).toBe(true)
+      expect(json.data.items).toHaveLength(3)
+      expect(json.data.items[0]!.body).toBe('third')
+      expect(json.data.total).toBe(3)
+    })
+
+    it('supports limit and offset', async () => {
+      const id = await createShareWithComments()
+      const res = await app.request(`/${id}/comments?limit=1&offset=1`)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: { body: string }[]; total: number }
+      }
+      expect(json.data.items).toHaveLength(1)
+      expect(json.data.items[0]!.body).toBe('second')
+      expect(json.data.total).toBe(3)
+    })
+
+    it('returns 404 for non-existent share', async () => {
+      const res = await app.request('/nonexist/comments')
+      expect(res.status).toBe(404)
+    })
+  })
+
+  describe('DELETE /:id/comments/:commentId', () => {
+    it('deletes own comment', async () => {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const commentRes = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: '',
+          body: 'delete me',
+          clientId: 'client-1',
+        }),
+      })
+      const { data: comment } = (await commentRes.json()) as {
+        data: { id: number }
+      }
+
+      const deleteRes = await app.request(`/${id}/comments/${comment.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-1' }),
+      })
+      expect(deleteRes.status).toBe(200)
+      const json = (await deleteRes.json()) as { ok: boolean }
+      expect(json.ok).toBe(true)
+    })
+
+    it('returns 403 for wrong clientId', async () => {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const commentRes = await app.request(`/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: '',
+          body: 'keep me',
+          clientId: 'client-1',
+        }),
+      })
+      const { data: comment } = (await commentRes.json()) as {
+        data: { id: number }
+      }
+
+      const deleteRes = await app.request(`/${id}/comments/${comment.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'wrong-client' }),
+      })
+      expect(deleteRes.status).toBe(403)
+    })
+  })
 })

@@ -41,6 +41,7 @@ type Props = {
   movieThumb: string
   createdAt: number
   reactionCount: number
+  commentCount?: number
   tags?: string[]
 }
 
@@ -51,6 +52,7 @@ export default function GalleryCard({
   musicThumb,
   movieThumb,
   reactionCount: initialReactionCount,
+  commentCount = 0,
   tags = [],
 }: Props) {
   const navigate = useNavigate()
@@ -184,6 +186,15 @@ export default function GalleryCard({
             </span>
             <span>{count}</span>
           </button>
+          {commentCount > 0 && (
+            <span
+              className="ml-2 flex items-center gap-0.5 text-xs"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              <span>💬</span>
+              <span>{commentCount}</span>
+            </span>
+          )}
         </div>
       </div>
     </Link>

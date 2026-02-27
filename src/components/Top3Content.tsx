@@ -16,6 +16,7 @@ import { useReaction } from '../hooks/useReaction'
 import DataCredits from './DataCredits'
 import ReactionButton from './ReactionButton'
 import TagList from './TagList'
+import CommentSection from './CommentSection'
 
 type Top3Params = {
   theme: string
@@ -324,6 +325,12 @@ export default function Top3Content({
           </PillLinkButton>
         </div>
       </div>
+
+      {readOnly && existingShareId && (
+        <div className="mx-auto max-w-4xl px-3 sm:px-4">
+          <CommentSection shareId={existingShareId} />
+        </div>
+      )}
 
       <DataCredits />
     </div>
