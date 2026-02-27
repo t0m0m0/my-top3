@@ -277,6 +277,47 @@ describe('shares route', () => {
       const json = (await res.json()) as { ok: boolean }
       expect(json.ok).toBe(false)
     })
+
+    it('includes reactionCount in response', async () => {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'reaction-test',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      // Initially 0
+      const res0 = await app.request(`/${id}`)
+      const json0 = (await res0.json()) as {
+        ok: boolean
+        data: { reactionCount: number }
+      }
+      expect(json0.data.reactionCount).toBe(0)
+
+      // Add reactions
+      await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-a' }),
+      })
+      await app.request(`/${id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: 'client-b' }),
+      })
+
+      const res2 = await app.request(`/${id}`)
+      const json2 = (await res2.json()) as {
+        ok: boolean
+        data: { reactionCount: number }
+      }
+      expect(json2.data.reactionCount).toBe(2)
+    })
   })
 
   describe('DELETE /:id', () => {

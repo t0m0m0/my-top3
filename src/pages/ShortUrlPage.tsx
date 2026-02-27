@@ -10,6 +10,7 @@ type ShareData = {
   bookId: string
   musicId: string
   movieId: string
+  reactionCount: number
 }
 
 function ShortUrlPage() {
@@ -90,7 +91,14 @@ function ShortUrlPage() {
     )
   }
 
-  return <Top3Content params={data} existingShareId={id} readOnly />
+  return (
+    <Top3Content
+      params={data}
+      existingShareId={id}
+      readOnly
+      reactionCount={data.reactionCount}
+    />
+  )
 }
 
 export default ShortUrlPage

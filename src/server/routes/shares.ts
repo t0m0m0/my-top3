@@ -158,7 +158,8 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
       )
     }
 
-    return c.json({ ok: true, data: params })
+    const reactionCount = store.getReactionCount(id)
+    return c.json({ ok: true, data: { ...params, reactionCount } })
   })
 
   app.delete('/:id', (c) => {
