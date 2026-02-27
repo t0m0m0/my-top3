@@ -19,6 +19,10 @@ const str = (v: unknown): string => (typeof v === 'string' ? v : '')
 export type SharesAppOptions = {
   adminApiKey?: string
   ttlSeconds?: number
+  reactionRateLimit?: {
+    windowMs: number
+    max: number
+  }
 }
 
 export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
@@ -30,6 +34,58 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
 
   const MAX_LIMIT = 50
   const DEFAULT_LIMIT = 20
+
+  // --- IP-based rate limiter for reactions ---
+  const REACTION_RATE_WINDOW_MS = options?.reactionRateLimit?.windowMs ?? 60_000
+  const REACTION_RATE_MAX = options?.reactionRateLimit?.max ?? 30
+  const reactionRateMap = new Map<string, number[]>()
+  const REACTION_RATE_MAX_KEYS = 10_000
+  const REACTION_RATE_CLEANUP_INTERVAL_MS = 5 * 60_000
+
+  const reactionRateCleanupTimer = setInterval(() => {
+    const now = Date.now()
+    for (const [key, timestamps] of reactionRateMap) {
+      const recent = timestamps.filter((t) => now - t < REACTION_RATE_WINDOW_MS)
+      if (recent.length === 0) {
+        reactionRateMap.delete(key)
+      } else {
+        reactionRateMap.set(key, recent)
+      }
+    }
+  }, REACTION_RATE_CLEANUP_INTERVAL_MS)
+  if (reactionRateCleanupTimer.unref) {
+    reactionRateCleanupTimer.unref()
+  }
+
+  function getClientIp(c: {
+    req: { header: (name: string) => string | undefined }
+  }): string {
+    const forwarded = c.req.header('x-forwarded-for')
+    if (forwarded) {
+      return forwarded.split(',')[0].trim()
+    }
+    return c.req.header('x-real-ip') ?? 'unknown'
+  }
+
+  function isReactionRateLimited(ip: string): boolean {
+    const now = Date.now()
+    const timestamps = reactionRateMap.get(ip) ?? []
+    const recent = timestamps.filter((t) => now - t < REACTION_RATE_WINDOW_MS)
+    if (recent.length >= REACTION_RATE_MAX) {
+      reactionRateMap.set(ip, recent)
+      return true
+    }
+    if (
+      !reactionRateMap.has(ip) &&
+      reactionRateMap.size >= REACTION_RATE_MAX_KEYS
+    ) {
+      const firstKey = reactionRateMap.keys().next().value
+      if (firstKey !== undefined) reactionRateMap.delete(firstKey)
+    }
+    recent.push(now)
+    reactionRateMap.set(ip, recent)
+    return false
+  }
 
   app.get('/', (c) => {
     const limitParam = parseInt(c.req.query('limit') ?? '', 10)
@@ -100,6 +156,21 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
   })
 
   app.post('/:id/reactions', async (c) => {
+    // IP-based rate limiting
+    const ip = getClientIp(c)
+    if (isReactionRateLimited(ip)) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'rate_limit',
+            message: 'Too many reactions. Please try again later.',
+          },
+        },
+        429,
+      )
+    }
+
     const id = c.req.param('id')
     const share = store.get(id)
     if (!share) {
