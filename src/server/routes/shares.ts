@@ -154,6 +154,169 @@ export function createSharesApp(dbPath: string, options?: SharesAppOptions) {
     }
   })
 
+  // --- Comments ---
+
+  // Simple in-memory rate limiter for comments
+  const commentRateMap = new Map<string, number[]>()
+  const RATE_LIMIT_WINDOW_MS = 60_000
+  const RATE_LIMIT_MAX = 5
+
+  function isRateLimited(clientId: string): boolean {
+    const now = Date.now()
+    const timestamps = commentRateMap.get(clientId) ?? []
+    const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS)
+    if (recent.length >= RATE_LIMIT_MAX) {
+      commentRateMap.set(clientId, recent)
+      return true
+    }
+    recent.push(now)
+    commentRateMap.set(clientId, recent)
+    return false
+  }
+
+  const COMMENT_MAX_LIMIT = 50
+  const COMMENT_DEFAULT_LIMIT = 20
+
+  app.get('/:id/comments', (c) => {
+    const id = c.req.param('id')
+    const share = store.get(id)
+    if (!share) {
+      return c.json(
+        { ok: false, error: { kind: 'not_found', message: 'Share not found' } },
+        404,
+      )
+    }
+
+    const limitParam = parseInt(c.req.query('limit') ?? '', 10)
+    const offsetParam = parseInt(c.req.query('offset') ?? '', 10)
+    const limit = Math.min(
+      Math.max(
+        Number.isFinite(limitParam) ? limitParam : COMMENT_DEFAULT_LIMIT,
+        1,
+      ),
+      COMMENT_MAX_LIMIT,
+    )
+    const offset = Math.max(
+      Number.isFinite(offsetParam) ? offsetParam : 0,
+      0,
+    )
+
+    const result = store.listComments(id, { limit, offset })
+    return c.json({ ok: true, data: result })
+  })
+
+  app.post('/:id/comments', async (c) => {
+    const id = c.req.param('id')
+    const share = store.get(id)
+    if (!share) {
+      return c.json(
+        { ok: false, error: { kind: 'not_found', message: 'Share not found' } },
+        404,
+      )
+    }
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid JSON' } },
+        400,
+      )
+    }
+
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid body' } },
+        400,
+      )
+    }
+
+    const { nickname, body: commentBody, clientId } = body as {
+      nickname?: unknown
+      body?: unknown
+      clientId?: unknown
+    }
+
+    const clientIdStr = typeof clientId === 'string' ? clientId : ''
+
+    // Rate limit check
+    if (clientIdStr && isRateLimited(clientIdStr)) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'rate_limit',
+            message: 'Too many comments. Please try again later.',
+          },
+        },
+        429,
+      )
+    }
+
+    try {
+      const comment = store.addComment(id, {
+        nickname: typeof nickname === 'string' ? nickname : '',
+        body: typeof commentBody === 'string' ? commentBody : '',
+        clientId: clientIdStr,
+      })
+      return c.json({ ok: true, data: comment }, 201)
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Validation failed'
+      return c.json({ ok: false, error: { kind: 'validation', message } }, 400)
+    }
+  })
+
+  app.delete('/:id/comments/:commentId', async (c) => {
+    const commentId = parseInt(c.req.param('commentId'), 10)
+    if (!Number.isFinite(commentId)) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'validation', message: 'Invalid comment ID' },
+        },
+        400,
+      )
+    }
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json(
+        { ok: false, error: { kind: 'validation', message: 'Invalid JSON' } },
+        400,
+      )
+    }
+
+    const { clientId } = (body as { clientId?: unknown }) ?? {}
+    if (typeof clientId !== 'string' || !clientId) {
+      return c.json(
+        {
+          ok: false,
+          error: { kind: 'validation', message: 'clientId is required' },
+        },
+        400,
+      )
+    }
+
+    const deleted = store.deleteComment(commentId, clientId)
+    if (!deleted) {
+      return c.json(
+        {
+          ok: false,
+          error: {
+            kind: 'forbidden',
+            message: 'Cannot delete this comment',
+          },
+        },
+        403,
+      )
+    }
+
+    return c.json({ ok: true })
+  })
+
   app.get('/:id', (c) => {
     const id = c.req.param('id')
     const params = store.get(id)
