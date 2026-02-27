@@ -1,12 +1,11 @@
-import { useState, useCallback, useEffect, useRef, type RefObject } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import ShareIcon from '@mui/icons-material/Share'
 import { StatusSnackbar } from './StatusSnackbar'
-import { generateImageBlob } from '../utils/image-helpers'
-import { createShortUrl } from '../utils/share-url'
+import { createShortUrl, uploadShareImage } from '../utils/share-url'
 
 type ShareParams = {
   theme: string
@@ -20,7 +19,6 @@ type ShareParams = {
 
 type ShareButtonsProps = {
   theme?: string
-  captureRef?: RefObject<HTMLDivElement | null>
   preGeneratedBlob?: Blob | null
   shareParams?: ShareParams
   existingShareId?: string
@@ -33,7 +31,6 @@ function buildShareText(theme?: string, url?: string): string {
 
 export default function ShareButtons({
   theme,
-  captureRef,
   preGeneratedBlob,
   shareParams,
   existingShareId,
@@ -81,6 +78,23 @@ export default function ShareButtons({
     }
   }, [shareParams, existingShareId])
 
+  // Upload pre-generated image for OGP when blob and share ID are ready
+  const imageUploadedRef = useRef(false)
+  useEffect(() => {
+    if (!preGeneratedBlob || imageUploadedRef.current) return
+
+    // Extract share ID from resolved URL or existingShareId
+    const shareId =
+      existingShareId ??
+      resolvedUrlRef.current?.match(/\/s\/([A-Za-z0-9_-]+)$/)?.[1]
+    if (!shareId) return
+
+    imageUploadedRef.current = true
+    uploadShareImage(shareId, preGeneratedBlob).catch(() => {
+      // Non-critical: OGP image just won't be available
+    })
+  }, [preGeneratedBlob, existingShareId])
+
   const getShareUrl = useCallback((): string => {
     return resolvedUrlRef.current ?? window.location.href
   }, [])
@@ -118,38 +132,6 @@ export default function ShareButtons({
     try {
       const shareUrl = getShareUrl()
 
-      // Try to share with image if captureRef is available and canShare supports files
-      if (captureRef?.current) {
-        const blob =
-          preGeneratedBlob ?? (await generateImageBlob(captureRef.current))
-        const file = new File([blob], 'my-no1s.png', { type: 'image/png' })
-
-        if (
-          typeof navigator.canShare === 'function' &&
-          navigator.canShare({ files: [file] })
-        ) {
-          try {
-            await navigator.share({
-              text: buildShareText(theme, shareUrl),
-              url: shareUrl,
-              files: [file],
-            })
-            return
-          } catch (fileShareError) {
-            // If image share was rejected (e.g. NotAllowedError due to gesture timeout),
-            // retry with text-only share below
-            if (
-              fileShareError instanceof DOMException &&
-              fileShareError.name === 'AbortError'
-            ) {
-              return
-            }
-            // Fall through to text-only share
-          }
-        }
-      }
-
-      // Fallback: text + URL only
       await navigator.share({
         title: 'すきコレ',
         text: buildShareText(theme, shareUrl),
@@ -164,7 +146,7 @@ export default function ShareButtons({
     } finally {
       setShareGenerating(false)
     }
-  }, [captureRef, theme, preGeneratedBlob, getShareUrl])
+  }, [theme, getShareUrl])
 
   const canWebShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'

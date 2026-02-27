@@ -1,22 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '../test/test-utils'
 import ShareButtons from './ShareButtons'
-import type { RefObject } from 'react'
-
-vi.mock('../utils/image-helpers', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../utils/image-helpers')>()
-  return {
-    ...actual,
-    generateImageBlob: vi.fn(),
-  }
-})
 
 vi.mock('../utils/share-url', () => ({
   createShortUrl: vi.fn(),
+  uploadShareImage: vi.fn().mockResolvedValue(true),
 }))
 
-import { generateImageBlob } from '../utils/image-helpers'
-import { createShortUrl } from '../utils/share-url'
+import { createShortUrl, uploadShareImage } from '../utils/share-url'
 
 describe('ShareButtons', () => {
   let originalClipboard: Clipboard
@@ -173,70 +164,11 @@ describe('ShareButtons', () => {
       })
     })
 
-    it('shares with image file when captureRef is provided and canShare supports files', async () => {
-      const fakeBlob = new Blob(['fake-image'], { type: 'image/png' })
-      vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
+    it('shares text+URL only (no image attachment)', async () => {
       const shareMock = vi.fn().mockResolvedValue(undefined)
-      const canShareMock = vi.fn().mockReturnValue(true)
-      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
+      Object.assign(navigator, { share: shareMock })
 
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
-
-      render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
-      fireEvent.click(screen.getByLabelText('シェア'))
-
-      await waitFor(() => {
-        expect(shareMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            text: `「テスト」 #すきコレ\n${window.location.href}`,
-            url: window.location.href,
-            files: expect.arrayContaining([expect.any(File)]),
-          }),
-        )
-      })
-    })
-
-    it('uses preGeneratedBlob instead of calling generateImageBlob', async () => {
-      const preBlob = new Blob(['pre-generated'], { type: 'image/png' })
-      vi.mocked(generateImageBlob).mockClear()
-      const shareMock = vi.fn().mockResolvedValue(undefined)
-      const canShareMock = vi.fn().mockReturnValue(true)
-      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
-
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
-
-      render(
-        <ShareButtons
-          theme="テスト"
-          captureRef={mockCaptureRef}
-          preGeneratedBlob={preBlob}
-        />,
-      )
-      fireEvent.click(screen.getByLabelText('シェア'))
-
-      await waitFor(() => {
-        expect(shareMock).toHaveBeenCalled()
-      })
-
-      expect(generateImageBlob).not.toHaveBeenCalled()
-    })
-
-    it('falls back to text+URL share when canShare does not support files', async () => {
-      const fakeBlob = new Blob(['fake-image'], { type: 'image/png' })
-      vi.mocked(generateImageBlob).mockResolvedValue(fakeBlob)
-      const shareMock = vi.fn().mockResolvedValue(undefined)
-      const canShareMock = vi.fn().mockReturnValue(false)
-      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
-
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
-
-      render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
+      render(<ShareButtons theme="テスト" />)
       fireEvent.click(screen.getByLabelText('シェア'))
 
       await waitFor(() => {
@@ -246,56 +178,8 @@ describe('ShareButtons', () => {
           url: window.location.href,
         })
       })
-    })
-
-    it('falls back to text+URL share when canShare is not available', async () => {
-      const shareMock = vi.fn().mockResolvedValue(undefined)
-      Object.assign(navigator, { share: shareMock, canShare: undefined })
-
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
-
-      render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
-      fireEvent.click(screen.getByLabelText('シェア'))
-
-      await waitFor(() => {
-        expect(shareMock).toHaveBeenCalledWith({
-          title: 'すきコレ',
-          text: `「テスト」 #すきコレ\n${window.location.href}`,
-          url: window.location.href,
-        })
-      })
-    })
-
-    it('shows generating state while creating image for share', async () => {
-      let resolveBlob!: (blob: Blob) => void
-      vi.mocked(generateImageBlob).mockReturnValue(
-        new Promise((resolve) => {
-          resolveBlob = resolve
-        }),
-      )
-      const shareMock = vi.fn().mockResolvedValue(undefined)
-      const canShareMock = vi.fn().mockReturnValue(true)
-      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
-
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
-
-      render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
-      fireEvent.click(screen.getByLabelText('シェア'))
-
-      await waitFor(() => {
-        expect(screen.getByLabelText('シェア')).toBeDisabled()
-      })
-
-      const fakeBlob = new Blob(['fake'], { type: 'image/png' })
-      resolveBlob(fakeBlob)
-
-      await waitFor(() => {
-        expect(screen.getByLabelText('シェア')).toBeEnabled()
-      })
+      // No files property
+      expect(shareMock.mock.calls[0][0]).not.toHaveProperty('files')
     })
 
     it('handles share cancellation gracefully (AbortError)', async () => {
@@ -327,62 +211,51 @@ describe('ShareButtons', () => {
         ).toBeInTheDocument()
       })
     })
+  })
 
-    it('shows error snackbar when image generation fails during share', async () => {
-      vi.mocked(generateImageBlob).mockRejectedValue(
-        new Error('generation failed'),
-      )
-      vi.spyOn(console, 'error').mockImplementation(() => {})
-      const canShareMock = vi.fn().mockReturnValue(true)
-      Object.assign(navigator, { share: vi.fn(), canShare: canShareMock })
-
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
-
-      render(<ShareButtons theme="テスト" captureRef={mockCaptureRef} />)
-      fireEvent.click(screen.getByLabelText('シェア'))
-
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            'シェアに失敗しました。URLをコピーして手動でシェアしてください。',
-          ),
-        ).toBeInTheDocument()
-      })
-    })
-
-    it('retries with text-only share when image share fails with NotAllowedError', async () => {
-      const preBlob = new Blob(['pre-generated'], { type: 'image/png' })
-      const shareMock = vi
-        .fn()
-        .mockRejectedValueOnce(
-          new DOMException('not allowed', 'NotAllowedError'),
-        )
-        .mockResolvedValueOnce(undefined)
-      const canShareMock = vi.fn().mockReturnValue(true)
-      Object.assign(navigator, { share: shareMock, canShare: canShareMock })
-
-      const mockCaptureRef = {
-        current: document.createElement('div'),
-      } as RefObject<HTMLDivElement>
+  describe('OGP image upload', () => {
+    it('uploads preGeneratedBlob for OGP when existingShareId is available', async () => {
+      vi.mocked(uploadShareImage).mockClear()
+      const preBlob = new Blob(['image-data'], { type: 'image/png' })
 
       render(
         <ShareButtons
           theme="テスト"
-          captureRef={mockCaptureRef}
           preGeneratedBlob={preBlob}
+          existingShareId="abc123"
         />,
       )
-      fireEvent.click(screen.getByLabelText('シェア'))
 
       await waitFor(() => {
-        expect(shareMock).toHaveBeenCalledTimes(2)
-        expect(shareMock).toHaveBeenLastCalledWith({
-          title: 'すきコレ',
-          text: `「テスト」 #すきコレ\n${window.location.href}`,
-          url: window.location.href,
-        })
+        expect(uploadShareImage).toHaveBeenCalledWith('abc123', preBlob)
+      })
+    })
+
+    it('does not upload when preGeneratedBlob is not provided', async () => {
+      vi.mocked(uploadShareImage).mockClear()
+
+      render(<ShareButtons theme="テスト" existingShareId="abc123" />)
+
+      // Wait a tick
+      await new Promise((r) => setTimeout(r, 50))
+      expect(uploadShareImage).not.toHaveBeenCalled()
+    })
+
+    it('handles upload failure gracefully', async () => {
+      vi.mocked(uploadShareImage).mockRejectedValue(new Error('upload failed'))
+      const preBlob = new Blob(['image-data'], { type: 'image/png' })
+
+      // Should not throw
+      render(
+        <ShareButtons
+          theme="テスト"
+          preGeneratedBlob={preBlob}
+          existingShareId="abc123"
+        />,
+      )
+
+      await waitFor(() => {
+        expect(uploadShareImage).toHaveBeenCalled()
       })
     })
   })

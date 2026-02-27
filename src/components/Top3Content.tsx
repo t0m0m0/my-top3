@@ -293,7 +293,6 @@ export default function Top3Content({
         <div className="mt-6">
           <ShareButtons
             theme={params.theme}
-            captureRef={showImage ? captureRef : undefined}
             preGeneratedBlob={preGeneratedBlob}
             shareParams={{
               ...params,
