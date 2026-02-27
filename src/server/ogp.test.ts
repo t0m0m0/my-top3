@@ -131,6 +131,32 @@ describe('buildMetaTags', () => {
 
     expect(result).toContain('content="summary"')
   })
+
+  it('uses summary_large_image and includes image tags when imageUrl is provided', () => {
+    const result = buildMetaTags({
+      title: 'Test',
+      description: 'Desc',
+      url: 'https://example.com',
+      imageUrl: 'https://example.com/image.png',
+    })
+
+    expect(result).toContain('content="summary_large_image"')
+    expect(result).toContain('og:image')
+    expect(result).toContain('content="https://example.com/image.png"')
+    expect(result).toContain('twitter:image')
+  })
+
+  it('does not include image tags and uses summary card when imageUrl is not provided', () => {
+    const result = buildMetaTags({
+      title: 'Test',
+      description: 'Desc',
+      url: 'https://example.com',
+    })
+
+    expect(result).not.toContain('og:image')
+    expect(result).not.toContain('twitter:image')
+    expect(result).toContain('content="summary"')
+  })
 })
 
 describe('injectOgpTags', () => {
