@@ -1,4 +1,3 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
@@ -10,6 +9,7 @@ import { imageProxyApp } from './routes/image-proxy.ts'
 import { createSharesApp } from './routes/shares.ts'
 import { createShareImageApp } from './routes/share-image.ts'
 import { createShareStore } from './share-store.ts'
+import { deleteShareImage } from './share-image-cleanup.ts'
 
 if (!process.env['GOOGLE_BOOKS_API_KEY']) {
   console.warn(
@@ -53,18 +53,9 @@ const imagesDir = path.resolve(process.cwd(), 'data', 'images')
 
 const SHARE_TTL_SECONDS = 90 * 24 * 60 * 60 // 90 days
 
-function deleteShareImage(id: string): void {
-  const filePath = path.join(imagesDir, `${id}.png`)
-  try {
-    fs.unlinkSync(filePath)
-  } catch {
-    // File may not exist — ignore
-  }
-}
-
 const shareStore = createShareStore(sharesDataPath, {
   ttlSeconds: SHARE_TTL_SECONDS,
-  onDelete: deleteShareImage,
+  onDelete: (id) => deleteShareImage(imagesDir, id),
 })
 
 app.route('/api/books', booksApp)

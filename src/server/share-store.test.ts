@@ -4,6 +4,7 @@ import path from 'node:path'
 import os from 'node:os'
 import Database from 'better-sqlite3'
 import { createShareStore, type ShareParams } from './share-store'
+import { deleteShareImage, purgeOrphanImages } from './share-image-cleanup'
 
 describe('share-store', () => {
   let tmpDir: string
@@ -938,7 +939,20 @@ describe('share-store', () => {
     })
   })
 
-  describe('purgeOrphanImages', () => {
+  describe('getAllIds', () => {
+    it('returns all share ids', () => {
+      const store = createShareStore(dbPath)
+      const id1 = store.save({ ...sampleParams, theme: 'a' })
+      const id2 = store.save({ ...sampleParams, theme: 'b' })
+      const ids = store.getAllIds()
+      expect(ids).toContain(id1)
+      expect(ids).toContain(id2)
+      expect(ids).toHaveLength(2)
+      store.close()
+    })
+  })
+
+  describe('purgeOrphanImages (utility)', () => {
     it('deletes image files with no corresponding DB record', () => {
       const store = createShareStore(dbPath)
       const id = store.save(sampleParams)
@@ -950,7 +964,8 @@ describe('share-store', () => {
       fs.writeFileSync(path.join(imgDir, 'orphan1.png'), 'orphan')
       fs.writeFileSync(path.join(imgDir, 'orphan2.png'), 'orphan')
 
-      const removed = store.purgeOrphanImages(imgDir)
+      const validIds = new Set(store.getAllIds())
+      const removed = purgeOrphanImages(imgDir, validIds)
       expect(removed).toBe(2)
       expect(fs.existsSync(path.join(imgDir, `${id}.png`))).toBe(true)
       expect(fs.existsSync(path.join(imgDir, 'orphan1.png'))).toBe(false)
@@ -966,41 +981,54 @@ describe('share-store', () => {
       fs.mkdirSync(imgDir, { recursive: true })
       fs.writeFileSync(path.join(imgDir, `${id}.png`), 'valid')
 
-      const removed = store.purgeOrphanImages(imgDir)
+      const validIds = new Set(store.getAllIds())
+      const removed = purgeOrphanImages(imgDir, validIds)
       expect(removed).toBe(0)
       store.close()
     })
 
     it('handles empty images directory', () => {
-      const store = createShareStore(dbPath)
       const imgDir = path.join(tmpDir, 'images')
       fs.mkdirSync(imgDir, { recursive: true })
 
-      const removed = store.purgeOrphanImages(imgDir)
+      const removed = purgeOrphanImages(imgDir, new Set())
       expect(removed).toBe(0)
-      store.close()
     })
 
     it('handles non-existent images directory', () => {
-      const store = createShareStore(dbPath)
       const imgDir = path.join(tmpDir, 'nonexistent-images')
 
-      const removed = store.purgeOrphanImages(imgDir)
+      const removed = purgeOrphanImages(imgDir, new Set())
       expect(removed).toBe(0)
-      store.close()
     })
 
     it('ignores non-png files', () => {
-      const store = createShareStore(dbPath)
       const imgDir = path.join(tmpDir, 'images')
       fs.mkdirSync(imgDir, { recursive: true })
       fs.writeFileSync(path.join(imgDir, 'readme.txt'), 'not an image')
       fs.writeFileSync(path.join(imgDir, 'data.json'), '{}')
 
-      const removed = store.purgeOrphanImages(imgDir)
+      const removed = purgeOrphanImages(imgDir, new Set())
       expect(removed).toBe(0)
       expect(fs.existsSync(path.join(imgDir, 'readme.txt'))).toBe(true)
-      store.close()
+    })
+  })
+
+  describe('deleteShareImage (utility)', () => {
+    it('deletes the png file for a given id', () => {
+      const imgDir = path.join(tmpDir, 'images')
+      fs.mkdirSync(imgDir, { recursive: true })
+      fs.writeFileSync(path.join(imgDir, 'abc.png'), 'data')
+
+      deleteShareImage(imgDir, 'abc')
+      expect(fs.existsSync(path.join(imgDir, 'abc.png'))).toBe(false)
+    })
+
+    it('does not throw when file does not exist', () => {
+      const imgDir = path.join(tmpDir, 'images')
+      fs.mkdirSync(imgDir, { recursive: true })
+
+      expect(() => deleteShareImage(imgDir, 'nonexistent')).not.toThrow()
     })
   })
 })

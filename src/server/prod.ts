@@ -7,6 +7,7 @@ import { Hono } from 'hono'
 import api from './index.ts'
 import { injectOgpTags } from './ogp.ts'
 import { createShareStore } from './share-store.ts'
+import { deleteShareImage, purgeOrphanImages } from './share-image-cleanup.ts'
 
 const imagesDir = path.resolve(process.cwd(), 'data', 'images')
 
@@ -25,24 +26,16 @@ const sharesDataPath =
   process.env['SHARES_DATA_PATH'] ||
   path.resolve(process.cwd(), 'data', 'shares.db')
 
-function deleteShareImage(id: string): void {
-  const filePath = path.join(imagesDir, `${id}.png`)
-  try {
-    fs.unlinkSync(filePath)
-  } catch {
-    // File may not exist — ignore
-  }
-}
-
 const shareStore = createShareStore(sharesDataPath, {
-  onDelete: deleteShareImage,
+  onDelete: (id) => deleteShareImage(imagesDir, id),
 })
 
 // Periodic orphan image cleanup (every 6 hours)
 const ORPHAN_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000
 const orphanCleanupTimer = setInterval(() => {
   try {
-    const removed = shareStore.purgeOrphanImages(imagesDir)
+    const validIds = new Set(shareStore.getAllIds())
+    const removed = purgeOrphanImages(imagesDir, validIds)
     if (removed > 0) {
       console.log(`[cleanup] Removed ${removed} orphan image(s)`)
     }
@@ -50,9 +43,7 @@ const orphanCleanupTimer = setInterval(() => {
     console.error('[cleanup] Failed to purge orphan images:', e)
   }
 }, ORPHAN_CLEANUP_INTERVAL_MS)
-if (orphanCleanupTimer.unref) {
-  orphanCleanupTimer.unref()
-}
+orphanCleanupTimer.unref()
 
 const app = new Hono()
 

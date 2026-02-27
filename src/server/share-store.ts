@@ -219,7 +219,7 @@ export type ShareStore = {
   list: (options: ShareListOptions) => ShareListResult
   delete: (id: string) => boolean
   purgeExpired: () => number
-  purgeOrphanImages: (imagesDir: string) => number
+  getAllIds: () => string[]
   addReaction: (shareId: string, clientId: string) => ReactionResult
   removeReaction: (shareId: string, clientId: string) => ReactionResult
   getReactionCount: (shareId: string) => number
@@ -449,6 +449,27 @@ export function createShareStore(
     return createdAt < Math.floor(Date.now() / 1000) - ttlSeconds
   }
 
+  function deleteRelatedRecords(id: string): void {
+    deleteTagsByShareStmt.run(id)
+    deleteReactionsByShareStmt.run(id)
+    deleteCommentsByShareStmt.run(id)
+  }
+
+  function purgeExpiredInternal(): number {
+    if (ttlSeconds <= 0) return 0
+    const rows = selectExpiredIdsStmt.all(ttlSeconds) as { id: string }[]
+    for (const row of rows) {
+      deleteRelatedRecords(row.id)
+    }
+    const result = purgeExpiredStmt.run(ttlSeconds)
+    if (onDelete) {
+      for (const row of rows) {
+        onDelete(row.id)
+      }
+    }
+    return result.changes
+  }
+
   function saveTags(shareId: string, tags: string[]): void {
     // Deduplicate while preserving order
     const unique = [...new Set(tags)]
@@ -512,19 +533,15 @@ export function createShareStore(
     const { cnt } = countStmt.get() as { cnt: number }
     if (cnt >= maxRecords) {
       const excess = cnt - maxRecords + 1
+      const rows = selectOldestIdsStmt.all(excess) as { id: string }[]
+      for (const row of rows) {
+        deleteRelatedRecords(row.id)
+      }
+      deleteOldestStmt.run(excess)
       if (onDelete) {
-        const rows = selectOldestIdsStmt.all(excess) as { id: string }[]
-        for (const row of rows) {
-          deleteTagsByShareStmt.run(row.id)
-          deleteReactionsByShareStmt.run(row.id)
-          deleteCommentsByShareStmt.run(row.id)
-        }
-        deleteOldestStmt.run(excess)
         for (const row of rows) {
           onDelete(row.id)
         }
-      } else {
-        deleteOldestStmt.run(excess)
       }
     }
 
@@ -566,22 +583,7 @@ export function createShareStore(
     },
 
     list(options: ShareListOptions): ShareListResult {
-      if (ttlSeconds > 0) {
-        if (onDelete) {
-          const rows = selectExpiredIdsStmt.all(ttlSeconds) as { id: string }[]
-          for (const row of rows) {
-            deleteTagsByShareStmt.run(row.id)
-            deleteReactionsByShareStmt.run(row.id)
-            deleteCommentsByShareStmt.run(row.id)
-          }
-          purgeExpiredStmt.run(ttlSeconds)
-          for (const row of rows) {
-            onDelete(row.id)
-          }
-        } else {
-          purgeExpiredStmt.run(ttlSeconds)
-        }
-      }
+      purgeExpiredInternal()
 
       type ListRow = ShareRow & {
         id: string
@@ -622,9 +624,7 @@ export function createShareStore(
 
     delete(id: string): boolean {
       if (!isValidShareId(id)) return false
-      deleteTagsByShareStmt.run(id)
-      deleteReactionsByShareStmt.run(id)
-      deleteCommentsByShareStmt.run(id)
+      deleteRelatedRecords(id)
       const result = deleteByIdStmt.run(id)
       const deleted = result.changes > 0
       if (deleted && onDelete) {
@@ -634,40 +634,11 @@ export function createShareStore(
     },
 
     purgeExpired(): number {
-      if (ttlSeconds <= 0) return 0
-      if (onDelete) {
-        const rows = selectExpiredIdsStmt.all(ttlSeconds) as { id: string }[]
-        for (const row of rows) {
-          deleteTagsByShareStmt.run(row.id)
-          deleteReactionsByShareStmt.run(row.id)
-          deleteCommentsByShareStmt.run(row.id)
-        }
-        const result = purgeExpiredStmt.run(ttlSeconds)
-        for (const row of rows) {
-          onDelete(row.id)
-        }
-        return result.changes
-      }
-      const result = purgeExpiredStmt.run(ttlSeconds)
-      return result.changes
+      return purgeExpiredInternal()
     },
 
-    purgeOrphanImages(imagesDir: string): number {
-      if (!fs.existsSync(imagesDir)) return 0
-      const validIds = new Set(
-        (selectAllIdsStmt.all() as { id: string }[]).map((r) => r.id),
-      )
-      const files = fs.readdirSync(imagesDir)
-      let removed = 0
-      for (const file of files) {
-        if (!file.endsWith('.png')) continue
-        const id = file.slice(0, -4) // strip .png
-        if (!validIds.has(id)) {
-          fs.unlinkSync(path.join(imagesDir, file))
-          removed++
-        }
-      }
-      return removed
+    getAllIds(): string[] {
+      return (selectAllIdsStmt.all() as { id: string }[]).map((r) => r.id)
     },
 
     addReaction(shareId: string, clientId: string): ReactionResult {
