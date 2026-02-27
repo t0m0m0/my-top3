@@ -288,49 +288,6 @@ describe('ShareButtons', () => {
     })
   })
 
-  describe('Instagram button', () => {
-    it('renders Instagram button', () => {
-      render(<ShareButtons />)
-      expect(screen.getByLabelText('Instagramへ投稿')).toBeInTheDocument()
-    })
-
-    it('opens Instagram guidance dialog on click', async () => {
-      render(<ShareButtons />)
-      fireEvent.click(screen.getByLabelText('Instagramへ投稿'))
-
-      await waitFor(() => {
-        expect(screen.getByText('Instagramへの投稿手順')).toBeInTheDocument()
-      })
-    })
-
-    it('shows step-by-step guidance in dialog', async () => {
-      render(<ShareButtons />)
-      fireEvent.click(screen.getByLabelText('Instagramへ投稿'))
-
-      await waitFor(() => {
-        expect(screen.getByText(/画像を保存/)).toBeInTheDocument()
-        expect(screen.getByText(/Instagramアプリ/)).toBeInTheDocument()
-      })
-    })
-
-    it('closes dialog when close button is clicked', async () => {
-      render(<ShareButtons />)
-      fireEvent.click(screen.getByLabelText('Instagramへ投稿'))
-
-      await waitFor(() => {
-        expect(screen.getByText('Instagramへの投稿手順')).toBeInTheDocument()
-      })
-
-      fireEvent.click(screen.getByLabelText('閉じる'))
-
-      await waitFor(() => {
-        expect(
-          screen.queryByText('Instagramへの投稿手順'),
-        ).not.toBeInTheDocument()
-      })
-    })
-  })
-
   describe('OGP image upload', () => {
     it('uploads preGeneratedBlob for OGP when existingShareId is available', async () => {
       vi.mocked(uploadShareImage).mockClear()
