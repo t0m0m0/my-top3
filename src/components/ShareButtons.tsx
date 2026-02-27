@@ -4,6 +4,7 @@ import Tooltip from '@mui/material/Tooltip'
 import CircularProgress from '@mui/material/CircularProgress'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import ShareIcon from '@mui/icons-material/Share'
+import XIcon from '@mui/icons-material/X'
 import { StatusSnackbar } from './StatusSnackbar'
 import { createShortUrl, uploadShareImage } from '../utils/share-url'
 
@@ -44,7 +45,6 @@ export default function ShareButtons({
   const handleCloseSuccess = useCallback(() => setCopied(false), [])
   const handleCloseError = useCallback(() => setCopyFailed(false), [])
   const handleCloseShareError = useCallback(() => setShareFailed(false), [])
-
   // Pre-resolve short URL on mount so it's ready when user taps share.
   // Wait until thumbnails are loaded for categories that have an ID,
   // otherwise the share record would be saved with empty thumbnails.
@@ -148,6 +148,19 @@ export default function ShareButtons({
     }
   }, [theme, getShareUrl])
 
+  const handleXShare = useCallback(() => {
+    const shareUrl = getShareUrl()
+    const textParts: string[] = []
+    if (theme) {
+      textParts.push(`「${theme}」`)
+    }
+    const intentUrl = new URL('https://twitter.com/intent/tweet')
+    intentUrl.searchParams.set('text', textParts.join(''))
+    intentUrl.searchParams.set('url', shareUrl)
+    intentUrl.searchParams.set('hashtags', 'すきコレ')
+    window.open(intentUrl.toString(), '_blank', 'noopener,noreferrer')
+  }, [theme, getShareUrl])
+
   const canWebShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
@@ -171,8 +184,27 @@ export default function ShareButtons({
           <ContentCopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
+      <Tooltip title="Xでシェア" arrow>
+        <IconButton
+          onClick={handleXShare}
+          aria-label="Xでシェア"
+          sx={{
+            width: 44,
+            height: 44,
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#000000',
+              filter: 'brightness(0.8)',
+            },
+          }}
+        >
+          <XIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
       {canWebShare && (
-        <Tooltip title="シェア" arrow>
+        <Tooltip title="その他" arrow>
           <IconButton
             onClick={handleWebShare}
             aria-label="シェア"
