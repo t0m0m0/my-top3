@@ -181,6 +181,32 @@ describe('searchBooks', () => {
     }
   })
 
+  it('adjusts totalItems when merged results are fewer than maxResults', async () => {
+    const vol1 = mockVolume()
+    let callCount = 0
+    server.use(
+      http.get(BOOKS_API, () => {
+        callCount++
+        if (callCount === 1) {
+          // intitle returns 1 result
+          return HttpResponse.json(mockSearchResponse([vol1], 500))
+        }
+        // inauthor returns same result (duplicate)
+        return HttpResponse.json(mockSearchResponse([vol1], 300))
+      }),
+    )
+    const result = await searchBooks('key', 'test', {
+      startIndex: 0,
+      maxResults: 20,
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.items).toHaveLength(1)
+      // totalItems should be capped since merged results (1) < maxResults (20)
+      expect(result.data.totalItems).toBe(1)
+    }
+  })
+
   it('handles missing thumbnails', async () => {
     server.use(
       http.get(BOOKS_API, () =>

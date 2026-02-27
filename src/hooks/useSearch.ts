@@ -21,9 +21,12 @@ export function useSearch(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
-  const [startIndex, setStartIndex] = useState(0)
   const abortControllerRef = useRef<AbortController | null>(null)
   const isLoadingMoreRef = useRef(false)
+  // Track startIndex via ref to avoid stale closures in loadMore
+  const startIndexRef = useRef(0)
+  // Track last requested index to prevent duplicate requests
+  const lastRequestedIndexRef = useRef<number | null>(null)
 
   const fetchResults = useCallback(
     async (index: number, append: boolean) => {
@@ -83,9 +86,12 @@ export function useSearch(
         const { items, totalItems, startIndex: returnedIndex } = json.data
 
         if (append) {
+          // Use a ref-like container to extract uniqueCount from the state updater
+          const countRef = { value: 0 }
           setResults((prev) => {
             const existingIds = new Set(prev.map((r) => r.id))
             const unique = items.filter((item) => !existingIds.has(item.id))
+            countRef.value = unique.length
             if (import.meta.env.DEV && unique.length < items.length) {
               console.warn(
                 `[useSearch] Dropped ${items.length - unique.length} duplicate item(s) during pagination.`,
@@ -93,6 +99,19 @@ export function useSearch(
             }
             return [...prev, ...unique]
           })
+
+          // React 18 batches state updates, but the updater function runs synchronously
+          // within setResults, so countRef.value is available here.
+          if (countRef.value === 0 && items.length > 0) {
+            if (import.meta.env.DEV) {
+              console.warn(
+                `[useSearch] All ${items.length} item(s) were duplicates at index=${returnedIndex}. Stopping pagination.`,
+              )
+            }
+            setHasMore(false)
+            startIndexRef.current = returnedIndex + items.length
+            return
+          }
         } else {
           setResults(items)
         }
@@ -104,7 +123,7 @@ export function useSearch(
           )
         }
         setHasMore(items.length > 0 && moreAvailable)
-        setStartIndex(returnedIndex + items.length)
+        startIndexRef.current = returnedIndex + items.length
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
           return
@@ -121,7 +140,8 @@ export function useSearch(
   )
 
   useEffect(() => {
-    setStartIndex(0)
+    startIndexRef.current = 0
+    lastRequestedIndexRef.current = null
     setResults([])
     setHasMore(false)
     fetchResults(0, false)
@@ -137,9 +157,16 @@ export function useSearch(
     if (isLoadingMoreRef.current || isLoading || !hasMore) {
       return
     }
+    // Use ref to always get the latest startIndex (avoids stale closure)
+    const currentIndex = startIndexRef.current
+    // Guard against requesting the same index twice
+    if (lastRequestedIndexRef.current === currentIndex) {
+      return
+    }
+    lastRequestedIndexRef.current = currentIndex
     isLoadingMoreRef.current = true
-    fetchResults(startIndex, true)
-  }, [fetchResults, startIndex, isLoading, hasMore])
+    fetchResults(currentIndex, true)
+  }, [fetchResults, isLoading, hasMore])
 
   return { results, isLoading, error, loadMore, hasMore }
 }
