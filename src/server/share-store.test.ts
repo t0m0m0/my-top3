@@ -715,4 +715,134 @@ describe('share-store', () => {
       store.close()
     })
   })
+
+  describe('comments', () => {
+    it('adds a comment and retrieves it', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const comment = store.addComment(id, { nickname: 'テスター', body: 'いいね！' })
+      expect(comment.id).toBeDefined()
+      expect(comment.nickname).toBe('テスター')
+      expect(comment.body).toBe('いいね！')
+      expect(comment.createdAt).toBeGreaterThan(0)
+      store.close()
+    })
+
+    it('returns comments in newest-first order', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addComment(id, { nickname: '', body: 'first' })
+      store.addComment(id, { nickname: '', body: 'second' })
+      store.addComment(id, { nickname: '', body: 'third' })
+      const result = store.listComments(id, { limit: 10, offset: 0 })
+      expect(result.items).toHaveLength(3)
+      expect(result.items[0]!.body).toBe('third')
+      expect(result.items[2]!.body).toBe('first')
+      expect(result.total).toBe(3)
+      store.close()
+    })
+
+    it('supports pagination', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      for (let i = 0; i < 5; i++) {
+        store.addComment(id, { nickname: '', body: `comment-${i}` })
+      }
+      const result = store.listComments(id, { limit: 2, offset: 1 })
+      expect(result.items).toHaveLength(2)
+      expect(result.total).toBe(5)
+      store.close()
+    })
+
+    it('defaults nickname to 匿名 when empty', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const comment = store.addComment(id, { nickname: '', body: 'hello' })
+      expect(comment.nickname).toBe('匿名')
+      store.close()
+    })
+
+    it('defaults nickname to 匿名 when whitespace only', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      const comment = store.addComment(id, { nickname: '   ', body: 'hello' })
+      expect(comment.nickname).toBe('匿名')
+      store.close()
+    })
+
+    it('rejects comment body exceeding 140 chars', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(() =>
+        store.addComment(id, { nickname: '', body: 'あ'.repeat(141) }),
+      ).toThrow(/body/)
+      store.close()
+    })
+
+    it('rejects empty comment body', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(() =>
+        store.addComment(id, { nickname: '', body: '' }),
+      ).toThrow(/body/)
+      store.close()
+    })
+
+    it('rejects nickname exceeding 20 chars', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(() =>
+        store.addComment(id, { nickname: 'あ'.repeat(21), body: 'hello' }),
+      ).toThrow(/nickname/)
+      store.close()
+    })
+
+    it('rejects comment body with control characters', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(() =>
+        store.addComment(id, { nickname: '', body: 'hello\x00world' }),
+      ).toThrow(/body/)
+      store.close()
+    })
+
+    it('deletes comments when share is deleted', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      store.addComment(id, { nickname: '', body: 'test' })
+      store.delete(id)
+      const result = store.listComments(id, { limit: 10, offset: 0 })
+      expect(result.items).toHaveLength(0)
+      expect(result.total).toBe(0)
+      store.close()
+    })
+
+    it('returns comment count for a share', () => {
+      const store = createShareStore(dbPath)
+      const id = store.save(sampleParams)
+      expect(store.getCommentCount(id)).toBe(0)
+      store.addComment(id, { nickname: '', body: 'a' })
+      store.addComment(id, { nickname: '', body: 'b' })
+      expect(store.getCommentCount(id)).toBe(2)
+      store.close()
+    })
+
+    it('deletes a comment by id and clientId', () => {
+      const store = createShareStore(dbPath)
+      const shareId = store.save(sampleParams)
+      const comment = store.addComment(shareId, { nickname: '', body: 'delete me', clientId: 'client-1' })
+      expect(store.deleteComment(comment.id, 'client-1')).toBe(true)
+      expect(store.listComments(shareId, { limit: 10, offset: 0 }).total).toBe(0)
+      store.close()
+    })
+
+    it('does not delete a comment with wrong clientId', () => {
+      const store = createShareStore(dbPath)
+      const shareId = store.save(sampleParams)
+      const comment = store.addComment(shareId, { nickname: '', body: 'keep me', clientId: 'client-1' })
+      expect(store.deleteComment(comment.id, 'client-2')).toBe(false)
+      expect(store.listComments(shareId, { limit: 10, offset: 0 }).total).toBe(1)
+      store.close()
+    })
+  })
 })

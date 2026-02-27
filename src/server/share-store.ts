@@ -163,6 +163,56 @@ function validateClientId(clientId: string): void {
   }
 }
 
+export type CommentInput = {
+  nickname: string
+  body: string
+  clientId?: string
+}
+
+export type Comment = {
+  id: number
+  nickname: string
+  body: string
+  clientId: string
+  createdAt: number
+}
+
+export type CommentListResult = {
+  items: Comment[]
+  total: number
+}
+
+export type CommentListOptions = {
+  limit: number
+  offset: number
+}
+
+const MAX_COMMENT_BODY_LENGTH = 140
+const MAX_NICKNAME_LENGTH = 20
+const DEFAULT_NICKNAME = '匿名'
+
+function validateCommentInput(input: CommentInput): void {
+  const body = input.body.trim()
+  if (!body) {
+    throw new Error('body is required')
+  }
+  if (body.length > MAX_COMMENT_BODY_LENGTH) {
+    throw new Error(`body exceeds maximum length of ${MAX_COMMENT_BODY_LENGTH}`)
+  }
+  if (CONTROL_CHAR_RE.test(body)) {
+    throw new Error('body contains invalid characters')
+  }
+  const nickname = input.nickname.trim()
+  if (nickname.length > MAX_NICKNAME_LENGTH) {
+    throw new Error(
+      `nickname exceeds maximum length of ${MAX_NICKNAME_LENGTH}`,
+    )
+  }
+  if (nickname && CONTROL_CHAR_RE.test(nickname)) {
+    throw new Error('nickname contains invalid characters')
+  }
+}
+
 export type ShareStore = {
   save: (params: ShareParams) => string
   get: (id: string) => ShareParams | null
@@ -173,6 +223,13 @@ export type ShareStore = {
   removeReaction: (shareId: string, clientId: string) => ReactionResult
   getReactionCount: (shareId: string) => number
   hasReacted: (shareId: string, clientId: string) => boolean
+  addComment: (shareId: string, input: CommentInput) => Comment
+  listComments: (
+    shareId: string,
+    options: CommentListOptions,
+  ) => CommentListResult
+  getCommentCount: (shareId: string) => number
+  deleteComment: (commentId: number, clientId: string) => boolean
   close: () => void
 }
 
@@ -220,6 +277,18 @@ export function createShareStore(
       PRIMARY KEY (share_id, tag)
     );
     CREATE INDEX IF NOT EXISTS idx_share_tags_tag ON share_tags(tag);
+  `)
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      share_id TEXT NOT NULL REFERENCES shares(id),
+      nickname TEXT NOT NULL DEFAULT '匿名',
+      body TEXT NOT NULL,
+      client_id TEXT NOT NULL DEFAULT '',
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+    CREATE INDEX IF NOT EXISTS idx_comments_share_id ON comments(share_id, created_at DESC);
   `)
 
   db.exec(`
@@ -288,6 +357,30 @@ export function createShareStore(
 
   const deleteReactionsByShareStmt = db.prepare(`
     DELETE FROM reactions WHERE share_id = ?
+  `)
+
+  const insertCommentStmt = db.prepare(`
+    INSERT INTO comments (share_id, nickname, body, client_id, created_at)
+    VALUES (?, ?, ?, ?, unixepoch())
+  `)
+
+  const listCommentsStmt = db.prepare(`
+    SELECT id, nickname, body, client_id, created_at
+    FROM comments WHERE share_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ? OFFSET ?
+  `)
+
+  const countCommentsStmt = db.prepare(`
+    SELECT COUNT(*) as cnt FROM comments WHERE share_id = ?
+  `)
+
+  const deleteCommentStmt = db.prepare(`
+    DELETE FROM comments WHERE id = ? AND client_id = ?
+  `)
+
+  const deleteCommentsByShareStmt = db.prepare(`
+    DELETE FROM comments WHERE share_id = ?
   `)
 
   const deleteOldestStmt = db.prepare(`
@@ -491,6 +584,7 @@ export function createShareStore(
       if (!isValidShareId(id)) return false
       deleteTagsByShareStmt.run(id)
       deleteReactionsByShareStmt.run(id)
+      deleteCommentsByShareStmt.run(id)
       const result = deleteByIdStmt.run(id)
       return result.changes > 0
     },
@@ -522,6 +616,64 @@ export function createShareStore(
 
     hasReacted(shareId: string, clientId: string): boolean {
       return !!hasReactedStmt.get(shareId, clientId)
+    },
+
+    addComment(shareId: string, input: CommentInput): Comment {
+      validateCommentInput(input)
+      const nickname = input.nickname.trim() || DEFAULT_NICKNAME
+      const body = input.body.trim()
+      const clientId = input.clientId ?? ''
+      const result = insertCommentStmt.run(
+        shareId,
+        nickname,
+        body,
+        clientId,
+      )
+      return {
+        id: Number(result.lastInsertRowid),
+        nickname,
+        body,
+        clientId,
+        createdAt: Math.floor(Date.now() / 1000),
+      }
+    },
+
+    listComments(
+      shareId: string,
+      options: CommentListOptions,
+    ): CommentListResult {
+      const { cnt } = countCommentsStmt.get(shareId) as { cnt: number }
+      const rows = listCommentsStmt.all(
+        shareId,
+        options.limit,
+        options.offset,
+      ) as {
+        id: number
+        nickname: string
+        body: string
+        client_id: string
+        created_at: number
+      }[]
+      return {
+        items: rows.map((r) => ({
+          id: r.id,
+          nickname: r.nickname,
+          body: r.body,
+          clientId: r.client_id,
+          createdAt: r.created_at,
+        })),
+        total: cnt,
+      }
+    },
+
+    getCommentCount(shareId: string): number {
+      const { cnt } = countCommentsStmt.get(shareId) as { cnt: number }
+      return cnt
+    },
+
+    deleteComment(commentId: number, clientId: string): boolean {
+      const result = deleteCommentStmt.run(commentId, clientId)
+      return result.changes > 0
     },
 
     close(): void {
