@@ -518,4 +518,158 @@ describe('shares route', () => {
       expect(listJson.data.items[0]!.reactionCount).toBe(2)
     })
   })
+
+  describe('tags', () => {
+    it('creates a share with tags and returns them in GET /:id', async () => {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'タグテスト',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+          tags: ['アニメ', '推し活'],
+        }),
+      })
+      expect(createRes.status).toBe(201)
+      const { id } = (await createRes.json()) as { id: string }
+
+      const res = await app.request(`/${id}`)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { tags: string[] }
+      }
+      expect(json.data.tags).toEqual(['アニメ', '推し活'])
+    })
+
+    it('returns tags in list items', async () => {
+      await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'with-tags',
+          bookId: 'b1',
+          musicId: 'm1',
+          movieId: 'v1',
+          tags: ['rock'],
+        }),
+      })
+
+      const res = await app.request('/')
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: { tags: string[] }[] }
+      }
+      expect(json.data.items[0]!.tags).toEqual(['rock'])
+    })
+
+    it('filters by tag query parameter', async () => {
+      await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'anime-board',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+          tags: ['アニメ', '2025春'],
+        }),
+      })
+      await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'music-board',
+          bookId: '',
+          musicId: 'm1',
+          movieId: '',
+          tags: ['音楽'],
+        }),
+      })
+
+      const res = await app.request('/?tag=アニメ')
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: { theme: string }[]; total: number }
+      }
+      expect(json.data.items).toHaveLength(1)
+      expect(json.data.items[0]!.theme).toBe('anime-board')
+      expect(json.data.total).toBe(1)
+    })
+
+    it('returns empty when filtering by nonexistent tag', async () => {
+      await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'no-match',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+          tags: ['アニメ'],
+        }),
+      })
+
+      const res = await app.request('/?tag=存在しないタグ')
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { items: unknown[]; total: number }
+      }
+      expect(json.data.items).toHaveLength(0)
+      expect(json.data.total).toBe(0)
+    })
+
+    it('returns 400 for too many tags', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+          tags: ['a', 'b', 'c', 'd', 'e', 'f'],
+        }),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('returns 400 for tag exceeding max length', async () => {
+      const res = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'test',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+          tags: ['あ'.repeat(21)],
+        }),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    it('handles shares without tags (empty array)', async () => {
+      const createRes = await app.request('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: 'no-tags',
+          bookId: 'b1',
+          musicId: '',
+          movieId: '',
+        }),
+      })
+      const { id } = (await createRes.json()) as { id: string }
+
+      const res = await app.request(`/${id}`)
+      const json = (await res.json()) as {
+        ok: boolean
+        data: { tags: string[] }
+      }
+      expect(json.data.tags).toEqual([])
+    })
+  })
+
 })
